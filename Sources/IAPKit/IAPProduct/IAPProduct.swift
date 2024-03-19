@@ -34,6 +34,9 @@ public class IAPProduct: IAPProductProtocol {
     public var priceLocale: Locale { product.priceLocale }
     public var units: Int? { product.units }
     public var subsciptionPrice: NSDecimalNumber { product.subsciptionPrice }
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+        product.subscriptionPeriodUnit(withWeekly: weekly, monthly: monthly, yearly: yearly)
+    }
 }
 
 extension IAPProduct: Equatable {
@@ -56,6 +59,7 @@ protocol IAPProductProtocol {
     var priceLocale: Locale { get }
     var units: Int? { get }
     var subsciptionPrice: NSDecimalNumber { get }
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {
@@ -145,6 +149,18 @@ protocol IAPProductProtocol {
     var subsciptionPrice: NSDecimalNumber {
         price as NSDecimalNumber
     }
+
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+        guard let unit = subscription?.subscriptionPeriod.unit else { return "" }
+
+        switch unit {
+        case .day: return ((subscription?.subscriptionPeriod.value ?? .zero) > 1) ? weekly : "daily"
+        case .week: return weekly
+        case .month: return monthly
+        case .year: return yearly
+        @unknown default: return ""
+        }
+    }
 }
 
 extension SKProduct: IAPProductProtocol {
@@ -231,5 +247,17 @@ extension SKProduct: IAPProductProtocol {
 
     var subsciptionPrice: NSDecimalNumber {
         price
+    }
+
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+        guard let unit = subscriptionPeriod?.unit else { return "" }
+
+        switch unit {
+        case .day: return ((subscriptionPeriod?.numberOfUnits ?? .zero) > 1) ? weekly : "daily"
+        case .week: return weekly
+        case .month: return monthly
+        case .year: return yearly
+        @unknown default: return ""
+        }
     }
 }

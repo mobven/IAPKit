@@ -39,7 +39,7 @@ public class IAPProduct: IAPProductProtocol {
     }
     public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
     public var introductoryPricePaymentMode: UInt {product.introductoryPricePaymentMode}
-    public var periodUnit: IAPPeriodUnit.PeriodUnit {product.introductoryPricePaymentMode}
+    public var periodUnit: IAPPeriodUnit.PeriodUnit {product.periodUnit}
 
 }
 
@@ -66,6 +66,7 @@ protocol IAPProductProtocol {
     func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String
     var subscriptionPeriodUnitRawValue: UInt { get }
     var introductoryPricePaymentMode: UInt { get }
+    var periodUnit: IAPPeriodUnit.PeriodUnit { get }
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {

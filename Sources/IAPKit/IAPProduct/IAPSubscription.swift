@@ -13,4 +13,5 @@ public struct IAPSubscription {
     public let isInGracePeriod: Bool
     public let activeIntroductoryOfferType: String?
     public let vendorProductId: String
+    public let vendorOriginalTransactionId: String
 }

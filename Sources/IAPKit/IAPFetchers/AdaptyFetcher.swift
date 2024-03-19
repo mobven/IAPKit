@@ -111,7 +111,8 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                             activatedAt: subscription?.activatedAt ?? Date(),
                             isInGracePeriod: subscription?.isInGracePeriod ?? false,
                             activeIntroductoryOfferType: subscription?.activeIntroductoryOfferType,
-                            vendorProductId: subscription?.vendorProductId ?? ""
+                            vendorProductId: subscription?.vendorProductId ?? "",
+                            vendorOriginalTransactionId: subscription?.vendorOriginalTransactionId ?? ""
                         )
                     )
                 )

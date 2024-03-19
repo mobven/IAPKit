@@ -10,11 +10,11 @@ let package = Package(
         .library(
             name: "IAPKit",
             targets: ["IAPKit"]
-        )
+        ),
     ],
     dependencies: [
         .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "2.9.3"),
-        .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0")
+        .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
     ],
     targets: [
         .target(
@@ -22,12 +22,12 @@ let package = Package(
             dependencies: [
                 .product(name: "Adapty", package: "AdaptySDK-iOS"),
                 .product(name: "RxSwift", package: "RxSwift"),
-                .product(name: "RxRelay", package: "RxSwift")
+                .product(name: "RxRelay", package: "RxSwift"),
             ]
         ),
         .testTarget(
             name: "IAPKitTests",
             dependencies: ["IAPKit"]
-        )
+        ),
     ]
 )

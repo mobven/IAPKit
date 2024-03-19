@@ -37,10 +37,10 @@ public class IAPProduct: IAPProductProtocol {
     public func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
         product.subscriptionPeriodUnit(withWeekly: weekly, monthly: monthly, yearly: yearly)
     }
-    public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
-    public var introductoryPricePaymentMode: UInt {product.introductoryPricePaymentMode}
-    public var periodUnit: IAPPeriodUnit.PeriodUnit {product.periodUnit}
 
+    public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
+    public var introductoryPricePaymentMode: UInt { product.introductoryPricePaymentMode }
+    public var periodUnit: IAPPeriodUnit.PeriodUnit { product.periodUnit }
 }
 
 extension IAPProduct: Equatable {
@@ -104,19 +104,18 @@ protocol IAPProductProtocol {
 
     var subscriptionPeriodText: String {
         guard let subscriptionPeriod = subscription?.subscriptionPeriod else { return "" }
-        let dateComponents: DateComponents
-        switch subscriptionPeriod.unit {
+        let dateComponents = switch subscriptionPeriod.unit {
         case .day:
             if subscriptionPeriod.value == 7 {
-                dateComponents = DateComponents(weekOfMonth: 1)
+                DateComponents(weekOfMonth: 1)
             } else {
-                dateComponents = DateComponents(day: subscriptionPeriod.value)
+                DateComponents(day: subscriptionPeriod.value)
             }
-        case .week: dateComponents = DateComponents(weekOfMonth: subscriptionPeriod.value)
-        case .month: dateComponents = DateComponents(month: subscriptionPeriod.value)
-        case .year: dateComponents = DateComponents(year: subscriptionPeriod.value)
+        case .week: DateComponents(weekOfMonth: subscriptionPeriod.value)
+        case .month: DateComponents(month: subscriptionPeriod.value)
+        case .year: DateComponents(year: subscriptionPeriod.value)
         @unknown default:
-            dateComponents = DateComponents(month: subscriptionPeriod.value)
+            DateComponents(month: subscriptionPeriod.value)
         }
         return DateComponentsFormatter.localizedString(from: dateComponents, unitsStyle: .full)?.replacingOccurrences(
             of: "1 ",
@@ -126,7 +125,8 @@ protocol IAPProductProtocol {
 
     func weeklyPrice() -> Double? {
         if let period = subscription?.subscriptionPeriod, period.unit != .week || period.value > 1,
-           period.unit != .day {
+           period.unit != .day
+        {
             var priceDoubleForWeek: Double?
             switch period.unit {
             case .day:
@@ -170,7 +170,7 @@ protocol IAPProductProtocol {
     }
 
     var subscriptionPeriodUnitRawValue: UInt {
-        return switch subscription?.subscriptionPeriod.unit {
+        switch subscription?.subscriptionPeriod.unit {
         case .week: 1
         case .month: 2
         case .year: 3
@@ -179,7 +179,7 @@ protocol IAPProductProtocol {
     }
 
     var introductoryPricePaymentMode: UInt {
-        return switch subscription?.introductoryOffer?.paymentMode {
+        switch subscription?.introductoryOffer?.paymentMode {
         case .payAsYouGo: 0
         case .payUpFront: 1
         case .freeTrial: 2
@@ -189,11 +189,11 @@ protocol IAPProductProtocol {
 
     var periodUnit: IAPPeriodUnit.PeriodUnit {
         switch subscription?.subscriptionPeriod.unit {
-        case .day: return ((subscription?.subscriptionPeriod.value ?? .zero) > 1) ? .week : .day
-        case .week: return .week
-        case .month: return .month
-        case .year: return .year
-        default: return .day
+        case .day: ((subscription?.subscriptionPeriod.value ?? .zero) > 1) ? .week : .day
+        case .week: .week
+        case .month: .month
+        case .year: .year
+        default: .day
         }
     }
 }
@@ -233,19 +233,18 @@ extension SKProduct: IAPProductProtocol {
 
     var subscriptionPeriodText: String {
         guard let subscriptionPeriod else { return "" }
-        let dateComponents: DateComponents
-        switch subscriptionPeriod.unit {
+        let dateComponents = switch subscriptionPeriod.unit {
         case .day:
             if subscriptionPeriod.numberOfUnits == 7 {
-                dateComponents = DateComponents(weekOfMonth: 1)
+                DateComponents(weekOfMonth: 1)
             } else {
-                dateComponents = DateComponents(day: subscriptionPeriod.numberOfUnits)
+                DateComponents(day: subscriptionPeriod.numberOfUnits)
             }
-        case .week: dateComponents = DateComponents(weekOfMonth: subscriptionPeriod.numberOfUnits)
-        case .month: dateComponents = DateComponents(month: subscriptionPeriod.numberOfUnits)
-        case .year: dateComponents = DateComponents(year: subscriptionPeriod.numberOfUnits)
+        case .week: DateComponents(weekOfMonth: subscriptionPeriod.numberOfUnits)
+        case .month: DateComponents(month: subscriptionPeriod.numberOfUnits)
+        case .year: DateComponents(year: subscriptionPeriod.numberOfUnits)
         @unknown default:
-            dateComponents = DateComponents(month: subscriptionPeriod.numberOfUnits)
+            DateComponents(month: subscriptionPeriod.numberOfUnits)
         }
         return DateComponentsFormatter.localizedString(from: dateComponents, unitsStyle: .full)?.replacingOccurrences(
             of: "1 ",
@@ -255,7 +254,8 @@ extension SKProduct: IAPProductProtocol {
 
     func weeklyPrice() -> Double? {
         if let period = subscriptionPeriod, period.unit != .week || period.numberOfUnits > 1,
-           period.unit != .day {
+           period.unit != .day
+        {
             var priceDoubleForWeek: Double?
             switch period.unit {
             case .day:
@@ -305,12 +305,12 @@ extension SKProduct: IAPProductProtocol {
     }
 
     var periodUnit: IAPPeriodUnit.PeriodUnit {
-        switch  subscriptionPeriod?.unit {
-        case .day: return ((subscriptionPeriod?.numberOfUnits ?? .zero) > 1) ? .week : .day
-        case .week: return .week
-        case .month: return .month
-        case .year: return .year
-        default: return .day
+        switch subscriptionPeriod?.unit {
+        case .day: ((subscriptionPeriod?.numberOfUnits ?? .zero) > 1) ? .week : .day
+        case .week: .week
+        case .month: .month
+        case .year: .year
+        default: .day
         }
     }
 }

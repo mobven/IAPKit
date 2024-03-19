@@ -96,13 +96,14 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
 
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         guard let adaptyProduct = products
-            .first(where: { product.identifier.hasPrefix($0.skProduct.productIdentifier) }) else {
+            .first(where: { product.identifier.hasPrefix($0.skProduct.productIdentifier) })
+        else {
             waitForProductsThenBuy(product: product, completion: completion)
             return
         }
         Adapty.makePurchase(product: adaptyProduct) { result in
             switch result {
-            case .success(let info):
+            case let .success(info):
                 let subscription = info.profile.subscriptions[adaptyProduct.vendorProductId]
                 completion(
                     .success(

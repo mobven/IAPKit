@@ -7,8 +7,8 @@
 
 import Foundation
 
-public struct IAPPeriodUnit {
-    public enum PeriodUnit: UInt{
+public enum IAPPeriodUnit {
+    public enum PeriodUnit: UInt {
         case day = 0
         case week = 1
         case month = 2

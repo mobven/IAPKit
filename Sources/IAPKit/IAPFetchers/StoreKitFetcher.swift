@@ -18,7 +18,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
     let productIdentifiers = Set(
         [
             WeeklyProduct.productIdentifier,
-            MonthlyProduct.productIdentifier
+            MonthlyProduct.productIdentifier,
         ]
     )
 
@@ -66,7 +66,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
 
     @available(
         *, unavailable, message: "Not implemented or used currently! Would be alternative to Adapty to give timeout"
-    ) func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
+    ) func restorePurchases(completion _: @escaping ((Result<Bool, Error>) -> Void)) {
         let refresh = SKReceiptRefreshRequest()
         refresh.delegate = self
         refresh.start()
@@ -74,7 +74,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
 }
 
 extension StoreKitFetcher: SKProductsRequestDelegate {
-    func productsRequest(_ request: SKProductsRequest, didReceive response: SKProductsResponse) {
+    func productsRequest(_: SKProductsRequest, didReceive response: SKProductsResponse) {
         let products = response.products.compactMap { IAPProduct(product: $0) }
         completion?(.success(getSortedProducts(products)))
     }

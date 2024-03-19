@@ -110,7 +110,7 @@ public extension IAPKit {
         }
     }
 
-    func handleError(_ error: Error) {
+    func handleError(_: Error) {
         buyState.accept(false)
     }
 

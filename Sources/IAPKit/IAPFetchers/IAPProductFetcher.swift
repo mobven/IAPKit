@@ -25,8 +25,8 @@ final class IAPProductFetcher {
 
     var completion: (([IAPProduct]) -> Void)?
 
-    func activate() {
-        adaptyFetcher.activate()
+    func activate(adaptyApiKey apiKey: String, paywallName: String) {
+        adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
 
     var defaultProducts: [IAPProduct] = [

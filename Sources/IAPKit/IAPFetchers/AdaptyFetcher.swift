@@ -11,20 +11,20 @@ import Foundation
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
 
-    static let token = "public_live_L0MX8bFE.61RQ0wfAxtfSIsQMbcY5"
-    static let placementName = "appOpen_placement"
+    var placementName = ""
 
     private var isAdaptyFetchingProducts: Bool = false
     private var pendingPurchase: (product: IAPProduct, completion: (Result<Bool, Error>) -> Void)?
 
-    func activate() {
-        Adapty.activate(Self.token)
+    func activate(adaptyApiKey apiKey: String, paywallName: String) {
+        placementName = paywallName
+        Adapty.activate(apiKey)
     }
 
     func fetch(completion: @escaping ((Result<[IAPProduct], Error>) -> Void)) {
         isAdaptyFetchingProducts = true
         let locale = Locale.current.identifier
-        Adapty.getPaywall(placementId: Self.placementName, locale: locale) { result in
+        Adapty.getPaywall(placementId: placementName, locale: locale) { result in
             switch result {
             case let .success(paywall):
                 Adapty.getPaywallProducts(paywall: paywall) { [weak self] result in

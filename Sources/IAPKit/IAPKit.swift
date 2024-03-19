@@ -41,8 +41,8 @@ public final class IAPKit: NSObject {
         super.init()
     }
 
-    public func activate() {
-        productFetcher.activate()
+    public func activate(adaptyApiKey apiKey: String, paywallName: String) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
 
     public func logout() {

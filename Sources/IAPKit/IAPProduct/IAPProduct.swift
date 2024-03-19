@@ -38,6 +38,8 @@ public class IAPProduct: IAPProductProtocol {
         product.subscriptionPeriodUnit(withWeekly: weekly, monthly: monthly, yearly: yearly)
     }
     public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
+    public var introductoryPricePaymentMode: UInt {product.introductoryPricePaymentMode}
+    
 }
 
 extension IAPProduct: Equatable {
@@ -62,6 +64,7 @@ protocol IAPProductProtocol {
     var subsciptionPrice: NSDecimalNumber { get }
     func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String
     var subscriptionPeriodUnitRawValue: UInt { get }
+    var introductoryPricePaymentMode: UInt { get }
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {
@@ -172,6 +175,15 @@ protocol IAPProductProtocol {
         default: .zero
         }
     }
+
+    var introductoryPricePaymentMode: UInt {
+        return switch subscription?.introductoryOffer?.paymentMode {
+        case .payAsYouGo: 0
+        case .payUpFront: 1
+        case .freeTrial: 2
+        default: .zero
+        }
+    }
 }
 
 extension SKProduct: IAPProductProtocol {
@@ -274,5 +286,9 @@ extension SKProduct: IAPProductProtocol {
 
     var subscriptionPeriodUnitRawValue: UInt {
         subscriptionPeriod?.unit.rawValue ?? .zero
+    }
+
+    var introductoryPricePaymentMode: UInt {
+        introductoryPrice?.paymentMode.rawValue ?? .zero
     }
 }

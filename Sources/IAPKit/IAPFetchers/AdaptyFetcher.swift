@@ -14,7 +14,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var placementName = ""
 
     private var isAdaptyFetchingProducts: Bool = false
-    private var pendingPurchase: (product: IAPProduct, completion: (Result<Bool, Error>) -> Void)?
+    private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
 
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
         placementName = paywallName
@@ -94,7 +94,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         }
     }
 
-    func buy(product: IAPProduct, completion: @escaping ((Result<Bool, Error>) -> Void)) {
+    func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         guard let adaptyProduct = products
             .first(where: { product.identifier.hasPrefix($0.skProduct.productIdentifier) }) else {
             waitForProductsThenBuy(product: product, completion: completion)
@@ -102,15 +102,23 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         }
         Adapty.makePurchase(product: adaptyProduct) { result in
             switch result {
-            case .success:
-                completion(.success(true))
+            case .success(let info):
+                let activatedAt = info.profile.subscriptions[adaptyProduct.vendorProductId]?.activatedAt
+                let vendorTransactionId = info.profile.subscriptions[adaptyProduct.vendorProductId]?.vendorTransactionId
+                completion(
+                    .success(
+                        IAPSubscription(
+                            vendorTransactionId: vendorTransactionId ?? "", activatedAt: activatedAt ?? Date()
+                        )
+                    )
+                )
             case let .failure(error):
                 completion(.failure(error))
             }
         }
     }
 
-    func waitForProductsThenBuy(product: IAPProduct, completion: @escaping ((Result<Bool, Error>) -> Void)) {
+    func waitForProductsThenBuy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         if isAdaptyFetchingProducts {
             pendingPurchase = (product: product, completion: completion)
         } else {

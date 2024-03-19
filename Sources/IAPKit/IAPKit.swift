@@ -121,15 +121,31 @@ public extension IAPKit {
         productFetcher.buy(product: product) { [weak self] result in
             self?.isBuyProcess = false
             switch result {
-            case let .success(isSubscribed):
+            case .success:
                 self?.delegate?.iapKitDidBuy(product: product)
-                self?.buyState.accept(isSubscribed)
+                self?.buyState.accept(true)
             case let .failure(error):
                 self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)
                 self?.buyState.accept(false)
             }
         }
         return buyState
+    }
+
+    func buyProduct(_ product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
+        guard !isBuyProcess else { return }
+        isBuyProcess = true
+        productFetcher.buy(product: product) { [weak self] result in
+            self?.isBuyProcess = false
+            switch result {
+            case let .success(subscription):
+                self?.delegate?.iapKitDidBuy(product: product)
+                completion(.success(subscription))
+            case let .failure(error):
+                self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)
+                completion(.failure(error))
+            }
+        }
     }
 
     func restore() {

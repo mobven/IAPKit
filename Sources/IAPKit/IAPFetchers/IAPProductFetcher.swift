@@ -68,7 +68,7 @@ final class IAPProductFetcher {
         adaptyFetcher.restorePurchases(completion: completion)
     }
 
-    func buy(product: IAPProduct, completion: @escaping ((Result<Bool, Error>) -> Void)) {
+    func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         adaptyFetcher.buy(product: product, completion: completion)
     }
 

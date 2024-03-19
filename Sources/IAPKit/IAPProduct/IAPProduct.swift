@@ -34,10 +34,10 @@ public class IAPProduct: IAPProductProtocol {
     public var priceLocale: Locale { product.priceLocale }
     public var units: Int? { product.units }
     public var subsciptionPrice: NSDecimalNumber { product.subsciptionPrice }
-    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+    public func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
         product.subscriptionPeriodUnit(withWeekly: weekly, monthly: monthly, yearly: yearly)
     }
-    var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
+    public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
 }
 
 extension IAPProduct: Equatable {

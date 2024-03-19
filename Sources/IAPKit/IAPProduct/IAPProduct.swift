@@ -189,7 +189,7 @@ protocol IAPProductProtocol {
 
     var periodUnit: IAPPeriodUnit.PeriodUnit {
         switch subscription?.subscriptionPeriod.unit {
-        case .day: return .day
+        case .day: return ((subscription?.subscriptionPeriod.value ?? .zero) > 1) ? .week : .day
         case .week: return .week
         case .month: return .month
         case .year: return .year
@@ -306,7 +306,7 @@ extension SKProduct: IAPProductProtocol {
 
     var periodUnit: IAPPeriodUnit.PeriodUnit {
         switch  subscriptionPeriod?.unit {
-        case .day: return .day
+        case .day: return ((subscriptionPeriod?.numberOfUnits ?? .zero) > 1) ? .week : .day
         case .week: return .week
         case .month: return .month
         case .year: return .year

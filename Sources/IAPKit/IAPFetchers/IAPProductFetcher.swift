@@ -9,7 +9,7 @@ import Foundation
 import StoreKit
 
 protocol IAPProductFetchable {
-    func fetch(completion: @escaping ((Result<[IAPProduct], Error>) -> Void))
+    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void))
 }
 
 final class IAPProductFetcher {
@@ -33,11 +33,11 @@ final class IAPProductFetcher {
         //        WeeklyProduct(), MonthlyProduct()
     ]
 
-    func fetch(completion: @escaping ((Result<[IAPProduct], Error>) -> Void)) {
+    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         fetchAdaptyOrTimeOut(completion: completion)
     }
 
-    func fetchAdaptyOrTimeOut(completion: @escaping ((Result<[IAPProduct], Error>) -> Void)) {
+    func fetchAdaptyOrTimeOut(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         if adaptyTimeout == .zero {
             // call adaptyFetcher.fetch to prepare products for purchase on selection
             adaptyFetcher.fetch(completion: { _ in })

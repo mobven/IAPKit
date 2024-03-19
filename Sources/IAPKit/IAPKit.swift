@@ -83,12 +83,23 @@ public extension IAPKit {
         productFetcher.fetch { [weak self] result in
             switch result {
             case let .success(products):
-                self?.skProducts.accept(products)
+                self?.skProducts.accept(products.products)
             case let .failure(error):
                 self?.handleError(error)
             }
         }
         return skProducts
+    }
+
+    func requestProducts(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
+        productFetcher.fetch { [weak self] result in
+            switch result {
+            case let .success(products):
+                completion(.success(products))
+            case let .failure(error):
+                self?.handleError(error)
+            }
+        }
     }
 
     func verify(completion: @escaping ((Bool) -> Void)) {

@@ -13,7 +13,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
     var request: SKProductsRequest!
     // swiftlint:enable implicitly_unwrapped_optional
 
-    var completion: ((Result<[IAPProduct], Error>) -> Void)?
+    var completion: ((Result<IAPProducts, Error>) -> Void)?
 
     let productIdentifiers = Set(
         [
@@ -22,11 +22,12 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
         ]
     )
 
-    func fetch(completion: @escaping ((Result<[IAPProduct], Error>) -> Void)) {
+    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         if #available(iOS 15, *) {
             Task {
                 let products = try await Product.products(for: productIdentifiers)
-                completion(.success(getSortedProducts(products.compactMap { IAPProduct(product: $0) })))
+                let iapProducts = products.compactMap { IAPProduct(product: $0) }
+                completion(.success(IAPProducts(products: iapProducts)))
             }
         } else {
             self.completion = completion
@@ -76,7 +77,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
 extension StoreKitFetcher: SKProductsRequestDelegate {
     func productsRequest(_: SKProductsRequest, didReceive response: SKProductsResponse) {
         let products = response.products.compactMap { IAPProduct(product: $0) }
-        completion?(.success(getSortedProducts(products)))
+        completion?(.success(IAPProducts(products: getSortedProducts(products))))
     }
 }
 

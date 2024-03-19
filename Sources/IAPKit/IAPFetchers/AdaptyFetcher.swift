@@ -27,7 +27,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.activate("public_live_L0MX8bFE.61RQ0wfAxtfSIsQMbcY5")
     }
 
-    func fetch(completion: @escaping ((Result<[IAPProduct], Error>) -> Void)) {
+    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         isAdaptyFetchingProducts = true
         let locale = Locale.current.identifier
         Adapty.getPaywall(placementId: placementName, locale: locale) { result in
@@ -41,7 +41,8 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     switch result {
                     case let .success(products):
                         self.products = products
-                        completion(.success(products.compactMap { IAPProduct(product: $0.skProduct) }))
+                        let iapProducts = products.compactMap { IAPProduct(product: $0.skProduct) }
+                        completion(.success(IAPProducts(products: iapProducts, config: paywall.remoteConfig)))
                         if let pendingPurchase {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }

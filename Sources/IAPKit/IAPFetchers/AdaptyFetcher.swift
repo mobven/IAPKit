@@ -103,12 +103,15 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.makePurchase(product: adaptyProduct) { result in
             switch result {
             case .success(let info):
-                let activatedAt = info.profile.subscriptions[adaptyProduct.vendorProductId]?.activatedAt
-                let vendorTransactionId = info.profile.subscriptions[adaptyProduct.vendorProductId]?.vendorTransactionId
+                let subscription = info.profile.subscriptions[adaptyProduct.vendorProductId]
                 completion(
                     .success(
                         IAPSubscription(
-                            vendorTransactionId: vendorTransactionId ?? "", activatedAt: activatedAt ?? Date()
+                            vendorTransactionId: subscription?.vendorTransactionId ?? "",
+                            activatedAt: subscription?.activatedAt ?? Date(),
+                            isInGracePeriod: subscription?.isInGracePeriod ?? false,
+                            activeIntroductoryOfferType: subscription?.activeIntroductoryOfferType,
+                            vendorProductId: subscription?.vendorProductId ?? ""
                         )
                     )
                 )

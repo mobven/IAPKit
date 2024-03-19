@@ -10,4 +10,7 @@ import Foundation
 public struct IAPSubscription {
     public let vendorTransactionId: String
     public let activatedAt: Date
+    public let isInGracePeriod: Bool
+    public let activeIntroductoryOfferType: String?
+    public let vendorProductId: String
 }

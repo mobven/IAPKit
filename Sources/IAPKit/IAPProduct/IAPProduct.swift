@@ -39,7 +39,8 @@ public class IAPProduct: IAPProductProtocol {
     }
     public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
     public var introductoryPricePaymentMode: UInt {product.introductoryPricePaymentMode}
-    
+    public var periodUnit: IAPPeriodUnit.PeriodUnit {product.introductoryPricePaymentMode}
+
 }
 
 extension IAPProduct: Equatable {
@@ -184,6 +185,16 @@ protocol IAPProductProtocol {
         default: .zero
         }
     }
+
+    var periodUnit: IAPPeriodUnit.PeriodUnit {
+        switch subscription?.subscriptionPeriod.unit {
+        case .day: return .day
+        case .week: return .week
+        case .month: return .month
+        case .year: return .year
+        default: return .day
+        }
+    }
 }
 
 extension SKProduct: IAPProductProtocol {
@@ -290,5 +301,15 @@ extension SKProduct: IAPProductProtocol {
 
     var introductoryPricePaymentMode: UInt {
         introductoryPrice?.paymentMode.rawValue ?? .zero
+    }
+
+    var periodUnit: IAPPeriodUnit.PeriodUnit {
+        switch  subscriptionPeriod?.unit {
+        case .day: return .day
+        case .week: return .week
+        case .month: return .month
+        case .year: return .year
+        default: return .day
+        }
     }
 }

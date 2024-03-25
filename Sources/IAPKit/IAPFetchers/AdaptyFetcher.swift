@@ -21,12 +21,6 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.activate(apiKey)
     }
 
-    @available(*, deprecated, renamed: "Renamed", message: "use activate(adaptyApiKey:,paywallName) instead")
-    func activate() {
-        placementName = "appOpen_placement"
-        Adapty.activate("public_live_L0MX8bFE.61RQ0wfAxtfSIsQMbcY5")
-    }
-
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         isAdaptyFetchingProducts = true
         let locale = Locale.current.identifier

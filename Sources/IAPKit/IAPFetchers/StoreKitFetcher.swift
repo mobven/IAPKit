@@ -26,7 +26,7 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
         if #available(iOS 15, *) {
             Task {
                 let products = try await Product.products(for: productIdentifiers)
-                let iapProducts = products.compactMap { IAPProduct(product: $0) }
+                let iapProducts = getSortedProducts(products.compactMap { IAPProduct(product: $0) })
                 completion(.success(IAPProducts(products: iapProducts)))
             }
         } else {

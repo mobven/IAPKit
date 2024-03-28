@@ -12,7 +12,7 @@ import StoreKit
 typealias ProductIdentifier = String
 
 public protocol IAPKitDelegate: AnyObject {
-    func iapKitDidBuy(product: IAPProduct)
+    func iapKitDidBuy(product: IAPProduct, paywallId: String?)
     func iapKitDidFailToBuy(product: IAPProduct, withError error: Error)
 }
 
@@ -24,6 +24,7 @@ public final class IAPKit: NSObject {
     private var isBuyProcess: Bool = false
     private let skProducts: BehaviorRelay<[IAPProduct]>
     private let buyState: BehaviorRelay<Bool> = BehaviorRelay(value: false)
+    private var paywallId: String = ""
 
     private var productFetcher = IAPProductFetcher()
 
@@ -84,6 +85,7 @@ public extension IAPKit {
             switch result {
             case let .success(products):
                 self?.skProducts.accept(products.products)
+                self?.paywallId = products.paywallId ?? ""
             case let .failure(error):
                 self?.handleError(error)
             }
@@ -133,7 +135,7 @@ public extension IAPKit {
             self?.isBuyProcess = false
             switch result {
             case .success:
-                self?.delegate?.iapKitDidBuy(product: product)
+                self?.delegate?.iapKitDidBuy(product: product, paywallId: self?.paywallId)
                 self?.buyState.accept(true)
             case let .failure(error):
                 self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)
@@ -150,7 +152,7 @@ public extension IAPKit {
             self?.isBuyProcess = false
             switch result {
             case let .success(subscription):
-                self?.delegate?.iapKitDidBuy(product: product)
+                self?.delegate?.iapKitDidBuy(product: product, paywallId: self?.paywallId)
                 completion(.success(subscription))
             case let .failure(error):
                 self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)

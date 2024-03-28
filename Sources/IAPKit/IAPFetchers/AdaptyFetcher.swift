@@ -36,7 +36,11 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     case let .success(products):
                         self.products = products
                         let iapProducts = products.compactMap { IAPProduct(product: $0.skProduct) }
-                        completion(.success(IAPProducts(products: iapProducts, config: paywall.remoteConfig)))
+                        completion(.success(IAPProducts(
+                            products: iapProducts,
+                            config: paywall.remoteConfig,
+                            paywallId: paywall.instanceIdentity
+                        )))
                         if let pendingPurchase {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }

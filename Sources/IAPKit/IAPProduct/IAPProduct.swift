@@ -179,12 +179,15 @@ protocol IAPProductProtocol {
     }
 
     var introductoryPricePaymentMode: UInt {
-        switch subscription?.introductoryOffer?.paymentMode {
-        case .payAsYouGo: 0
-        case .payUpFront: 1
-        case .freeTrial: 2
-        default: .zero
+        var paymentMode: UInt = 0
+        if subscription?.introductoryOffer?.paymentMode == .payAsYouGo {
+            paymentMode = 0
+        } else if subscription?.introductoryOffer?.paymentMode == .payUpFront {
+            paymentMode = 1
+        } else if subscription?.introductoryOffer?.paymentMode == .freeTrial {
+            paymentMode = 2
         }
+        return paymentMode
     }
 
     var periodUnit: IAPPeriodUnit.PeriodUnit {

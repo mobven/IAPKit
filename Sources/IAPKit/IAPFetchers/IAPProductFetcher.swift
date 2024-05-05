@@ -29,9 +29,9 @@ final class IAPProductFetcher {
         adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
 
-    var defaultProducts: [IAPProduct] = [
+    var defaultProducts: IAPProducts = IAPProducts(products: [])
         //        WeeklyProduct(), MonthlyProduct()
-    ]
+
 
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         fetchAdaptyOrTimeOut(completion: completion)

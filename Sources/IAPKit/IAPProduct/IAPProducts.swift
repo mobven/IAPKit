@@ -11,7 +11,7 @@ public struct IAPProducts {
     public let products: [IAPProduct]
     public let config: [String: Any]?
     public let paywallId: String?
-    public let productConfigs: IAPPaymentConfig?
+    public let productConfigs: IAPPaymentConfig
 
     init(
         products: [IAPProduct],

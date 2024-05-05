@@ -30,7 +30,7 @@ public struct IAPPaymentConfig {
         (first?.hasTrial ?? false) || (second?.hasTrial ?? false)
     }
 
-    init(
+    public init(
         designType: IAPPaywallType = .defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,

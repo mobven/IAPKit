@@ -25,4 +25,24 @@ public extension IAPProduct {
         numberFormatter.locale = priceLocale
         return numberFormatter.currencyCode
     }
+
+    func unitName(weekly: String, monthly: String, yearly: String) -> String {
+        let weekly = NSLocalizedString(weekly, comment: "")
+        let monthly = NSLocalizedString(monthly, comment: "")
+        let yearly = NSLocalizedString(yearly, comment: "")
+        return subscriptionPeriodUnit(withWeekly: weekly, monthly: monthly, yearly: yearly)
+    }
+
+    func localizedDateText(weekly: String, monthly: String, yearly: String) -> String {
+        switch subscriptionPeriodUnitRawValue {
+        case 1: // Weekly
+            weekly
+        case 2: // Monthly
+            monthly
+        case 3: // Yearly
+            yearly
+        default:
+            ""
+        }
+    }
 }

@@ -22,7 +22,7 @@ public final class IAPKit: NSObject {
     public weak var delegate: IAPKitDelegate?
 
     private var isBuyProcess: Bool = false
-    private let skProducts: BehaviorRelay<[IAPProduct]>
+    private let skProducts: BehaviorRelay<IAPProducts>
     private let buyState: BehaviorRelay<Bool> = BehaviorRelay(value: false)
     private var paywallId: String = ""
 
@@ -80,11 +80,11 @@ public final class IAPKit: NSObject {
 }
 
 public extension IAPKit {
-    @discardableResult func requestProducts() -> BehaviorRelay<[IAPProduct]> {
+    @discardableResult func requestProducts() -> BehaviorRelay<IAPProducts> {
         productFetcher.fetch { [weak self] result in
             switch result {
             case let .success(products):
-                self?.skProducts.accept(products.products)
+                self?.skProducts.accept(IAPProducts(products: products.products, config: products.config))
                 self?.paywallId = products.paywallId ?? ""
             case let .failure(error):
                 self?.handleError(error)

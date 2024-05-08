@@ -21,7 +21,7 @@ public struct IAPProducts {
         self.products = products
         self.config = config
         self.paywallId = paywallId
-        self.productConfigs = .init(withParams: config ?? [:])
+        self.productConfigs = config == nil ? .init() : .init(withParams: config ?? [:])
     }
 }
 

@@ -15,8 +15,7 @@ public struct IAPPaymentConfig {
     public let products: [IAPPaymentProduct]
 
     public var defaultProduct: IAPPaymentProduct? {
-        guard !products.isEmpty else {return nil}
-        return products[defaultProductIndex]
+        return products[safe: defaultProductIndex]
     }
 
     public var first: IAPPaymentProduct? {

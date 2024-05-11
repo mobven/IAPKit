@@ -22,12 +22,12 @@ public struct IAPPaymentConfig {
         products.first
     }
 
-    public  var second: IAPPaymentProduct? {
+    public var second: IAPPaymentProduct? {
         products[1]
     }
 
-    public  var supportsTrial: Bool {
-        (first?.hasTrial ?? false) || (second?.hasTrial ?? false)
+    public var supportsTrial: Bool {
+        trialToggle != 0
     }
 
     public init(
@@ -48,7 +48,7 @@ public struct IAPPaymentConfig {
         let designTypeString = parameters["designType"] as? String
         designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
-        trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero) - 1
+        trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []
         for productNo in 1 ... productCount {
@@ -60,7 +60,8 @@ public struct IAPPaymentConfig {
                 productLocale: parameters["product\(productNo)_period"] as? String,
                 productLegalText: parameters["product\(productNo)_legalText"] as? String,
                 productButtonTitle: parameters["product\(productNo)_buttonTitle"] as? String,
-                productTrailBadge: parameters["product\(productNo)_trailBadge"] as? Bool
+                productTrailBadge: parameters["product\(productNo)_trailBadge"] as? Bool,
+                hasTrial: trialToggle == productNo
             )
             products.append(product)
         }

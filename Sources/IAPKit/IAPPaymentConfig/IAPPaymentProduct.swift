@@ -18,10 +18,7 @@ public extension IAPPaymentConfig {
         public var productLegalText: String?
         public var productButtonTitle: String?
         public var productTrailBadge: Bool?
-
-        public var hasTrial: Bool {
-            productTrailBadge == true
-        }
+        public var hasTrial: Bool
 
         public var hasSubtitle: Bool {
             !(productPriceDivide == nil || productPriceDivide == 0)

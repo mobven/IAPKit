@@ -12,7 +12,10 @@ public struct IAPProducts {
     public let config: [String: Any]?
     public let paywallId: String?
     public let productConfigs: IAPPaymentConfig
-    public let defaultProduct: IAPProduct?
+    
+    public var defaultProduct: IAPProduct? {
+        config == nil ? products.first : products[productConfigs.defaultProductIndex]
+    }
 
     init(
         products: [IAPProduct],
@@ -23,7 +26,6 @@ public struct IAPProducts {
         self.config = config
         self.paywallId = paywallId
         self.productConfigs = config == nil ? .init() : .init(withParams: config ?? [:])
-        self.defaultProduct = config == nil ? products.first : products[productConfigs.defaultProductIndex]
     }
 }
 

@@ -35,7 +35,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// let localizedSubtitle = subtitleForProduct(product, productTimeLocalized: "Month"localized(), defaultProductTime: "week".localized())
     /// print(localizedSubtitle) // Output: "$4.99/Month"
     /// ```
-    public func subtitleForProduct(
+    func subtitleForProduct(
         _ skProduct: IAPProduct?,
         productTimeLocalized: String?,
         defaultProductTime: String?
@@ -73,7 +73,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// let localizedSubtitle = config?.name(forSKProduct: product, defaultlocalizedDateText: productName)?.localized
     /// print(localizedSubtitle) // Output: ""3 Days Free""
     /// ```
-    public func name(forSKProduct skProduct: IAPProduct?, defaultlocalizedDateText: String?) -> String? {
+    func name(forSKProduct skProduct: IAPProduct?, defaultlocalizedDateText: String?) -> String? {
         productName.isNilOrEmpty ? defaultlocalizedDateText : productName
     }
 
@@ -90,7 +90,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// let productPrice = config?.priceTitle(skProduct: product, productLocale: defaultUnitName)
     /// print(productPrice) // Output: "$4.99/USD" (if available) or "0.99/USD" (if not available)
     /// ```
-    public func priceTitle(skProduct: IAPProduct?, productLocale: String) -> String {
+    func priceTitle(skProduct: IAPProduct?, productLocale: String) -> String {
 
         let price2 = productPrice
         let divide = price2.isNil || price2 ?? 0 > 0 ? (price2 ?? 0) : 1.0
@@ -106,11 +106,11 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         return price + "/" + productLocale
     }
 
-    public func formattedCustomPrice(_ customPrice: Double, alternativePrice: String) -> String {
+    func formattedCustomPrice(_ customPrice: Double, alternativePrice: String) -> String {
         (customPrice > 0) ? formatedCustomPrice(customPrice) : alternativePrice
     }
 
-    public func formatedCustomPrice(_ customPrice: Double) -> String {
+    func formatedCustomPrice(_ customPrice: Double) -> String {
         if customPrice.truncatingRemainder(dividingBy: 1.0) == .zero {
             String(format: "%.0f", customPrice).replacingOccurrences(of: ".", with: ",")
         } else {
@@ -126,13 +126,12 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// You should use the returned string with the localized function
     /// Example usage:
     /// ```
-    /// let product = IAPProduct(...)
     /// var config: IAPPaymentConfig.IAPPaymentProduct?
     /// let defaultButtonTitle = "Subscribe"
-    /// let buttonTitle = buttonTitle(skProduct: product, defaultButtonTitle: defaultButtonTitle)
+    /// let buttonTitle = buttonTitle(defaultButtonTitle: defaultButtonTitle)
     /// print(buttonTitle) // Output: "Subscribe" (if available) or "Become Premium" (if not available)
     /// ```
-    public func buttonTitle(skProduct: IAPProduct?, defaultButtonTitle: String) -> String? {
+    func buttonTitle(defaultButtonTitle: String) -> String? {
         productButtonTitle.isNilOrEmpty ? defaultButtonTitle : productButtonTitle
     }
 }

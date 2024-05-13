@@ -12,6 +12,10 @@ public struct IAPProducts {
     public let config: [String: Any]?
     public let paywallId: String?
     public let productConfigs: IAPPaymentConfig
+    
+    public var defaultProduct: IAPProduct? {
+        config == nil ? products.first : products[productConfigs.defaultProductIndex]
+    }
 
     init(
         products: [IAPProduct],

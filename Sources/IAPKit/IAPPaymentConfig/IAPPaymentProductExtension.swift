@@ -65,15 +65,14 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
 
     /// Returns the name for a given product You should use the returned string with the localized function. You should use the returned string with the localized function.
     /// - Parameters:
-    ///   - skProduct: The `IAPProduct` representing the product
-    ///   - defaultlocalizedDateText: The default localized date text to be used if `productName` is not available.  It must be localized string,
+    ///   - placeholder: The default localized date text to be used if `productName` is not available.  It must be localized string,
     /// - Returns:  A string representing the name of the product. If `productName` is nil or empty, returns `defaultlocalizedDateText`.
     /// Example usage:
     /// ```
     /// let product = IAPProduct(...)
     /// var config: IAPPaymentConfig.IAPPaymentProduct?
     /// let productName = "productTitle:\(product.identifier)".localized
-    /// let localizedSubtitle = config?.name(forSKProduct: product, defaultlocalizedDateText: productName)?.localized
+    /// let localizedSubtitle = config?.name(placeholder: productName)?.localized
     /// print(localizedSubtitle) // Output: ""3 Days Free""
     /// ```
     func name(placeholder: String?) -> String? {

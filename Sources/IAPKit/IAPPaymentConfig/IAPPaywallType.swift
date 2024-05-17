@@ -8,7 +8,7 @@
 import Foundation
 
 public extension IAPPaymentConfig {
-    public enum IAPPaywallType: String {
+    enum IAPPaywallType: String {
         case defaultPaywall, eft, offer
     }
 }

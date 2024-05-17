@@ -24,25 +24,26 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default time value.
     /// - Parameters:
     ///   - skProduct: The `IAPProduct` representing the product
-    ///   - productTimeLocalized: The localized time label for the product. It must be localized string,
-    ///   - defaultProductTime: The default time value to be used if `productTimeLocalized` is not available..It must be localized string,
+    ///   - placeholder: The default time value to be used if `productTimeLocalized` is not available..It must be localized string,
+    ///   - productTimeLabelLocalized: The localized time label for the product. It must be localized string,
     /// - Returns:  A string representing the formatted subtitle for the product,
     /// including its price and time information.
     /// Returns `nil` if `productPriceDivide` is `nil` or less than or equal to zero.
     /// Example usage:
     /// ```
     /// let product = IAPProduct(...)
-    /// let localizedSubtitle = subtitleForProduct(product, productTimeLocalized: "Month"localized(), defaultProductTime: "week".localized())
+    /// let localizedSubtitle = subtitleForProduct(product, placeholder: "Month"localized(), productTimeLocalized: "Month")
     /// print(localizedSubtitle) // Output: "$4.99/Month"
     /// ```
-    func subtitleForProduct(
+    func subTitleForProduct(
         _ skProduct: IAPProduct?,
-        productTimeLocalized: String?,
-        defaultProductTime: String?
+        placeholder: String,
+        productTimeLabelLocalized: String?
     ) -> String? {
         let productPriceDivide = productPriceDivide
+        let productTime = productTimeLabel
         let productPrice1 = skProduct?.subsciptionPrice.doubleValue ?? 0.0
-        let productTimeLabel = productTimeLocalized.isNilOrEmpty ? defaultProductTime : productTimeLocalized
+        let productTimeLabel = productTime.isNilOrEmpty ? placeholder : productTimeLabelLocalized
 
         let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
         let floatValue = Decimal(productPrice1)
@@ -57,7 +58,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
             .replacingOccurrences(of: ".", with: ",")
             .replacingOccurrences(of: "\\,?0+$", with: "", options: .regularExpression)
 
-        let timeString = (productTimeLabel != nil ? productTimeLabel : defaultProductTime) ?? ""
+        let timeString = (productTimeLabel != nil ? productTimeLabel : placeholder) ?? ""
 
         return "\(currencySymbol)\(formattedPrice)" + "/" + timeString
     }
@@ -75,8 +76,8 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// let localizedSubtitle = config?.name(forSKProduct: product, defaultlocalizedDateText: productName)?.localized
     /// print(localizedSubtitle) // Output: ""3 Days Free""
     /// ```
-    func name(forSKProduct skProduct: IAPProduct?, defaultlocalizedDateText: String?) -> String? {
-        productName.isNilOrEmpty ? defaultlocalizedDateText : productName
+    func name(placeholder: String?) -> String? {
+        productName.isNilOrEmpty ? placeholder : productName
     }
 
     /// Returns the price title for a given product and product locale.

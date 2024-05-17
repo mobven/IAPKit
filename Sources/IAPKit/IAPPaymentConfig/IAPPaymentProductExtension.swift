@@ -45,13 +45,15 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let productTimeLabel = productTimeLocalized.isNilOrEmpty ? defaultProductTime : productTimeLocalized
 
         let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
-        let floatValue = productPrice1
+        let floatValue = Decimal(productPrice1)
 
-        guard productPriceDivide != nil && productPriceDivide ?? 0 > 0 else { return nil }
+        guard let productPriceDivide, productPriceDivide > 0 else { return nil }
+        let divideDecimal = Decimal(productPriceDivide) // Ensure divide is also a Decimal
+        let multiplied = floatValue / divideDecimal * Decimal(100)
 
-        let truncatedValue = floor(floatValue / (productPriceDivide ?? 0) * 100) / 100
+        let truncatedValue = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
 
-        let formattedPrice = String(format: "%.2f", truncatedValue)
+        let formattedPrice = String(format: "%.2f", NSDecimalNumber(decimal: truncatedValue).doubleValue)
             .replacingOccurrences(of: ".", with: ",")
             .replacingOccurrences(of: "\\,?0+$", with: "", options: .regularExpression)
 
@@ -95,11 +97,16 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let price2 = productPrice
         let divide = price2.isNil || price2 ?? 0 > 0 ? (price2 ?? 0) : 1.0
 
-        var customPrice = skProduct?.subsciptionPrice.doubleValue ?? 0.0
+        var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
+        
+        let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
+        let multiplied = customPrice / divideDecimal * Decimal(100)
 
-        customPrice = floor(customPrice / divide * 100) / 100
-
-        let formattedPrice = formattedCustomPrice(customPrice, alternativePrice: skProduct?.priceString() ?? "")
+        customPrice = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
+        
+        let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
+        
+        let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
 
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice

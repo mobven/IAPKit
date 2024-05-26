@@ -23,7 +23,11 @@ public struct IAPPaymentConfig {
     }
 
     public var second: IAPPaymentProduct? {
-        products[1]
+        return products[safe: 1]
+    }
+
+    public var third: IAPPaymentProduct? {
+        return products[safe: 2]
     }
 
     public var supportsTrial: Bool {

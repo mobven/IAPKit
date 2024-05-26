@@ -65,6 +65,7 @@ public struct IAPPaymentConfig {
                 productLegalText: parameters["product\(productNo)_legalText"] as? String,
                 productButtonTitle: parameters["product\(productNo)_buttonTitle"] as? String,
                 productTrailBadge: parameters["product\(productNo)_trailBadge"] as? Bool,
+                productPromoBadgeText: parameters["product\(productNo)_promoBadge"] as? String,
                 hasTrial: trialToggle == productNo
             )
             products.append(product)

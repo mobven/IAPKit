@@ -9,6 +9,12 @@ import Foundation
 
 public extension IAPPaymentConfig {
     enum IAPPaywallType: String {
-        case defaultPaywall, eft, offer
+        case defaultPaywall
+        case eft
+        case offer
+        case plan2Vertical = "2plan_vertical"
+        case plan2Horizontal = "2plan_horizontal"
+        case plan3Vertical = "3plan_vertical"
+        case plan3Horizontal = "3plan_horizontal"
     }
 }

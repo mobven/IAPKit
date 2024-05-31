@@ -23,7 +23,11 @@ public struct IAPPaymentConfig {
     }
 
     public var second: IAPPaymentProduct? {
-        products[1]
+        return products[safe: 1]
+    }
+
+    public var third: IAPPaymentProduct? {
+        return products[safe: 2]
     }
 
     public var supportsTrial: Bool {
@@ -61,6 +65,7 @@ public struct IAPPaymentConfig {
                 productLegalText: parameters["product\(productNo)_legalText"] as? String,
                 productButtonTitle: parameters["product\(productNo)_buttonTitle"] as? String,
                 productTrailBadge: parameters["product\(productNo)_trailBadge"] as? Bool,
+                productPromoBadgeText: parameters["product\(productNo)_promoBadge"] as? String,
                 hasTrial: trialToggle == productNo
             )
             products.append(product)

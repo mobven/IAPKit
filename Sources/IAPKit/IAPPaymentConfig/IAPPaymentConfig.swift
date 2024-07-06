@@ -8,6 +8,7 @@
 import Foundation
 
 public struct IAPPaymentConfig {
+    public let onboardType: IAPOnboardingType
     public let designType: IAPPaywallType
     public let defaultProductIndex: Int
     public let trialToggle: Int
@@ -35,12 +36,14 @@ public struct IAPPaymentConfig {
     }
 
     public init(
+        onboardType: IAPOnboardingType = .single,
         designType: IAPPaywallType = .defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
         products: [IAPPaymentProduct] = []
     ) {
+        self.onboardType = onboardType
         self.designType = designType
         self.defaultProductIndex = defaultProductIndex
         self.trialToggle = trialToggle
@@ -49,6 +52,8 @@ public struct IAPPaymentConfig {
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
+        let onboardingType = parameters["onboardType"] as? String
+        onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .single
         let designTypeString = parameters["designType"] as? String
         designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1

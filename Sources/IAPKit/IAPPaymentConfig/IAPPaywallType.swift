@@ -16,5 +16,6 @@ public extension IAPPaymentConfig {
         case plan2Horizontal = "2plan_horizontal"
         case plan3Vertical = "3plan_vertical"
         case plan3Horizontal = "3plan_horizontal"
+        case timeLine = "Timeline"
     }
 }

@@ -53,7 +53,7 @@ public struct IAPPaymentConfig {
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
         let onboardingType = parameters["onboardType"] as? String
-        onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .single
+        onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .default
         let designTypeString = parameters["designType"] as? String
         designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1

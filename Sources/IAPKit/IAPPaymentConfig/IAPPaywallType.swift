@@ -18,6 +18,7 @@ public extension IAPPaymentConfig {
         case plan3Horizontal = "3plan_horizontal"
         case timeLine = "Timeline"
         case buttons = "Buttons"
+        case singleProductPlan = "Single-Plan"
     }
 
     enum IAPOnboardingType: String {

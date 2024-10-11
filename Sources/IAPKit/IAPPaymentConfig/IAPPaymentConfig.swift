@@ -69,7 +69,7 @@ public struct IAPPaymentConfig {
                 productLocale: parameters["product\(productNo)_period"] as? String,
                 productLegalText: parameters["product\(productNo)_legalText"] as? String,
                 productButtonTitle: parameters["product\(productNo)_buttonTitle"] as? String,
-                productTrailBadge: parameters["product\(productNo)_trailBadge"] as? Bool,
+                productTrailBadge: parameters["product\(productNo)_trialBadge"] as? Bool,
                 productPromoBadgeText: parameters["product\(productNo)_promoBadge"] as? String,
                 productTrialToggleText: parameters["product\(productNo)_trialToggleText"] as? String,
                 hasTrial: trialToggle == productNo

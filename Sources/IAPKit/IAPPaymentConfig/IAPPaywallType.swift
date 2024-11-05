@@ -21,7 +21,7 @@ public extension IAPPaymentConfig {
         case singleProductPlan = "Single-Plan"
         case singleProductPlanSecondDesign = "singlePlan"
         case singleProductPlanWithToggle = "singlePlan_toggle"
-        case plan2Toggle = "plan2Toggle"
+        case plan2Toggle = "2planToggle"
     }
 
     enum IAPOnboardingType: String {

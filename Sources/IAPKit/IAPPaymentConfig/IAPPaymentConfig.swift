@@ -13,6 +13,7 @@ public struct IAPPaymentConfig {
     public let defaultProductIndex: Int
     public let trialToggle: Int
     public let skipPaywall: Bool
+    public let offer: Bool
     public let products: [IAPPaymentProduct]
 
     public var defaultProduct: IAPPaymentProduct? {
@@ -41,6 +42,7 @@ public struct IAPPaymentConfig {
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
+        offer: Bool = false,
         products: [IAPPaymentProduct] = []
     ) {
         self.onboardType = onboardType
@@ -48,6 +50,7 @@ public struct IAPPaymentConfig {
         self.defaultProductIndex = defaultProductIndex
         self.trialToggle = trialToggle
         self.skipPaywall = skipPaywall
+        self.offer = offer
         self.products = products
     }
 
@@ -58,6 +61,7 @@ public struct IAPPaymentConfig {
         designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
+        offer = ((parameters["offer"] as? Int) ?? .zero) == 1
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []
         for productNo in 1 ... productCount {

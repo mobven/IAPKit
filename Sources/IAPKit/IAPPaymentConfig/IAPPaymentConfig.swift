@@ -14,6 +14,7 @@ public struct IAPPaymentConfig {
     public let trialToggle: Int
     public let skipPaywall: Bool
     public let offer: Bool
+    public let upperCtaText: String?
     public let products: [IAPPaymentProduct]
 
     public var defaultProduct: IAPPaymentProduct? {
@@ -26,6 +27,11 @@ public struct IAPPaymentConfig {
 
     public var second: IAPPaymentProduct? {
         return products[safe: 1]
+    }
+    
+    // Key varsa boş olsa bile tick gösterilmeli, key olmazsa gösterilmemeli şeklinde kural konuldu
+    public var hasUpperCtaText: Bool {
+        upperCtaText != nil
     }
 
     public var third: IAPPaymentProduct? {
@@ -43,6 +49,7 @@ public struct IAPPaymentConfig {
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
         offer: Bool = false,
+        upperCtaText: String? = nil,
         products: [IAPPaymentProduct] = []
     ) {
         self.onboardType = onboardType
@@ -51,6 +58,7 @@ public struct IAPPaymentConfig {
         self.trialToggle = trialToggle
         self.skipPaywall = skipPaywall
         self.offer = offer
+        self.upperCtaText = upperCtaText
         self.products = products
     }
 
@@ -59,6 +67,7 @@ public struct IAPPaymentConfig {
         onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .default
         let designTypeString = parameters["designType"] as? String
         designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
+        upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         offer = ((parameters["offer"] as? Int) ?? .zero) == 1

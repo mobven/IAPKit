@@ -22,6 +22,9 @@ public extension IAPPaymentConfig {
         case singleProductPlanSecondDesign = "singlePlan"
         case singleProductPlanWithToggle = "singlePlan_toggle"
         case plan2Toggle = "2planToggle"
+        case rink2PTimelineSingle = "rink2pTimelineSingle"
+        case rink2PTimelineVertical = "rink2pTimelineVR"
+        case rink2PTimelineHorizontal = "rink2pTimelineHR"
     }
 
     enum IAPOnboardingType: String {

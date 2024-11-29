@@ -34,6 +34,7 @@ public extension IAPPaymentConfig {
     }
     
     enum IAPOfferType: String {
+        case noOffer
         case yearOffer = "year_offer"
     }
 }

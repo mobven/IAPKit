@@ -48,7 +48,7 @@ public struct IAPPaymentConfig {
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
-        offerType: IAPOfferType = .yearOffer,
+        offerType: IAPOfferType = .noOffer,
         upperCtaText: String? = nil,
         products: [IAPPaymentProduct] = []
     ) {
@@ -71,7 +71,7 @@ public struct IAPPaymentConfig {
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         let offerTypeString = parameters["offerType"] as? String
-        offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .yearOffer
+        offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []
         for productNo in 1 ... productCount {

@@ -13,6 +13,7 @@ public struct IAPPaymentConfig {
     public let defaultProductIndex: Int
     public let trialToggle: Int
     public let skipPaywall: Bool
+    public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
     public let offerType: IAPOfferType
     public let upperCtaText: String?
     public let products: [IAPPaymentProduct]
@@ -70,6 +71,7 @@ public struct IAPPaymentConfig {
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
+        hasNotificationToggle = ((parameters["notification_toggle"] as? Bool) ?? false)
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false

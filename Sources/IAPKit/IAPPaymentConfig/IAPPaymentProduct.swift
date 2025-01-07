@@ -17,7 +17,7 @@ public extension IAPPaymentConfig {
         public var productLocale: String?
         public var productLegalText: String?
         public var productButtonTitle: String?
-        public var productTrailBadge: Bool?
+        public var productTrialBadge: String?
         public var productPromoBadgeText: String?
         public var productTrialToggleText: String?
         public var hasTrial: Bool

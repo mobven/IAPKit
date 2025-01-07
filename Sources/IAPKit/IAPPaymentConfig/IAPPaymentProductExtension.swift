@@ -18,7 +18,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         lhs.productLocale == rhs.productLocale &&
         lhs.productLegalText == rhs.productLegalText &&
         lhs.productButtonTitle == rhs.productButtonTitle &&
-        lhs.productTrailBadge == rhs.productTrailBadge
+        lhs.productTrialBadge == rhs.productTrialBadge
     }
 
     /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default time value.

@@ -10,14 +10,14 @@ import StoreKit
 
 public class IAPProduct: IAPProductProtocol {
     // swiftlint:disable implicitly_unwrapped_optional
-    var product: IAPProductProtocol!
+    public var product: IAPProductProtocol!
     // swiftlint:enable implicitly_unwrapped_optional
 
     init() {
         // empty initializer
     }
 
-    init(product: IAPProductProtocol) {
+    public init(product: IAPProductProtocol) {
         self.product = product
     }
 
@@ -49,7 +49,7 @@ extension IAPProduct: Equatable {
     }
 }
 
-protocol IAPProductProtocol {
+public protocol IAPProductProtocol {
     var identifier: String { get }
     func hasFreeTrial() -> Bool
     func isWeekly() -> Bool
@@ -70,39 +70,39 @@ protocol IAPProductProtocol {
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {
-    var identifier: String { id }
+    public var identifier: String { id }
 
-    func hasFreeTrial() -> Bool {
+    public func hasFreeTrial() -> Bool {
         subscription?.introductoryOffer?.paymentMode == .freeTrial
     }
 
-    func isWeekly() -> Bool {
+    public func isWeekly() -> Bool {
         (subscription?.subscriptionPeriod.value ?? 0 == 7 && subscription?.subscriptionPeriod.unit == .day) ||
             (subscription?.subscriptionPeriod.value ?? 0 == 1 && subscription?.subscriptionPeriod.unit == .week)
     }
 
-    func isMonthly() -> Bool {
+    public func isMonthly() -> Bool {
         (subscription?.subscriptionPeriod.value ?? 0 == 1 && subscription?.subscriptionPeriod.unit == .month)
     }
 
-    func is2Monthly() -> Bool {
+    public func is2Monthly() -> Bool {
         (subscription?.subscriptionPeriod.value ?? 0 == 2 && subscription?.subscriptionPeriod.unit == .month)
     }
 
-    func is3Monthly() -> Bool {
+    public func is3Monthly() -> Bool {
         (subscription?.subscriptionPeriod.value == 3 && subscription?.subscriptionPeriod.unit == .month)
     }
 
-    func is6Monthly() -> Bool {
+    public func is6Monthly() -> Bool {
         (subscription?.subscriptionPeriod.value ?? 0 == 6 && subscription?.subscriptionPeriod.unit == .month)
     }
 
-    func isYearly() -> Bool {
+    public func isYearly() -> Bool {
         (subscription?.subscriptionPeriod.value ?? 0 == 12 && subscription?.subscriptionPeriod.unit == .month) ||
             (subscription?.subscriptionPeriod.value ?? 0 == 1 && subscription?.subscriptionPeriod.unit == .year)
     }
 
-    var subscriptionPeriodText: String {
+    public var subscriptionPeriodText: String {
         guard let subscriptionPeriod = subscription?.subscriptionPeriod else { return "" }
         let dateComponents = switch subscriptionPeriod.unit {
         case .day:
@@ -123,7 +123,7 @@ protocol IAPProductProtocol {
         ) ?? ""
     }
 
-    func weeklyPrice() -> Double? {
+    public func weeklyPrice() -> Double? {
         if let period = subscription?.subscriptionPeriod, period.unit != .week || period.value > 1,
            period.unit != .day
         {
@@ -145,19 +145,19 @@ protocol IAPProductProtocol {
         return nil
     }
 
-    var priceLocale: Locale {
+    public var priceLocale: Locale {
         priceFormatStyle.locale
     }
 
-    var units: Int? {
+    public var units: Int? {
         subscription?.subscriptionPeriod.value
     }
 
-    var subsciptionPrice: NSDecimalNumber {
+    public var subsciptionPrice: NSDecimalNumber {
         price as NSDecimalNumber
     }
 
-    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+    public func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
         guard let unit = subscription?.subscriptionPeriod.unit else { return "" }
 
         switch unit {
@@ -169,7 +169,7 @@ protocol IAPProductProtocol {
         }
     }
 
-    var subscriptionPeriodUnitRawValue: UInt {
+    public var subscriptionPeriodUnitRawValue: UInt {
         switch subscription?.subscriptionPeriod.unit {
         case .week: 1
         case .month: 2
@@ -178,7 +178,7 @@ protocol IAPProductProtocol {
         }
     }
 
-    var introductoryPricePaymentMode: UInt {
+    public var introductoryPricePaymentMode: UInt {
         var paymentMode: UInt = 0
         if subscription?.introductoryOffer?.paymentMode == .payAsYouGo {
             paymentMode = 0
@@ -190,7 +190,7 @@ protocol IAPProductProtocol {
         return paymentMode
     }
 
-    var periodUnit: IAPPeriodUnit.PeriodUnit {
+    public var periodUnit: IAPPeriodUnit.PeriodUnit {
         switch subscription?.subscriptionPeriod.unit {
         case .day: ((subscription?.subscriptionPeriod.value ?? .zero) > 1) ? .week : .day
         case .week: .week
@@ -202,39 +202,39 @@ protocol IAPProductProtocol {
 }
 
 extension SKProduct: IAPProductProtocol {
-    var identifier: String { productIdentifier }
+    public var identifier: String { productIdentifier }
 
-    func hasFreeTrial() -> Bool {
+    public func hasFreeTrial() -> Bool {
         introductoryPrice?.subscriptionPeriod.numberOfUnits ?? 0 > 0
     }
 
-    func isWeekly() -> Bool {
+    public func isWeekly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 7 && subscriptionPeriod?.unit == .day) ||
             (subscriptionPeriod?.numberOfUnits ?? 0 == 1 && subscriptionPeriod?.unit == .week)
     }
 
-    func isMonthly() -> Bool {
+    public func isMonthly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 1 && subscriptionPeriod?.unit == .month)
     }
 
-    func is2Monthly() -> Bool {
+    public func is2Monthly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 2 && subscriptionPeriod?.unit == .month)
     }
 
-    func is3Monthly() -> Bool {
+    public func is3Monthly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 3 && subscriptionPeriod?.unit == .month)
     }
 
-    func is6Monthly() -> Bool {
+    public func is6Monthly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 6 && subscriptionPeriod?.unit == .month)
     }
 
-    func isYearly() -> Bool {
+    public func isYearly() -> Bool {
         (subscriptionPeriod?.numberOfUnits ?? 0 == 12 && subscriptionPeriod?.unit == .month) ||
             (subscriptionPeriod?.numberOfUnits ?? 0 == 1 && subscriptionPeriod?.unit == .year)
     }
 
-    var subscriptionPeriodText: String {
+    public var subscriptionPeriodText: String {
         guard let subscriptionPeriod else { return "" }
         let dateComponents = switch subscriptionPeriod.unit {
         case .day:
@@ -255,7 +255,7 @@ extension SKProduct: IAPProductProtocol {
         ) ?? ""
     }
 
-    func weeklyPrice() -> Double? {
+    public func weeklyPrice() -> Double? {
         if let period = subscriptionPeriod, period.unit != .week || period.numberOfUnits > 1,
            period.unit != .day
         {
@@ -279,15 +279,15 @@ extension SKProduct: IAPProductProtocol {
 
     var locale: Locale { priceLocale }
 
-    var units: Int? {
+    public var units: Int? {
         introductoryPrice?.subscriptionPeriod.numberOfUnits
     }
 
-    var subsciptionPrice: NSDecimalNumber {
+    public var subsciptionPrice: NSDecimalNumber {
         price
     }
 
-    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
+    public func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String {
         guard let unit = subscriptionPeriod?.unit else { return "" }
 
         switch unit {
@@ -299,15 +299,15 @@ extension SKProduct: IAPProductProtocol {
         }
     }
 
-    var subscriptionPeriodUnitRawValue: UInt {
+    public var subscriptionPeriodUnitRawValue: UInt {
         subscriptionPeriod?.unit.rawValue ?? .zero
     }
 
-    var introductoryPricePaymentMode: UInt {
+    public var introductoryPricePaymentMode: UInt {
         introductoryPrice?.paymentMode.rawValue ?? .zero
     }
 
-    var periodUnit: IAPPeriodUnit.PeriodUnit {
+    public var periodUnit: IAPPeriodUnit.PeriodUnit {
         switch subscriptionPeriod?.unit {
         case .day: ((subscriptionPeriod?.numberOfUnits ?? .zero) > 1) ? .week : .day
         case .week: .week

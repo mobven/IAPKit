@@ -36,6 +36,10 @@ public extension IAPPaymentConfig {
     
     enum IAPOfferType: String {
         case noOffer
+        // CallRecorder types
         case yearOffer = "year_offer"
+        // interviewRecorder types
+        case offerVariantA = "offerVarA"
+        case offerVariantB = "offerVarB"
     }
 }

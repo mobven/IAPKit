@@ -19,7 +19,7 @@ public struct IAPPaymentConfig {
     public let products: [IAPPaymentProduct]
 
     public var defaultProduct: IAPPaymentProduct? {
-        return products[safe: defaultProductIndex]
+        products[safe: defaultProductIndex]
     }
 
     public var first: IAPPaymentProduct? {
@@ -27,16 +27,16 @@ public struct IAPPaymentConfig {
     }
 
     public var second: IAPPaymentProduct? {
-        return products[safe: 1]
+        products[safe: 1]
     }
-    
+
     // Key varsa boş olsa bile tick gösterilmeli, key olmazsa gösterilmemeli şeklinde kural konuldu
     public var hasUpperCtaText: Bool {
         upperCtaText != nil
     }
 
     public var third: IAPPaymentProduct? {
-        return products[safe: 2]
+        products[safe: 2]
     }
 
     public var supportsTrial: Bool {

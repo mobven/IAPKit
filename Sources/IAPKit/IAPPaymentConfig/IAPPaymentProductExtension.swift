@@ -9,16 +9,15 @@ import Foundation
 import StoreKit
 
 public extension IAPPaymentConfig.IAPPaymentProduct {
-
     static func == (lhs: IAPPaymentConfig.IAPPaymentProduct, rhs: IAPPaymentConfig.IAPPaymentProduct) -> Bool {
         lhs.productName == rhs.productName &&
-        lhs.productPrice == rhs.productPrice &&
-        lhs.productPriceDivide == rhs.productPriceDivide &&
-        lhs.productTimeLabel == rhs.productTimeLabel &&
-        lhs.productLocale == rhs.productLocale &&
-        lhs.productLegalText == rhs.productLegalText &&
-        lhs.productButtonTitle == rhs.productButtonTitle &&
-        lhs.productTrialBadge == rhs.productTrialBadge
+            lhs.productPrice == rhs.productPrice &&
+            lhs.productPriceDivide == rhs.productPriceDivide &&
+            lhs.productTimeLabel == rhs.productTimeLabel &&
+            lhs.productLocale == rhs.productLocale &&
+            lhs.productLegalText == rhs.productLegalText &&
+            lhs.productButtonTitle == rhs.productButtonTitle &&
+            lhs.productTrialBadge == rhs.productTrialBadge
     }
 
     /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default time value.
@@ -93,19 +92,18 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// print(productPrice) // Output: "$4.99/USD" (if available) or "0.99/USD" (if not available)
     /// ```
     func priceTitle(skProduct: IAPProduct?, productLocale: String) -> String {
-
         let price2 = productPrice
         let divide = price2.isNil || price2 ?? 0 > 0 ? (price2 ?? 0) : 1.0
 
         var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
-        
+
         let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
         let multiplied = customPrice / divideDecimal * Decimal(100)
 
         customPrice = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
-        
+
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
-        
+
         let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
 
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""

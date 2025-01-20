@@ -17,7 +17,7 @@ public extension IAPPaymentConfig {
         case plan3Vertical = "3plan_vertical"
         case plan3Horizontal = "3plan_horizontal"
         case timeLine = "Timeline"
-        case timelineToggle = "timelineToggle"
+        case timelineToggle
         case buttons = "Buttons"
         case singleProductPlan = "Single-Plan"
         case singleProductPlanSecondDesign = "singlePlan"
@@ -33,7 +33,7 @@ public extension IAPPaymentConfig {
         case multiple
         case `default`
     }
-    
+
     enum IAPOfferType: String {
         case noOffer
         // CallRecorder types

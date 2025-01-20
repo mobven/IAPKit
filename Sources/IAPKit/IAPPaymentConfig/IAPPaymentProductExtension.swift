@@ -9,16 +9,15 @@ import Foundation
 import StoreKit
 
 public extension IAPPaymentConfig.IAPPaymentProduct {
-
     static func == (lhs: IAPPaymentConfig.IAPPaymentProduct, rhs: IAPPaymentConfig.IAPPaymentProduct) -> Bool {
         lhs.productName == rhs.productName &&
-        lhs.productPrice == rhs.productPrice &&
-        lhs.productPriceDivide == rhs.productPriceDivide &&
-        lhs.productTimeLabel == rhs.productTimeLabel &&
-        lhs.productLocale == rhs.productLocale &&
-        lhs.productLegalText == rhs.productLegalText &&
-        lhs.productButtonTitle == rhs.productButtonTitle &&
-        lhs.productTrialBadge == rhs.productTrialBadge
+            lhs.productPrice == rhs.productPrice &&
+            lhs.productPriceDivide == rhs.productPriceDivide &&
+            lhs.productTimeLabel == rhs.productTimeLabel &&
+            lhs.productLocale == rhs.productLocale &&
+            lhs.productLegalText == rhs.productLegalText &&
+            lhs.productButtonTitle == rhs.productButtonTitle &&
+            lhs.productTrialBadge == rhs.productTrialBadge
     }
 
     /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default time value.
@@ -93,24 +92,68 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// print(productPrice) // Output: "$4.99/USD" (if available) or "0.99/USD" (if not available)
     /// ```
     func priceTitle(skProduct: IAPProduct?, productLocale: String) -> String {
-
         let price2 = productPrice
         let divide = price2.isNil || price2 ?? 0 > 0 ? (price2 ?? 0) : 1.0
 
         var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
-        
+
         let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
         let multiplied = customPrice / divideDecimal * Decimal(100)
 
         customPrice = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
-        
+
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
-        
+
         let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
 
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice
         return price + "/" + productLocale
+    }
+    
+    func formattedPriceTitle(
+        skProduct: IAPProduct?,
+        productLocale: String,
+        multiplier: Double = 1.0
+    ) -> String {
+        // Get the base product price or set a default value
+        let basePrice = productPrice
+        let divisor = (basePrice.isNil || (basePrice ?? 0) <= 0) ? 1.0 : (basePrice ?? 1.0)
+
+        // Calculate the custom price based on the subscription price
+        var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
+        let divisorDecimal = Decimal(divisor)
+        let scaledPrice = customPrice / divisorDecimal * Decimal(100)
+
+        // Round the scaled price to two decimal places
+        customPrice = (
+            (scaledPrice as NSDecimalNumber)
+                .rounding(accordingToBehavior: nil) as Decimal
+        ) / Decimal(100)
+
+        // Convert to Double for truncation and further operations
+        var truncatedPrice = NSDecimalNumber(decimal: customPrice).doubleValue
+
+        // Apply multiplier logic
+        if multiplier != 1.0 {
+            truncatedPrice *= multiplier
+            truncatedPrice = floor(truncatedPrice) + 0.99 // Apply pricing convention
+        }
+
+        // Format the final price
+        let formattedPrice = formattedCustomPrice(
+            truncatedPrice,
+            alternativePrice: skProduct?.priceString() ?? ""
+        )
+
+        // Get the currency symbol
+        let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
+        
+        // Prepend the currency symbol only if the price is greater than 0
+        let priceWithCurrency = (truncatedPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
+
+        // Return the final price string with locale
+        return priceWithCurrency + "/" + productLocale
     }
 
     func formattedCustomPrice(_ customPrice: Double, alternativePrice: String) -> String {

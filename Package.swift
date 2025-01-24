@@ -15,6 +15,7 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "2.9.3"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
+        .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.27.0"),
     ],
     targets: [
         .target(
@@ -23,6 +24,8 @@ let package = Package(
                 .product(name: "Adapty", package: "AdaptySDK-iOS"),
                 .product(name: "RxSwift", package: "RxSwift"),
                 .product(name: "RxRelay", package: "RxSwift"),
+                .product(name: "FirebaseCrashlytics", package: "firebase-ios-sdk"),
+                .product(name: "FirebaseAnalytics", package: "firebase-ios-sdk"),
             ]
         ),
         .testTarget(

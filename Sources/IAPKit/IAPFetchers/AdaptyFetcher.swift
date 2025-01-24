@@ -7,6 +7,9 @@
 
 import Adapty
 import Foundation
+import Firebase
+import FirebaseCore
+import FirebaseCrashlytics
 
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
@@ -18,7 +21,14 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
 
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
         placementName = paywallName
-        Adapty.activate(apiKey)
+        Adapty.activate(apiKey, { result in
+            if let error = result {
+                SDKLogger.logError(error, context: "Adapty Activate")
+            }
+        })
+        if !FirebaseChecker.isFirebaseConfigured() {
+            print("Firebase is not configured in the main application. Crashlytics will not work.")
+        }
     }
 
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
@@ -45,6 +55,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }
                     case let .failure(error):
+                        SDKLogger.logError(error, context: paywall.name)
                         completion(.failure(error))
                         if let pendingPurchase {
                             pendingPurchase.completion(.failure(NSError(domain: "IAPAdaptyFetcherError", code: 33001)))
@@ -52,19 +63,21 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     }
                 }
             case let .failure(error):
+                SDKLogger.logError(error, context: self.placementName)
                 completion(.failure(error))
             }
         }
     }
 
     func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
-        Adapty.getProfile { result in
+        Adapty.getProfile { [weak self] result in
             switch result {
             case let .success(profile):
                 let isSubscribed = profile.isPremium
                 let expireDate = profile.subscriptions.first(where: { $0.value.isActive })?.value.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
+                SDKLogger.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }
@@ -83,11 +96,13 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                         case let .success(profile):
                             completion(.success(profile.isSubscribed))
                         case let .failure(error):
+                            SDKLogger.logError(error, context: self.placementName)
                             completion(.failure(error))
                         }
                     }
                 }
             case let .failure(error):
+                SDKLogger.logError(error, context: self.placementName)
                 completion(.failure(error))
             }
         }
@@ -100,7 +115,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             waitForProductsThenBuy(product: product, completion: completion)
             return
         }
-        Adapty.makePurchase(product: adaptyProduct) { result in
+        Adapty.makePurchase(product: adaptyProduct) { [weak self] result in
             switch result {
             case let .success(info):
                 let subscription = info.profile.subscriptions[adaptyProduct.vendorProductId]
@@ -117,6 +132,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     )
                 )
             case let .failure(error):
+                SDKLogger.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }
@@ -154,5 +170,22 @@ public struct IAPProfile {
 extension AdaptyProfile {
     var isPremium: Bool {
         accessLevels["premium"]?.isActive ?? false
+    }
+}
+
+
+public class FirebaseChecker {
+    public static func isFirebaseConfigured() -> Bool {
+        return FirebaseApp.app() != nil
+    }
+}
+
+public class SDKLogger {
+    public static func logError(_ error: Error, context: String? = nil) {
+        let crashlytics = Crashlytics.crashlytics()
+        crashlytics.record(error: error)
+        if let context = context {
+            crashlytics.log("Context: \(context)")
+        }
     }
 }

@@ -110,7 +110,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
 
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         guard let adaptyProduct = products
-            .first(where: { product.identifier.hasPrefix($0.skProduct.productIdentifier) })
+            .first(where: { product.identifier == $0.skProduct.productIdentifier })
         else {
             waitForProductsThenBuy(product: product, completion: completion)
             return

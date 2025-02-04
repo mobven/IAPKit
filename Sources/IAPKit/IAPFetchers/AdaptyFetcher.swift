@@ -30,6 +30,18 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             print("Firebase is not configured in the main application. Crashlytics will not work.")
         }
     }
+    
+    func fetchPaywallName(completion: @escaping (Result<String, Error>) -> Void) {
+        let locale = Locale.current.identifier
+        Adapty.getPaywall(placementId: placementName, locale: locale) { result in
+            switch result {
+            case let .success(paywall):
+                completion(.success(paywall.name))
+            case let .failure(error):
+                completion(.failure(error))
+            }
+        }
+    }
 
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         isAdaptyFetchingProducts = true

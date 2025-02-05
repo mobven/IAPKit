@@ -35,6 +35,17 @@ final class IAPProductFetcher {
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         fetchAdaptyOrTimeOut(completion: completion)
     }
+    
+    func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
+        adaptyFetcher.fetchPaywall { result in
+            switch result {
+            case let .success(paywallName):
+                completion(paywallName)
+            case let .failure(error):
+                completion(error.localizedDescription)
+            }
+        }
+    }
 
     func fetchAdaptyOrTimeOut(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         if adaptyTimeout == .zero {

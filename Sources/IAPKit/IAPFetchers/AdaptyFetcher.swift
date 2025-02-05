@@ -31,7 +31,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         }
     }
     
-    func fetchPaywallName(completion: @escaping (Result<String, Error>) -> Void) {
+    func fetchPaywall(completion: @escaping (Result<String, Error>) -> Void) {
         let locale = Locale.current.identifier
         Adapty.getPaywall(placementId: placementName, locale: locale) { result in
             switch result {

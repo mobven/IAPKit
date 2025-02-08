@@ -16,6 +16,7 @@ public struct IAPPaymentConfig {
     public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
     public let offerType: IAPOfferType
     public let upperCtaText: String?
+    public let discountRate: Double?
     public let products: [IAPPaymentProduct]
 
     public var defaultProduct: IAPPaymentProduct? {
@@ -51,6 +52,7 @@ public struct IAPPaymentConfig {
         skipPaywall: Bool = false,
         offerType: IAPOfferType = .noOffer,
         upperCtaText: String? = nil,
+        discountRate: Double? = nil,
         products: [IAPPaymentProduct] = []
     ) {
         self.onboardType = onboardType
@@ -60,6 +62,7 @@ public struct IAPPaymentConfig {
         self.skipPaywall = skipPaywall
         self.offerType = offerType
         self.upperCtaText = upperCtaText
+        self.discountRate = discountRate
         self.products = products
     }
 
@@ -74,6 +77,8 @@ public struct IAPPaymentConfig {
         hasNotificationToggle = ((parameters["notification_toggle"] as? Bool) ?? false)
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
+        let discountRateString = parameters["discountRate"] as? String ?? "1.42"
+        discountRate = Double(discountRateString) ?? 1.42
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []
         for productNo in 1 ... productCount {

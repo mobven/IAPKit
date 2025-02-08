@@ -77,7 +77,7 @@ public struct IAPPaymentConfig {
         hasNotificationToggle = ((parameters["notification_toggle"] as? Bool) ?? false)
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
-        let discountRateString = parameters["discountRate"] as? String ?? "1.42"
+        let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []

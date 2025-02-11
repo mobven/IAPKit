@@ -78,7 +78,7 @@ public struct IAPPaymentConfig {
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
-        discountRate = Double(discountRateString) ?? 1.42
+        discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false
         var products: [IAPPaymentProduct] = []
         for productNo in 1 ... productCount {

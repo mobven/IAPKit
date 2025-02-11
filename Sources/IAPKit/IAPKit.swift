@@ -65,6 +65,10 @@ public final class IAPKit: NSObject {
     public func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
         productFetcher.fetchProfile(completion: completion)
     }
+    
+    public func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
+        productFetcher.fetchPaywallName(completion: completion)
+    }
 
     public static func getReceiptToken() -> String? {
         if let receiptURL = Bundle.main.appStoreReceiptURL {

@@ -32,6 +32,7 @@ public extension IAPPaymentConfig {
         case single
         case multiple
         case `default`
+        case personal
     }
 
     enum IAPOfferType: String {

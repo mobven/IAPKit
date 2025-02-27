@@ -39,6 +39,10 @@ public struct IAPPaymentConfig {
     public var third: IAPPaymentProduct? {
         products[safe: 2]
     }
+    
+    public var fourth: IAPPaymentProduct? {
+        products[safe: 3]
+    }
 
     public var supportsTrial: Bool {
         trialToggle != 0

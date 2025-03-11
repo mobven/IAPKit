@@ -33,6 +33,8 @@ public extension IAPPaymentConfig {
     enum IAPOnboardingType: String {
         case single
         case multiple
+        case personalGreen
+        case personalRed
         case `default`
         case personal
     }

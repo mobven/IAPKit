@@ -25,5 +25,32 @@ public extension IAPPaymentConfig {
         public var hasSubtitle: Bool {
             !(productPriceDivide == nil || productPriceDivide == 0)
         }
+        
+        // Public initializer tanımı:
+        public init(
+            productName: String? = nil,
+            productPrice: Double? = nil,
+            productPriceDivide: Double? = nil,
+            productTimeLabel: String? = nil,
+            productLocale: String? = nil,
+            productLegalText: String? = nil,
+            productButtonTitle: String? = nil,
+            productTrialBadge: String? = nil,
+            productPromoBadgeText: String? = nil,
+            productTrialToggleText: String? = nil,
+            hasTrial: Bool
+        ) {
+            self.productName = productName
+            self.productPrice = productPrice
+            self.productPriceDivide = productPriceDivide
+            self.productTimeLabel = productTimeLabel
+            self.productLocale = productLocale
+            self.productLegalText = productLegalText
+            self.productButtonTitle = productButtonTitle
+            self.productTrialBadge = productTrialBadge
+            self.productPromoBadgeText = productPromoBadgeText
+            self.productTrialToggleText = productTrialToggleText
+            self.hasTrial = hasTrial
+        }
     }
 }

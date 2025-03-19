@@ -28,6 +28,7 @@ public extension IAPPaymentConfig {
         case rink2PTimelineHorizontal = "rink2pTimelineHR"
         case business = "Business"
         case personal = "Personal"
+        case buttonsVR = "buttonsVR"
     }
 
     enum IAPOnboardingType: String {

@@ -5,7 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "IAPKit",
-    platforms: [.iOS(.v12)],
+    platforms: [.iOS(.v13)],
     products: [
         .library(
             name: "IAPKit",
@@ -13,7 +13,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "2.9.3"),
+        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.8.0"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
         .package(url: "https://github.com/firebase/firebase-ios-sdk.git", from: "10.27.0"),
     ],

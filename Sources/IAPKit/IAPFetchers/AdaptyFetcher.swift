@@ -146,16 +146,21 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.makePurchase(product: adaptyProduct) { [weak self] result in
             switch result {
             case let .success(info):
-                let subscription = info.profile?.subscriptions[adaptyProduct.vendorProductId]
+                guard let subscription = info.profile?.subscriptions[adaptyProduct.vendorProductId] else {
+                    let error = NSError(domain: "Cancelled payment by closing it", code: 404)
+                    SDKLogger.logError(error, context: self?.placementName)
+                    completion(.failure(error))
+                    return
+                }
                 completion(
                     .success(
                         IAPSubscription(
-                            vendorTransactionId: subscription?.vendorTransactionId ?? "",
-                            activatedAt: subscription?.activatedAt ?? Date(),
-                            isInGracePeriod: subscription?.isInGracePeriod ?? false,
-                            activeIntroductoryOfferType: subscription?.activeIntroductoryOfferType,
-                            vendorProductId: subscription?.vendorProductId ?? "",
-                            vendorOriginalTransactionId: subscription?.vendorOriginalTransactionId ?? ""
+                            vendorTransactionId: subscription.vendorTransactionId,
+                            activatedAt: subscription.activatedAt,
+                            isInGracePeriod: subscription.isInGracePeriod,
+                            activeIntroductoryOfferType: subscription.activeIntroductoryOfferType,
+                            vendorProductId: subscription.vendorProductId,
+                            vendorOriginalTransactionId: subscription.vendorOriginalTransactionId
                         )
                     )
                 )

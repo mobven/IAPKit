@@ -7,9 +7,6 @@
 
 import Adapty
 import Foundation
-import Firebase
-import FirebaseCore
-import FirebaseCrashlytics
 
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
@@ -21,16 +18,13 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
 
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
         placementName = paywallName
-        Adapty.activate(apiKey, { result in
+        Adapty.activate(apiKey) { result in
             if let error = result {
                 SDKLogger.logError(error, context: "Adapty Activate")
             }
-        })
-        if !FirebaseChecker.isFirebaseConfigured() {
-            print("Firebase is not configured in the main application. Crashlytics will not work.")
         }
     }
-    
+
     func fetchPaywall(completion: @escaping (Result<String, Error>) -> Void) {
         let locale = Locale.current.identifier
         Adapty.getPaywall(placementId: placementName, locale: locale) { result in
@@ -130,7 +124,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     }
                 }
             case let .failure(error):
-                SDKLogger.logError(error, context: self.placementName)
+                SDKLogger.logError(error, context: placementName)
                 completion(.failure(error))
             }
         }
@@ -211,19 +205,13 @@ extension AdaptyProfile {
     }
 }
 
-
-public class FirebaseChecker {
-    public static func isFirebaseConfigured() -> Bool {
-        return FirebaseApp.app() != nil
-    }
-}
-
 public class SDKLogger {
-    public static func logError(_ error: Error, context: String? = nil) {
-        let crashlytics = Crashlytics.crashlytics()
-        crashlytics.record(error: error)
-        if let context = context {
-            crashlytics.log("Context: \(context)")
-        }
+    public static func logError(_: Error, context _: String? = nil) {
+        // TODO: @hakan, burdaki loggeri, statik değil, inject edilebilir bir yapıya getirelim.
+//        let crashlytics = Crashlytics.crashlytics()
+//        crashlytics.record(error: error)
+//        if let context = context {
+//            crashlytics.log("Context: \(context)")
+//        }
     }
 }

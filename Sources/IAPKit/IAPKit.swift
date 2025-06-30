@@ -14,6 +14,7 @@ typealias ProductIdentifier = String
 public protocol IAPKitDelegate: AnyObject {
     func iapKitDidBuy(product: IAPProduct, paywallId: String?)
     func iapKitDidFailToBuy(product: IAPProduct, withError error: Error)
+    func iapKitGotError(_ error: Error, context: String?)
 }
 
 public final class IAPKit: NSObject {
@@ -40,6 +41,7 @@ public final class IAPKit: NSObject {
     override init() {
         skProducts = BehaviorRelay(value: productFetcher.defaultProducts)
         super.init()
+        productFetcher.delegate = self
     }
 
     public func activate(adaptyApiKey apiKey: String, paywallName: String) {
@@ -187,5 +189,11 @@ public extension IAPKit {
                 buyState.accept(false)
             }
         }
+    }
+}
+
+extension IAPKit: SDKLogger {
+    func logError(_ error: any Error, context: String?) {
+        delegate?.iapKitGotError(error, context: context)
     }
 }

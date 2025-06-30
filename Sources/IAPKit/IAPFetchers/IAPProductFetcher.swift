@@ -21,7 +21,10 @@ final class IAPProductFetcher {
     init() {
         adaptyFetcher = AdaptyFetcher()
         skFetcher = StoreKitFetcher()
+        adaptyFetcher.delegate = delegate
     }
+    
+    var delegate: SDKLogger?
 
     var completion: (([IAPProduct]) -> Void)?
 

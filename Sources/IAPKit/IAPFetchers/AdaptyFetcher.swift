@@ -8,8 +8,14 @@
 import Adapty
 import Foundation
 
+protocol SDKLogger: AnyObject {
+    func logError(_ error: Error, context: String?)
+}
+
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
+    
+    weak var delegate: SDKLogger?
 
     var placementName = ""
 
@@ -18,9 +24,9 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
 
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
         placementName = paywallName
-        Adapty.activate(apiKey) { result in
+        Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
-                SDKLogger.logError(error, context: "Adapty Activate")
+                self?.delegate?.logError(error, context: "Adapty Activate")
             }
         }
     }
@@ -77,7 +83,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }
                     case let .failure(error):
-                        SDKLogger.logError(error, context: paywall.name)
+                        self.delegate?.logError(error, context: paywall.name)
                         completion(.failure(error))
                         if let pendingPurchase {
                             pendingPurchase.completion(.failure(NSError(domain: "IAPAdaptyFetcherError", code: 33001)))
@@ -85,7 +91,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     }
                 }
             case let .failure(error):
-                SDKLogger.logError(error, context: self.placementName)
+                self.delegate?.logError(error, context: self.placementName)
                 completion(.failure(error))
             }
         }
@@ -99,7 +105,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                 let expireDate = profile.subscriptions.first(where: { $0.value.isActive })?.value.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
-                SDKLogger.logError(error, context: self?.placementName)
+                self?.delegate?.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }
@@ -118,13 +124,13 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                         case let .success(profile):
                             completion(.success(profile.isSubscribed))
                         case let .failure(error):
-                            SDKLogger.logError(error, context: self.placementName)
+                            self.delegate?.logError(error, context: self.placementName)
                             completion(.failure(error))
                         }
                     }
                 }
             case let .failure(error):
-                SDKLogger.logError(error, context: placementName)
+                self.delegate?.logError(error, context: placementName)
                 completion(.failure(error))
             }
         }
@@ -142,7 +148,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             case let .success(info):
                 guard !info.isPurchaseCancelled else {
                     let error = NSError(domain: "Cancelled payment by closing it", code: 404)
-                    SDKLogger.logError(error, context: self?.placementName)
+                    self?.delegate?.logError(error, context: self?.placementName)
                     completion(.failure(error))
                     return
                 }
@@ -160,7 +166,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     )
                 )
             case let .failure(error):
-                SDKLogger.logError(error, context: self?.placementName)
+                self?.delegate?.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }
@@ -202,16 +208,5 @@ public struct IAPProfile {
 extension AdaptyProfile {
     var isPremium: Bool {
         accessLevels["premium"]?.isActive ?? false
-    }
-}
-
-public class SDKLogger {
-    public static func logError(_: Error, context _: String? = nil) {
-        // TODO: @hakan, burdaki loggeri, statik değil, inject edilebilir bir yapıya getirelim.
-//        let crashlytics = Crashlytics.crashlytics()
-//        crashlytics.record(error: error)
-//        if let context = context {
-//            crashlytics.log("Context: \(context)")
-//        }
     }
 }

@@ -14,6 +14,7 @@ public struct IAPPaymentConfig {
     public let trialToggle: Int
     public let skipPaywall: Bool
     public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
+    public let notificationToggleState: Bool // uses for initial toggle state on timeline paywall
     public let offerType: IAPOfferType
     public let upperCtaText: String?
     public let discountRate: Double?
@@ -57,7 +58,8 @@ public struct IAPPaymentConfig {
         offerType: IAPOfferType = .noOffer,
         upperCtaText: String? = nil,
         discountRate: Double? = nil,
-        products: [IAPPaymentProduct] = []
+        products: [IAPPaymentProduct] = [],
+        notificationToggleState: Bool = false
     ) {
         self.onboardType = onboardType
         self.designType = designType
@@ -68,6 +70,7 @@ public struct IAPPaymentConfig {
         self.upperCtaText = upperCtaText
         self.discountRate = discountRate
         self.products = products
+        self.notificationToggleState = notificationToggleState
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
@@ -78,7 +81,9 @@ public struct IAPPaymentConfig {
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
-        hasNotificationToggle = ((parameters["notification_toggle"] as? Bool) ?? false)
+        let notificationValue = parameters["notification_toggle"] as? Bool
+        hasNotificationToggle = notificationValue != nil     // True when key exists
+        notificationToggleState = notificationValue ?? false  // Key's value
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"

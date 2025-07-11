@@ -26,6 +26,7 @@ public extension IAPPaymentConfig {
         case rink2PTimelineSingle = "rink2pTimelineSingle"
         case rink2PTimelineVertical = "rink2pTimelineVR"
         case rink2PTimelineHorizontal = "rink2pTimelineHR"
+        case rink2PTimelineVRToggle = "rink2pTimelineVR-toggle"
         case business = "Business"
         case personal = "Personal"
         case buttonsVR = "buttonsVR"

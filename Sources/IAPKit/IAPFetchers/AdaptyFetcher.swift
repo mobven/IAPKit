@@ -8,14 +8,12 @@
 import Adapty
 import Foundation
 
-protocol SDKLogger: AnyObject {
-    func logError(_ error: Error, context: String?)
-}
+
 
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
     
-    weak var delegate: SDKLogger?
+    weak var logger: SDKLoggable?
 
     var placementName = ""
 
@@ -26,7 +24,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         placementName = paywallName
         Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
-                self?.delegate?.logError(error, context: "Adapty Activate")
+                self?.logger?.logError(error, context: "Adapty Activate")
             }
         }
     }
@@ -83,7 +81,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }
                     case let .failure(error):
-                        self.delegate?.logError(error, context: paywall.name)
+                        self.logger?.logError(error, context: paywall.name)
                         completion(.failure(error))
                         if let pendingPurchase {
                             pendingPurchase.completion(.failure(NSError(domain: "IAPAdaptyFetcherError", code: 33001)))
@@ -91,7 +89,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     }
                 }
             case let .failure(error):
-                self.delegate?.logError(error, context: self.placementName)
+                self.logger?.logError(error, context: self.placementName)
                 completion(.failure(error))
             }
         }
@@ -105,7 +103,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                 let expireDate = profile.subscriptions.first(where: { $0.value.isActive })?.value.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
-                self?.delegate?.logError(error, context: self?.placementName)
+                self?.logger?.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }
@@ -124,13 +122,13 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                         case let .success(profile):
                             completion(.success(profile.isSubscribed))
                         case let .failure(error):
-                            self.delegate?.logError(error, context: self.placementName)
+                            self.logger?.logError(error, context: self.placementName)
                             completion(.failure(error))
                         }
                     }
                 }
             case let .failure(error):
-                self.delegate?.logError(error, context: placementName)
+                self.logger?.logError(error, context: placementName)
                 completion(.failure(error))
             }
         }
@@ -148,7 +146,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             case let .success(info):
                 guard !info.isPurchaseCancelled else {
                     let error = NSError(domain: "Cancelled payment by closing it", code: 404)
-                    self?.delegate?.logError(error, context: self?.placementName)
+                    self?.logger?.logError(error, context: self?.placementName)
                     completion(.failure(error))
                     return
                 }
@@ -166,7 +164,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     )
                 )
             case let .failure(error):
-                self?.delegate?.logError(error, context: self?.placementName)
+                self?.logger?.logError(error, context: self?.placementName)
                 completion(.failure(error))
             }
         }

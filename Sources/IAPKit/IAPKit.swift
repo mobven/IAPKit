@@ -21,6 +21,11 @@ public final class IAPKit: NSObject {
     public static let store: IAPKit = .init()
 
     public weak var delegate: IAPKitDelegate?
+    public weak var logger: SDKLoggable? {
+        didSet {
+            productFetcher.logger = logger
+        }
+    }
 
     private var isBuyProcess: Bool = false
     private let skProducts: BehaviorRelay<IAPProducts>
@@ -41,7 +46,6 @@ public final class IAPKit: NSObject {
     override init() {
         skProducts = BehaviorRelay(value: productFetcher.defaultProducts)
         super.init()
-        productFetcher.delegate = self
     }
 
     public func activate(adaptyApiKey apiKey: String, paywallName: String) {
@@ -192,8 +196,8 @@ public extension IAPKit {
     }
 }
 
-extension IAPKit: SDKLogger {
-    func logError(_ error: any Error, context: String?) {
+extension IAPKit: SDKLoggable {
+    public func logError(_ error: any Error, context: String?) {
         delegate?.iapKitGotError(error, context: context)
     }
 }

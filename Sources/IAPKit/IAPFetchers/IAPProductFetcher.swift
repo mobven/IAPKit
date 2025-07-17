@@ -24,7 +24,7 @@ final class IAPProductFetcher {
         adaptyFetcher.logger = logger
     }
     
-    public var logger: SDKLoggable?
+    public var logger: IAPKitLoggable?
 
     var completion: (([IAPProduct]) -> Void)?
 

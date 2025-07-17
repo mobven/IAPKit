@@ -21,7 +21,7 @@ public final class IAPKit: NSObject {
     public static let store: IAPKit = .init()
 
     public weak var delegate: IAPKitDelegate?
-    public weak var logger: SDKLoggable? {
+    public weak var logger: IAPKitLoggable? {
         didSet {
             productFetcher.logger = logger
         }
@@ -196,7 +196,7 @@ public extension IAPKit {
     }
 }
 
-extension IAPKit: SDKLoggable {
+extension IAPKit: IAPKitLoggable {
     public func logError(_ error: any Error, context: String?) {
         delegate?.iapKitGotError(error, context: context)
     }

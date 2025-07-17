@@ -114,12 +114,12 @@ let buyStateObservable = IAPKit.store.buyProduct(selectedProduct)
 
 ## Logging Integration
 
-IAPKit provides a flexible logging system through the `SDKLoggable` protocol. You can integrate it with any logging framework.
+IAPKit provides a flexible logging system through the `IAPKitLoggable` protocol. You can integrate it with any logging framework.
 
-### SDKLoggable Protocol
+### IAPKitLoggable Protocol
 
 ```swift
-public protocol SDKLoggable: AnyObject {
+public protocol IAPKitLoggable: AnyObject {
     func logError(_ error: Error, context: String?)
 }
 ```
@@ -129,7 +129,7 @@ public protocol SDKLoggable: AnyObject {
 ```swift
 import FirebaseCrashlytics
 
-class CrashlyticsLogger: SDKLoggable {
+class CrashlyticsLogger: IAPKitLoggable {
     func logError(_ error: Error, context: String?) {
         // Log to Crashlytics with context
         let userInfo = context.map { ["context": $0] } ?? [:]
@@ -149,7 +149,7 @@ IAPKit.store.logger = CrashlyticsLogger()
 ```swift
 import os.log
 
-class OSLogger: SDKLoggable {
+class OSLogger: IAPKitLoggable {
     private let logger = Logger(subsystem: "com.yourapp.iapkit", category: "purchases")
     
     func logError(_ error: Error, context: String?) {
@@ -164,7 +164,7 @@ IAPKit.store.logger = OSLogger()
 ### Integration with Custom Analytics
 
 ```swift
-class AnalyticsLogger: SDKLoggable {
+class AnalyticsLogger: IAPKitLoggable {
     func logError(_ error: Error, context: String?) {
         // Send to your analytics service
         Analytics.track("iap_error", properties: [
@@ -191,10 +191,10 @@ IAPKit.store.logger = AnalyticsLogger()
 ### Composite Logger (Multiple Destinations)
 
 ```swift
-class CompositeLogger: SDKLoggable {
-    private let loggers: [SDKLoggable]
+class CompositeLogger: IAPKitLoggable {
+    private let loggers: [IAPKitLoggable]
     
-    init(loggers: [SDKLoggable]) {
+    init(loggers: [IAPKitLoggable]) {
         self.loggers = loggers
     }
     

@@ -13,7 +13,7 @@ import Foundation
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
     
-    weak var logger: SDKLoggable?
+    weak var logger: IAPKitLoggable?
 
     var placementName = ""
 

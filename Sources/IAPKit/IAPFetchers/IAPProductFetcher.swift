@@ -21,7 +21,10 @@ final class IAPProductFetcher {
     init() {
         adaptyFetcher = AdaptyFetcher()
         skFetcher = StoreKitFetcher()
+        adaptyFetcher.logger = logger
     }
+    
+    public var logger: IAPKitLoggable?
 
     var completion: (([IAPProduct]) -> Void)?
 

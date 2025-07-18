@@ -14,7 +14,6 @@ typealias ProductIdentifier = String
 public protocol IAPKitDelegate: AnyObject {
     func iapKitDidBuy(product: IAPProduct, paywallId: String?)
     func iapKitDidFailToBuy(product: IAPProduct, withError error: Error)
-    func iapKitGotError(_ error: Error, context: String?)
 }
 
 public final class IAPKit: NSObject {
@@ -193,11 +192,5 @@ public extension IAPKit {
                 buyState.accept(false)
             }
         }
-    }
-}
-
-extension IAPKit: IAPKitLoggable {
-    public func logError(_ error: any Error, context: String?) {
-        delegate?.iapKitGotError(error, context: context)
     }
 }

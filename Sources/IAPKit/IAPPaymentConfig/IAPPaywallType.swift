@@ -47,5 +47,6 @@ public extension IAPPaymentConfig {
         // interviewRecorder types
         case offerVariantA = "offerVarA"
         case offerVariantB = "offerVarB"
+        case popupOffer = "popup_offer" // native alert gibi gözüken offer
     }
 }

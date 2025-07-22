@@ -45,6 +45,7 @@ public extension IAPPaymentConfig {
         case noOffer
         // CallRecorder types
         case yearOffer = "year_offer"
+        case singleYearOffer = "single_yearOffer"
         // interviewRecorder types
         case offerVariantA = "offerVarA"
         case offerVariantB = "offerVarB"

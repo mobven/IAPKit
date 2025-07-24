@@ -23,8 +23,12 @@ final class IAPProductFetcher {
         skFetcher = StoreKitFetcher()
         adaptyFetcher.logger = logger
     }
-    
-    public var logger: IAPKitLoggable?
+
+    var logger: IAPKitLoggable? {
+        didSet {
+            adaptyFetcher.logger = logger
+        }
+    }
 
     var completion: (([IAPProduct]) -> Void)?
 
@@ -38,7 +42,7 @@ final class IAPProductFetcher {
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         fetchAdaptyOrTimeOut(completion: completion)
     }
-    
+
     func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
         adaptyFetcher.fetchPaywall { result in
             switch result {

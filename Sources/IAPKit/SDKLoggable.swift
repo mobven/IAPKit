@@ -9,7 +9,7 @@ import StoreKit
 
 @available(iOS 15.0, *)
 public struct IAPKitTransaction {
-    let transaction: Transaction
+    public let transaction: Transaction
 }
 
 public protocol IAPKitLoggable: AnyObject {

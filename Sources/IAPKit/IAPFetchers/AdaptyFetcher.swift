@@ -8,11 +8,9 @@
 import Adapty
 import Foundation
 
-
-
 final class AdaptyFetcher: NSObject, IAPProductFetchable {
     var products: [AdaptyPaywallProduct] = []
-    
+
     weak var logger: IAPKitLoggable?
 
     var placementName = ""
@@ -81,7 +79,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                             buy(product: pendingPurchase.product, completion: pendingPurchase.completion)
                         }
                     case let .failure(error):
-                        self.logger?.logError(error, context: paywall.name)
+                        logger?.logError(error, context: paywall.name)
                         completion(.failure(error))
                         if let pendingPurchase {
                             pendingPurchase.completion(.failure(NSError(domain: "IAPAdaptyFetcherError", code: 33001)))
@@ -128,7 +126,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     }
                 }
             case let .failure(error):
-                self.logger?.logError(error, context: placementName)
+                logger?.logError(error, context: placementName)
                 completion(.failure(error))
             }
         }
@@ -149,6 +147,9 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     self?.logger?.logError(error, context: self?.placementName)
                     completion(.failure(error))
                     return
+                }
+                if #available(iOS 15.0, *), let transaction = info.sk2Transaction {
+                    self?.logger?.logTransaction(IAPKitTransaction(transaction: transaction))
                 }
                 let subscription = info.profile?.subscriptions[adaptyProduct.vendorProductId]
                 completion(

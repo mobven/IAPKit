@@ -115,33 +115,15 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         productLocale: String,
         multiplier: Double = 1.0
     ) -> String {
-        // Get the base product price or set a default value
-        let basePrice = productPrice
-        let divisor = (basePrice.isNil || (basePrice ?? 0) <= 0) ? 1.0 : (basePrice ?? 1.0)
+        // Retrieve the subscription price as Double
+        let rawPrice = skProduct?.subsciptionPrice.doubleValue ?? 0.0
 
-        // Calculate the custom price based on the subscription price
-        var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
-        let divisorDecimal = Decimal(divisor)
-        let scaledPrice = customPrice / divisorDecimal * Decimal(100)
-
-        // Round the scaled price to two decimal places
-        customPrice = (
-            (scaledPrice as NSDecimalNumber)
-                .rounding(accordingToBehavior: nil) as Decimal
-        ) / Decimal(100)
-
-        // Convert to Double for truncation and further operations
-        var truncatedPrice = NSDecimalNumber(decimal: customPrice).doubleValue
-
-        // Apply multiplier logic
-        if multiplier != 1.0 {
-            truncatedPrice *= multiplier
-            truncatedPrice = floor(truncatedPrice) + 0.99 // Apply pricing convention
-        }
+        // Apply multiplier if needed
+        let finalPrice = rawPrice * multiplier
 
         // Format the final price
         let formattedPrice = formattedCustomPrice(
-            truncatedPrice,
+            finalPrice,
             alternativePrice: skProduct?.priceString() ?? ""
         )
 
@@ -149,7 +131,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
         
         // Prepend the currency symbol only if the price is greater than 0
-        let priceWithCurrency = (truncatedPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
+        let priceWithCurrency = (finalPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
 
         // Return the final price string with locale
         return priceWithCurrency + "/" + productLocale

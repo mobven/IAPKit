@@ -98,9 +98,8 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
 
         let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
-        let multiplied = customPrice / divideDecimal * Decimal(100)
-
-        customPrice = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
+        
+        customPrice = customPrice / divideDecimal
 
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
 

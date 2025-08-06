@@ -161,10 +161,10 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
 
     func formatedCustomPrice(_ customPrice: Double) -> String {
         if customPrice.truncatingRemainder(dividingBy: 1.0) == .zero {
-            String(format: "%.0f", customPrice).replacingOccurrences(of: ".", with: ",")
-        } else {
-            String(format: "%.2f", customPrice).replacingOccurrences(of: ".", with: ",")
+            return String(format: "%.0f", customPrice).replacingOccurrences(of: ".", with: ",")
         }
+        let truncated = floor(customPrice * 100) / 100
+        return String(format: "%.2f", truncated).replacingOccurrences(of: ".", with: ",")
     }
 
     /// Returns the button title for a given product. You should use the returned string with the localized function

@@ -103,7 +103,11 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
 
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
 
-        let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
+        var formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
+        
+        if formattedPrice.hasSuffix(",98") {
+            formattedPrice = String(formattedPrice.dropLast(2)) + "99"
+        }
         
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice

@@ -98,18 +98,13 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
 
         let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
-        
-        let decimalValue: Decimal = customPrice / divideDecimal
-        let number = decimalValue as NSDecimalNumber
-        var text = number.stringValue
-        let formattedPrice: String
-        
-        if text.contains(".00") {
-            formattedPrice = String(format: "%.0f", text).replacingOccurrences(of: ".", with: ",")
-        } else {
-            formattedPrice = String(format: "%.2f", text).replacingOccurrences(of: ".", with: ",")
-        }
 
+        customPrice = customPrice / divideDecimal
+
+        let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
+
+        let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
+        
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice
         return price + "/" + productLocale

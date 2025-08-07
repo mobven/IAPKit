@@ -98,14 +98,17 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
 
         let divideDecimal = Decimal(divide) // Ensure divide is also a Decimal
-        let multiplied = customPrice / divideDecimal * Decimal(100)
 
-        customPrice = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
+        customPrice = customPrice / divideDecimal
 
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
 
-        let formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
-
+        var formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
+        
+        if formattedPrice.hasSuffix(",98") {
+            formattedPrice = String(formattedPrice.dropLast(2)) + "99"
+        }
+        
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice
         return price + "/" + productLocale
@@ -116,33 +119,15 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         productLocale: String,
         multiplier: Double = 1.0
     ) -> String {
-        // Get the base product price or set a default value
-        let basePrice = productPrice
-        let divisor = (basePrice.isNil || (basePrice ?? 0) <= 0) ? 1.0 : (basePrice ?? 1.0)
+        // Retrieve the subscription price as Double
+        let rawPrice = skProduct?.subsciptionPrice.doubleValue ?? 0.0
 
-        // Calculate the custom price based on the subscription price
-        var customPrice = Decimal(skProduct?.subsciptionPrice.doubleValue ?? 0.0)
-        let divisorDecimal = Decimal(divisor)
-        let scaledPrice = customPrice / divisorDecimal * Decimal(100)
-
-        // Round the scaled price to two decimal places
-        customPrice = (
-            (scaledPrice as NSDecimalNumber)
-                .rounding(accordingToBehavior: nil) as Decimal
-        ) / Decimal(100)
-
-        // Convert to Double for truncation and further operations
-        var truncatedPrice = NSDecimalNumber(decimal: customPrice).doubleValue
-
-        // Apply multiplier logic
-        if multiplier != 1.0 {
-            truncatedPrice *= multiplier
-            truncatedPrice = floor(truncatedPrice) + 0.99 // Apply pricing convention
-        }
+        // Apply multiplier if needed
+        let finalPrice = rawPrice * multiplier
 
         // Format the final price
         let formattedPrice = formattedCustomPrice(
-            truncatedPrice,
+            finalPrice,
             alternativePrice: skProduct?.priceString() ?? ""
         )
 
@@ -150,7 +135,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
         
         // Prepend the currency symbol only if the price is greater than 0
-        let priceWithCurrency = (truncatedPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
+        let priceWithCurrency = (finalPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
 
         // Return the final price string with locale
         return priceWithCurrency + "/" + productLocale
@@ -162,10 +147,10 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
 
     func formatedCustomPrice(_ customPrice: Double) -> String {
         if customPrice.truncatingRemainder(dividingBy: 1.0) == .zero {
-            String(format: "%.0f", customPrice).replacingOccurrences(of: ".", with: ",")
-        } else {
-            String(format: "%.2f", customPrice).replacingOccurrences(of: ".", with: ",")
+            return String(format: "%.0f", customPrice).replacingOccurrences(of: ".", with: ",")
         }
+        let truncated = floor(customPrice * 100) / 100
+        return String(format: "%.2f", truncated).replacingOccurrences(of: ".", with: ",")
     }
 
     /// Returns the button title for a given product. You should use the returned string with the localized function

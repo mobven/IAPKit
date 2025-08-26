@@ -32,6 +32,7 @@ public extension IAPPaymentConfig {
         case business = "Business"
         case personal = "Personal"
         case featurePaywall
+        case notebook
     }
 
     enum IAPOnboardingType: String {
@@ -41,6 +42,7 @@ public extension IAPPaymentConfig {
         case personalRed
         case `default`
         case personal
+        case notebook
     }
 
     enum IAPOfferType: String {

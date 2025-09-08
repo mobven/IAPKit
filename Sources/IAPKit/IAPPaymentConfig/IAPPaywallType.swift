@@ -36,13 +36,16 @@ public extension IAPPaymentConfig {
     }
 
     enum IAPOnboardingType: String {
+        case `default`
+        // Call Recorder onboard types
         case single
         case multiple
         case personalGreen
         case personalRed
-        case `default`
+        // Flick onboard types
         case personal
         case notebook
+        case question
     }
 
     enum IAPOfferType: String {

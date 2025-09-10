@@ -62,6 +62,10 @@ public final class IAPKit: NSObject {
     public func setPlayerId(_ playerId: String?) {
         productFetcher.setPlayerId(playerId)
     }
+    
+    public func setFirebaseId(_ id: String?) {
+        productFetcher.setFirebaseId(id)
+    }
 
     public func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
         productFetcher.restorePurchases(completion: completion)

@@ -100,4 +100,8 @@ final class IAPProductFetcher {
     func setPlayerId(_ playerId: String?) {
         adaptyFetcher.setPlayerId(playerId)
     }
+    
+    func setFirebaseId(_ id: String?) {
+        adaptyFetcher.setFirebaseId(id)
+    }
 }

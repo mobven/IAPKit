@@ -197,6 +197,15 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             )
         }
     }
+    
+    func setFirebaseId(_ id: String?) {
+        Task {
+            try? await Adapty.setIntegrationIdentifier(
+                key: "firebase_app_instance_id",
+                value: id ?? ""
+            )
+        }
+    }
 }
 
 public struct IAPProfile {

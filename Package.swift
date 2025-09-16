@@ -13,7 +13,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.8.0"),
+        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.11.0"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
     ],
     targets: [

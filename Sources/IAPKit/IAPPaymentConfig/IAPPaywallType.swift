@@ -43,6 +43,7 @@ public extension IAPPaymentConfig {
         case multiple
         case personalGreen
         case personalRed
+        case socialProofV2 = "socialproofv2"
         // Flick onboard types
         case personal
         case notebook

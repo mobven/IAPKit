@@ -34,6 +34,7 @@ public extension IAPPaymentConfig {
         case personal = "Personal"
         case featurePaywall
         case notebook
+        case video
     }
 
     enum IAPOnboardingType: String {

@@ -50,6 +50,10 @@ public final class IAPKit: NSObject {
     public func activate(adaptyApiKey apiKey: String, paywallName: String) {
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
+    
+    public func setPlacement(_ placementName: String) {
+        productFetcher.setPlacement(placementName)
+    }
 
     public func logout() {
         productFetcher.logout()

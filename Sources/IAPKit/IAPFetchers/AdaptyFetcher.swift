@@ -19,12 +19,16 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
     private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
 
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        placementName = paywallName
+        setPlacement(paywallName)
         Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
             }
         }
+    }
+    
+    func setPlacement(_ placementName: String) {
+        self.placementName = placementName
     }
 
     func fetchPaywall(completion: @escaping (Result<String, Error>) -> Void) {

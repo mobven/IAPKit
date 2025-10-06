@@ -16,6 +16,7 @@ public struct IAPPaymentConfig {
     public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
     public let notificationToggleState: Bool // uses for initial toggle state on timeline paywall
     public let offerType: IAPOfferType
+    public let offerSkip: Bool
     public let upperCtaText: String?
     public let discountRate: Double?
     public let products: [IAPPaymentProduct]
@@ -56,6 +57,7 @@ public struct IAPPaymentConfig {
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
         offerType: IAPOfferType = .noOffer,
+        offerSkip: Bool = false,
         upperCtaText: String? = nil,
         discountRate: Double? = nil,
         products: [IAPPaymentProduct] = [],
@@ -67,6 +69,7 @@ public struct IAPPaymentConfig {
         self.trialToggle = trialToggle
         self.skipPaywall = skipPaywall
         self.offerType = offerType
+        self.offerSkip = offerSkip
         self.upperCtaText = upperCtaText
         self.discountRate = discountRate
         self.products = products
@@ -86,6 +89,7 @@ public struct IAPPaymentConfig {
         notificationToggleState = notificationValue ?? false  // Key's value
         let offerTypeString = parameters["offerType"] as? String
         offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
+        offerSkip = (parameters["offer_skip"] as? Bool) ?? false
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında
         skipPaywall = (parameters["skip_paywall"] as? Bool) ?? false

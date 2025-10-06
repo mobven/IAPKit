@@ -35,6 +35,10 @@ final class IAPProductFetcher {
     func activate(adaptyApiKey apiKey: String, paywallName: String) {
         adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
+    
+    func setPlacement(_ placementName: String) {
+        adaptyFetcher.setPlacement(placementName)
+    }
 
     var defaultProducts: IAPProducts = .init(products: [])
     //        WeeklyProduct(), MonthlyProduct()

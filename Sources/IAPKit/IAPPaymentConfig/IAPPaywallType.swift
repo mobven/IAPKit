@@ -23,6 +23,7 @@ public extension IAPPaymentConfig {
         case rink2PTimelineVRToggle = "rink2pTimelineVR-toggle"
         case buttonsVR = "buttonsVR"
         case reminderTimeline = "reminder_timeline"
+        case timelineButton = "timeline_button"
         // Flick Paywalls
         case defaultPaywall
         case timeLine = "Timeline"

@@ -24,6 +24,7 @@ public extension IAPPaymentConfig {
         case buttonsVR = "buttonsVR"
         case reminderTimeline = "reminder_timeline"
         case timelineButton = "timeline_button"
+        case personalization
         // Flick Paywalls
         case defaultPaywall
         case timeLine = "Timeline"
@@ -46,6 +47,7 @@ public extension IAPPaymentConfig {
         case personalGreen
         case personalRed
         case socialProofV2 = "socialproofv2"
+        case personalization
         // Flick onboard types
         case personal
         case notebook

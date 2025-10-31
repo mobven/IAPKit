@@ -73,7 +73,6 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
         if #available(iOS 15, *) {
             Task {
                 do {
-                    try await AppStore.sync()
                     
                     var hasActiveEntitlement = false
                     for await result in Transaction.currentEntitlements {

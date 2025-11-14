@@ -51,7 +51,7 @@ public struct IAPPaymentConfig {
     }
 
     public init(
-        onboardType: IAPOnboardingType = .single,
+        onboardType: IAPOnboardingType = .default,
         designType: IAPPaywallType = .defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
@@ -77,18 +77,27 @@ public struct IAPPaymentConfig {
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
-        let onboardingType = parameters["onboardType"] as? String
-        onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .default
-        let designTypeString = parameters["designType"] as? String
-        designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
+        if let value = parameters["onboardType"] as? String, !value.isEmpty {
+            onboardType = IAPOnboardingType(rawValue: value)
+        } else {
+            onboardType = .default
+        }
+        if let value = parameters["designType"] as? String, !value.isEmpty {
+            designType = IAPPaywallType(rawValue: value)
+        } else {
+            designType = .defaultPaywall
+        }
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         let notificationValue = parameters["notification_toggle"] as? Bool
         hasNotificationToggle = notificationValue != nil     // True when key exists
         notificationToggleState = notificationValue ?? false  // Key's value
-        let offerTypeString = parameters["offerType"] as? String
-        offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
+        if let value = parameters["offerType"] as? String, !value.isEmpty {
+            offerType = IAPOfferType(rawValue: value)
+        } else {
+            offerType = .noOffer
+        }
         offerSkip = (parameters["offer_skip"] as? Bool) ?? false
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında

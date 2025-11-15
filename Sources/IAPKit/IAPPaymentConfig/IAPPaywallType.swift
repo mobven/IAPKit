@@ -8,27 +8,22 @@
 import Foundation
 
 public extension IAPPaymentConfig {
-    struct IAPPaywallType: RawRepresentable, Equatable, Hashable, ExpressibleByStringLiteral {
-        public let rawValue: String
-        public init(rawValue: String) { self.rawValue = rawValue }
-        public init(stringLiteral value: String) { self.rawValue = value }
+    protocol IAPPaywallType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+    
+    protocol IAPOnboardingType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+    
+    protocol IAPOfferType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+}
 
-        public static let defaultPaywall: Self = "defaultPaywall"
-    }
+// Default implementation types
+public enum PaywallType: String, IAPPaymentConfig.IAPPaywallType {
+    case defaultPaywall
+}
 
-    struct IAPOnboardingType: RawRepresentable, Equatable, Hashable, ExpressibleByStringLiteral {
-        public let rawValue: String
-        public init(rawValue: String) { self.rawValue = rawValue }
-        public init(stringLiteral value: String) { self.rawValue = value }
+public enum OnboardingType: String, IAPPaymentConfig.IAPOnboardingType {
+    case `default`
+}
 
-        public static let `default`: Self = "default"
-    }
-
-    struct IAPOfferType: RawRepresentable, Equatable, Hashable, ExpressibleByStringLiteral {
-        public let rawValue: String
-        public init(rawValue: String) { self.rawValue = rawValue }
-        public init(stringLiteral value: String) { self.rawValue = value }
-
-        public static let noOffer: Self = "noOffer"
-    }
+public enum OfferType: String, IAPPaymentConfig.IAPOfferType {
+    case noOffer
 }

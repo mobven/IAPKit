@@ -8,14 +8,14 @@
 import Foundation
 
 public struct IAPPaymentConfig {
-    public let onboardType: IAPOnboardingType
-    public let designType: IAPPaywallType
+    public let onboardType: any IAPOnboardingType
+    public let designType: any IAPPaywallType
     public let defaultProductIndex: Int
     public let trialToggle: Int
     public let skipPaywall: Bool
     public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
     public let notificationToggleState: Bool // uses for initial toggle state on timeline paywall
-    public let offerType: IAPOfferType
+    public let offerType: any IAPOfferType
     public let offerSkip: Bool
     public let upperCtaText: String?
     public let discountRate: Double?
@@ -51,12 +51,12 @@ public struct IAPPaymentConfig {
     }
 
     public init(
-        onboardType: IAPOnboardingType = .default,
-        designType: IAPPaywallType = .defaultPaywall,
+        onboardType: some IAPOnboardingType = OnboardingType.default,
+        designType: some IAPPaywallType = PaywallType.defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
-        offerType: IAPOfferType = .noOffer,
+        offerType: some IAPOfferType = OfferType.noOffer,
         offerSkip: Bool = false,
         upperCtaText: String? = nil,
         discountRate: Double? = nil,
@@ -77,27 +77,34 @@ public struct IAPPaymentConfig {
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
-        if let value = parameters["onboardType"] as? String, !value.isEmpty {
-            onboardType = IAPOnboardingType(rawValue: value)
+        if let value = parameters["onboardType"] as? String, !value.isEmpty,
+           let type = OnboardingType(rawValue: value) {
+            onboardType = type
         } else {
-            onboardType = .default
+            onboardType = OnboardingType.default
         }
-        if let value = parameters["designType"] as? String, !value.isEmpty {
-            designType = IAPPaywallType(rawValue: value)
+        
+        if let value = parameters["designType"] as? String, !value.isEmpty,
+           let type = PaywallType(rawValue: value) {
+            designType = type
         } else {
-            designType = .defaultPaywall
+            designType = PaywallType.defaultPaywall
         }
+        
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         let notificationValue = parameters["notification_toggle"] as? Bool
         hasNotificationToggle = notificationValue != nil     // True when key exists
         notificationToggleState = notificationValue ?? false  // Key's value
-        if let value = parameters["offerType"] as? String, !value.isEmpty {
-            offerType = IAPOfferType(rawValue: value)
+        
+        if let value = parameters["offerType"] as? String, !value.isEmpty,
+           let type = OfferType(rawValue: value) {
+            offerType = type
         } else {
-            offerType = .noOffer
+            offerType = OfferType.noOffer
         }
+        
         offerSkip = (parameters["offer_skip"] as? Bool) ?? false
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında

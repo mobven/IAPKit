@@ -8,22 +8,36 @@
 import Foundation
 
 public extension IAPPaymentConfig {
-    protocol IAPPaywallType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+    protocol IAPPaywallType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
+    }
     
-    protocol IAPOnboardingType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+    protocol IAPOnboardingType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
+    }
     
-    protocol IAPOfferType: RawRepresentable, Equatable, Hashable where RawValue == String {}
+    protocol IAPOfferType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
+    }
 }
 
-// Default implementation types
-public enum PaywallType: String, IAPPaymentConfig.IAPPaywallType {
+public enum DefaultPaywallType: String, IAPPaymentConfig.IAPPaywallType {
     case defaultPaywall
+    public static var defaultValue: Self { .defaultPaywall }
 }
 
-public enum OnboardingType: String, IAPPaymentConfig.IAPOnboardingType {
+public enum DefaultOnboardingType: String, IAPPaymentConfig.IAPOnboardingType {
     case `default`
+    public static var defaultValue: Self { .default }
 }
 
-public enum OfferType: String, IAPPaymentConfig.IAPOfferType {
+public enum DefaultOfferType: String, IAPPaymentConfig.IAPOfferType {
     case noOffer
+    public static var defaultValue: Self { .noOffer }
+}
+
+public struct IAPConfigTypeMapper {
+    public static var paywallType: (any IAPPaymentConfig.IAPPaywallType.Type) = DefaultPaywallType.self
+    public static var onboardingType: (any IAPPaymentConfig.IAPOnboardingType.Type) = DefaultOnboardingType.self
+    public static var offerType: (any IAPPaymentConfig.IAPOfferType.Type) = DefaultOfferType.self
 }

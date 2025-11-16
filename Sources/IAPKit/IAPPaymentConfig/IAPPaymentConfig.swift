@@ -51,12 +51,12 @@ public struct IAPPaymentConfig {
     }
 
     public init(
-        onboardType: some IAPOnboardingType = OnboardingType.default,
-        designType: some IAPPaywallType = PaywallType.defaultPaywall,
+        onboardType: some IAPOnboardingType = DefaultOnboardingType.default,
+        designType: some IAPPaywallType = DefaultPaywallType.defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
-        offerType: some IAPOfferType = OfferType.noOffer,
+        offerType: some IAPOfferType = DefaultOfferType.noOffer,
         offerSkip: Bool = false,
         upperCtaText: String? = nil,
         discountRate: Double? = nil,
@@ -77,34 +77,21 @@ public struct IAPPaymentConfig {
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
-        if let value = parameters["onboardType"] as? String, !value.isEmpty,
-           let type = OnboardingType(rawValue: value) {
-            onboardType = type
-        } else {
-            onboardType = OnboardingType.default
-        }
+        onboardType = IAPConfigTypeMapper.onboardingType.init(
+            rawValue: parameters["onboardType"] as? String ?? "") ?? IAPConfigTypeMapper.onboardingType.defaultValue
         
-        if let value = parameters["designType"] as? String, !value.isEmpty,
-           let type = PaywallType(rawValue: value) {
-            designType = type
-        } else {
-            designType = PaywallType.defaultPaywall
-        }
-        
+        designType = IAPConfigTypeMapper.paywallType.init(
+            rawValue: parameters["designType"] as? String ?? "") ?? IAPConfigTypeMapper.paywallType.defaultValue
+
+        offerType = IAPConfigTypeMapper.offerType.init(
+            rawValue: parameters["offerType"] as? String ?? "") ?? IAPConfigTypeMapper.offerType.defaultValue
+
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         let notificationValue = parameters["notification_toggle"] as? Bool
         hasNotificationToggle = notificationValue != nil     // True when key exists
         notificationToggleState = notificationValue ?? false  // Key's value
-        
-        if let value = parameters["offerType"] as? String, !value.isEmpty,
-           let type = OfferType(rawValue: value) {
-            offerType = type
-        } else {
-            offerType = OfferType.noOffer
-        }
-        
         offerSkip = (parameters["offer_skip"] as? Bool) ?? false
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında

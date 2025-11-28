@@ -8,6 +8,10 @@
 import Foundation
 import StoreKit
 
+enum StoreError: Error {
+    case failedVerification
+}
+
 final class StoreKitFetcher: NSObject, IAPProductFetchable {
     // swiftlint:disable implicitly_unwrapped_optional
     var request: SKProductsRequest!
@@ -65,12 +69,46 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
         }
     }
 
-    @available(
-        *, unavailable, message: "Not implemented or used currently! Would be alternative to Adapty to give timeout"
-    ) func restorePurchases(completion _: @escaping ((Result<Bool, Error>) -> Void)) {
-        let refresh = SKReceiptRefreshRequest()
-        refresh.delegate = self
-        refresh.start()
+    func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
+        if #available(iOS 15, *) {
+            Task {
+                do {
+                    
+                    var hasActiveEntitlement = false
+                    for await result in Transaction.currentEntitlements {
+                        do {
+                            let transaction = try checkVerified(result)
+                            // If we have any verified entitlement, user has an active purchase
+                            hasActiveEntitlement = true
+                            await transaction.finish()
+                            break
+                        } catch {
+                            // Failed to verify this transaction, continue checking others
+                            continue
+                        }
+                    }
+                    completion(.success(hasActiveEntitlement))
+                } catch {
+                    completion(.failure(error))
+                }
+            }
+        } else {
+            // For iOS 14 and earlier, StoreKit 1 doesn't provide a reliable way to check
+            // subscription status without server-side receipt validation.
+            // We trigger restore but return false to let Adapty handle the actual verification
+            SKPaymentQueue.default().restoreCompletedTransactions()
+            completion(.success(false))
+        }
+    }
+    
+    @available(iOS 15, *)
+    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+        switch result {
+        case .unverified:
+            throw StoreError.failedVerification
+        case .verified(let safe):
+            return safe
+        }
     }
 }
 

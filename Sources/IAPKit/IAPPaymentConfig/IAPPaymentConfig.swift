@@ -8,14 +8,14 @@
 import Foundation
 
 public struct IAPPaymentConfig {
-    public let onboardType: IAPOnboardingType
-    public let designType: IAPPaywallType
+    public let onboardType: any IAPOnboardingType
+    public let designType: any IAPPaywallType
     public let defaultProductIndex: Int
     public let trialToggle: Int
     public let skipPaywall: Bool
     public var hasNotificationToggle: Bool = false // uses for reminder notification on timeline paywall
     public let notificationToggleState: Bool // uses for initial toggle state on timeline paywall
-    public let offerType: IAPOfferType
+    public let offerType: any IAPOfferType
     public let offerSkip: Bool
     public let upperCtaText: String?
     public let discountRate: Double?
@@ -51,12 +51,12 @@ public struct IAPPaymentConfig {
     }
 
     public init(
-        onboardType: IAPOnboardingType = .single,
-        designType: IAPPaywallType = .defaultPaywall,
+        onboardType: some IAPOnboardingType = DefaultOnboardingType.default,
+        designType: some IAPPaywallType = DefaultPaywallType.defaultPaywall,
         defaultProductIndex: Int = .zero,
         trialToggle: Int = .zero,
         skipPaywall: Bool = false,
-        offerType: IAPOfferType = .noOffer,
+        offerType: some IAPOfferType = DefaultOfferType.noOffer,
         offerSkip: Bool = false,
         upperCtaText: String? = nil,
         discountRate: Double? = nil,
@@ -77,18 +77,21 @@ public struct IAPPaymentConfig {
     }
 
     init(withParams parameters: [String: Any], productCount: Int = 2) {
-        let onboardingType = parameters["onboardType"] as? String
-        onboardType = IAPOnboardingType(rawValue: onboardingType ?? "") ?? .default
-        let designTypeString = parameters["designType"] as? String
-        designType = IAPPaywallType(rawValue: designTypeString ?? "") ?? .defaultPaywall
+        onboardType = IAPConfigTypeMapper.onboardingType.init(
+            rawValue: parameters["onboardType"] as? String ?? "") ?? IAPConfigTypeMapper.onboardingType.defaultValue
+        
+        designType = IAPConfigTypeMapper.paywallType.init(
+            rawValue: parameters["designType"] as? String ?? "") ?? IAPConfigTypeMapper.paywallType.defaultValue
+
+        offerType = IAPConfigTypeMapper.offerType.init(
+            rawValue: parameters["offerType"] as? String ?? "") ?? IAPConfigTypeMapper.offerType.defaultValue
+
         upperCtaText = parameters["upper_cta_button"] as? String
         defaultProductIndex = ((parameters["defaultProduct"] as? Int) ?? .zero) - 1
         trialToggle = ((parameters["trial_toggle"] as? Int) ?? .zero)
         let notificationValue = parameters["notification_toggle"] as? Bool
         hasNotificationToggle = notificationValue != nil     // True when key exists
         notificationToggleState = notificationValue ?? false  // Key's value
-        let offerTypeString = parameters["offerType"] as? String
-        offerType = IAPOfferType(rawValue: offerTypeString ?? "") ?? .noOffer
         offerSkip = (parameters["offer_skip"] as? Bool) ?? false
         let discountRateString = parameters["discount_rate"] as? String ?? "1.42"
         discountRate = Double(discountRateString) ?? 1.42 // 10/7 şeklinde hesaplanmalı product tarafında

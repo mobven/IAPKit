@@ -8,58 +8,36 @@
 import Foundation
 
 public extension IAPPaymentConfig {
-    enum IAPPaywallType: String {
-        case eft
-        case offer
-        case plan2Vertical = "2plan_vertical"
-        case plan2Horizontal = "2plan_horizontal"
-        case plan3Vertical = "3plan_vertical"
-        case plan3Horizontal = "3plan_horizontal"
-        case buttons = "Buttons"
-        case plan2Toggle = "2planToggle"
-        case rink2PTimelineSingle = "rink2pTimelineSingle"
-        case rink2PTimelineVertical = "rink2pTimelineVR"
-        case rink2PTimelineHorizontal = "rink2pTimelineHR"
-        case rink2PTimelineVRToggle = "rink2pTimelineVR-toggle"
-        case buttonsVR = "buttonsVR"
-        case reminderTimeline = "reminder_timeline"
-        case timelineButton = "timeline_button"
-        // Flick Paywalls
-        case defaultPaywall
-        case timeLine = "Timeline"
-        case timelineToggle
-        case singleProductPlan = "Single-Plan"
-        case singleProductPlanSecondDesign = "singlePlan"
-        case singleProductPlanWithToggle = "singlePlan_toggle"
-        case business = "Business"
-        case personal = "Personal"
-        case featurePaywall
-        case notebook
-        case video
+    protocol IAPPaywallType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
     }
+    
+    protocol IAPOnboardingType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
+    }
+    
+    protocol IAPOfferType: RawRepresentable, Equatable, Hashable where RawValue == String {
+        static var defaultValue: Self { get }
+    }
+}
 
-    enum IAPOnboardingType: String {
-        case `default`
-        // Call Recorder onboard types
-        case single
-        case multiple
-        case personalGreen
-        case personalRed
-        case socialProofV2 = "socialproofv2"
-        // Flick onboard types
-        case personal
-        case notebook
-        case question
-    }
+public enum DefaultPaywallType: String, IAPPaymentConfig.IAPPaywallType {
+    case defaultPaywall
+    public static var defaultValue: Self { .defaultPaywall }
+}
 
-    enum IAPOfferType: String {
-        case noOffer
-        // CallRecorder types
-        case yearOffer = "year_offer"
-        case singleYearOffer = "single_yearOffer"
-        // interviewRecorder types
-        case offerVariantA = "offerVarA"
-        case offerVariantB = "offerVarB"
-        case popupOffer = "popup_offer" // native alert gibi gözüken offer
-    }
+public enum DefaultOnboardingType: String, IAPPaymentConfig.IAPOnboardingType {
+    case `default`
+    public static var defaultValue: Self { .default }
+}
+
+public enum DefaultOfferType: String, IAPPaymentConfig.IAPOfferType {
+    case noOffer
+    public static var defaultValue: Self { .noOffer }
+}
+
+public struct IAPConfigTypeMapper {
+    public static var paywallType: (any IAPPaymentConfig.IAPPaywallType.Type) = DefaultPaywallType.self
+    public static var onboardingType: (any IAPPaymentConfig.IAPOnboardingType.Type) = DefaultOnboardingType.self
+    public static var offerType: (any IAPPaymentConfig.IAPOfferType.Type) = DefaultOfferType.self
 }

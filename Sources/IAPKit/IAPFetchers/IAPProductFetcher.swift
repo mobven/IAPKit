@@ -86,7 +86,44 @@ final class IAPProductFetcher {
     }
 
     func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
-        adaptyFetcher.restorePurchases(completion: completion)
+        let group = DispatchGroup()
+        var adaptyResult: Result<Bool, Error>?
+        var storeKitResult: Result<Bool, Error>?
+        
+        // Call Adapty restore
+        group.enter()
+        adaptyFetcher.restorePurchases { result in
+            adaptyResult = result
+            group.leave()
+        }
+        
+        // Call StoreKit restore
+        group.enter()
+        skFetcher.restorePurchases { result in
+            storeKitResult = result
+            group.leave()
+        }
+        
+        // Wait for both to complete
+        group.notify(queue: .main) {
+            let adaptySuccess = (try? adaptyResult?.get()) ?? false
+            let storeKitSuccess = (try? storeKitResult?.get()) ?? false
+            
+            // If either returns true, return true
+            if adaptySuccess || storeKitSuccess {
+                completion(.success(true))
+                return
+            }
+            
+            // Check if any service returned an error
+            if case let .failure(error) = adaptyResult ?? storeKitResult {
+                completion(.failure(error))
+                return
+            }
+            
+            // Both services returned false and no error was provided
+            completion(.success(false))
+        }
     }
 
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {

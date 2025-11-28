@@ -112,14 +112,17 @@ final class IAPProductFetcher {
             // If either returns true, return true
             if adaptySuccess || storeKitSuccess {
                 completion(.success(true))
-            } else {
-                // Both failed or returned false - pass Adapty error if available
-                if case let .failure(error) = adaptyResult {
-                    completion(.failure(error))
-                } else {
-                    completion(.success(false))
-                }
+                return
             }
+            
+            // Check if any service returned an error
+            if case let .failure(error) = adaptyResult ?? storeKitResult {
+                completion(.failure(error))
+                return
+            }
+            
+            // Both services returned false and no error was provided
+            completion(.success(false))
         }
     }
 

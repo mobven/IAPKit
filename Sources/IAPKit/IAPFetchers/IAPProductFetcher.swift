@@ -145,4 +145,8 @@ final class IAPProductFetcher {
     func setFirebaseId(_ id: String?) {
         adaptyFetcher.setFirebaseId(id)
     }
+    
+    func setAdjustDeviceId(_ adjustId: String?) {
+        adaptyFetcher.setAdjustDeviceId(adjustId)
+    }
 }

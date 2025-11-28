@@ -70,6 +70,10 @@ public final class IAPKit: NSObject {
     public func setFirebaseId(_ id: String?) {
         productFetcher.setFirebaseId(id)
     }
+    
+    public func setAdjustDeviceId(_ adjustId: String?) {
+        productFetcher.setAdjustDeviceId(adjustId)
+    }
 
     public func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
         productFetcher.restorePurchases(completion: completion)

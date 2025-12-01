@@ -18,6 +18,11 @@ public protocol IAPKitDelegate: AnyObject {
 
 public final class IAPKit: NSObject {
     public static let store: IAPKit = .init()
+    
+    public static var logLevel: IAPKitLogLevel {
+        get { IAPKitLogLevel.logLevel }
+        set { IAPKitLogLevel.logLevel = newValue }
+    }
 
     public weak var delegate: IAPKitDelegate?
     public weak var logger: IAPKitLoggable? {
@@ -138,7 +143,7 @@ public extension IAPKit {
             case let .success(result):
                 completion(result.isSubscribed)
             case let .failure(error):
-                print("Receipt verification failed: \(error.localizedDescription)")
+                logger?.log("Receipt verification failed: \(error.localizedDescription)")
                 completion(false)
             }
         }

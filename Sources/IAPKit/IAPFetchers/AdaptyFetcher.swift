@@ -226,7 +226,7 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                     key: "adjust_device_id",
                     value: adjustId
                 )
-                print("Adjust device ID successfully sent to Adapty: \(adjustId)")
+                logger?.log("Adjust device ID successfully sent to Adapty: \(adjustId)")
             } catch {
                 logger?.logError(error, context: "setAdjustDeviceId - Failed to send Adjust device ID")
             }

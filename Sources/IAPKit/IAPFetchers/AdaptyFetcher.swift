@@ -210,6 +210,28 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             )
         }
     }
+    
+    func setAdjustDeviceId(_ adjustId: String?) {
+        guard let adjustId = adjustId, !adjustId.isEmpty else {
+            logger?.logError(
+                NSError(domain: "IAPKit", code: -1, userInfo: [NSLocalizedDescriptionKey: "Adjust device ID is nil or empty"]),
+                context: "setAdjustDeviceId"
+            )
+            return
+        }
+        
+        Task {
+            do {
+                try await Adapty.setIntegrationIdentifier(
+                    key: "adjust_device_id",
+                    value: adjustId
+                )
+                logger?.log("Adjust device ID successfully sent to Adapty: \(adjustId)")
+            } catch {
+                logger?.logError(error, context: "setAdjustDeviceId - Failed to send Adjust device ID")
+            }
+        }
+    }
 }
 
 public struct IAPProfile {

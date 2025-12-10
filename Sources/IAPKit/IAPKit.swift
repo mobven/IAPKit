@@ -210,4 +210,14 @@ public extension IAPKit {
             }
         }
     }
+    
+    @available(iOS 15.0, *)
+    func getLocalizedPrice(for productId: String) async -> String? {
+        do {
+            let products = try await Product.products(for: [productId])
+            return products.first?.displayPrice
+        } catch {
+            return nil
+        }
+    }
 }

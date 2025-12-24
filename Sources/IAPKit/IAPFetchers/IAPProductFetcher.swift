@@ -1,152 +1,244 @@
 //
 //  IAPProductFetcher.swift
-//  Rink
+//  IAPKit
 //
 //  Created by Rashid Ramazanov on 23.01.2024.
+//  Refactored as Coordinator on 22.12.2024.
 //
 
 import Foundation
 import StoreKit
 
-protocol IAPProductFetchable {
-    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void))
-}
-
+/// Coordinator that manages primary (Adapty/RevenueCat) and fallback (StoreKit) fetchers
 final class IAPProductFetcher {
-    private let adaptyFetcher: AdaptyFetcher
-    private var skFetcher: StoreKitFetcher
 
-    var adaptyTimeout: TimeInterval = 5
+    // MARK: - Properties
 
-    init() {
-        adaptyFetcher = AdaptyFetcher()
-        skFetcher = StoreKitFetcher()
-        adaptyFetcher.logger = logger
-    }
+    private var primaryFetcher: IAPFetcherProtocol?
+    private let fallbackFetcher: StoreKitFetcher
 
-    var logger: IAPKitLoggable? {
-        didSet {
-            adaptyFetcher.logger = logger
-        }
-    }
+    /// Timeout for primary fetcher before falling back to StoreKit
+    var timeout: TimeInterval = 5
 
-    var completion: (([IAPProduct]) -> Void)?
-
-    func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
-    }
-    
-    func setPlacement(_ placementName: String) {
-        adaptyFetcher.setPlacement(placementName)
+    /// Backward compatibility alias
+    var adaptyTimeout: TimeInterval {
+        get { timeout }
+        set { timeout = newValue }
     }
 
     var defaultProducts: IAPProducts = .init(products: [])
-    //        WeeklyProduct(), MonthlyProduct()
 
-    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
-        fetchAdaptyOrTimeOut(completion: completion)
+    var logger: IAPKitLoggable? {
+        didSet {
+            primaryFetcher?.logger = logger
+            fallbackFetcher.logger = logger
+        }
     }
 
+    // MARK: - Initialization
+
+    init() {
+        fallbackFetcher = StoreKitFetcher()
+    }
+
+    // MARK: - Activation
+
+    /// Activate with Adapty as primary fetcher
+    func activate(adaptyApiKey apiKey: String, paywallName: String) {
+        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium")
+    }
+
+    /// Activate with Adapty as primary fetcher with custom entitlement
+    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String) {
+        let adaptyFetcher = AdaptyFetcher()
+        adaptyFetcher.logger = logger
+        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId)
+        primaryFetcher = adaptyFetcher
+    }
+
+    /// Activate with RevenueCat as primary fetcher
+    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String) {
+        let revenueCatFetcher = RevenueCatFetcher()
+        revenueCatFetcher.logger = logger
+        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId)
+        primaryFetcher = revenueCatFetcher
+    }
+
+    /// Set placement/offering name
+    func setPlacement(_ placementName: String) {
+        primaryFetcher?.setPlacement(placementName)
+    }
+
+    // MARK: - Products
+
+    /// Fetch products with timeout fallback to StoreKit
+    func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
+        guard let primaryFetcher = primaryFetcher else {
+            // No primary fetcher configured, use StoreKit directly
+            fallbackFetcher.fetch(completion: completion)
+            return
+        }
+
+        // If timeout is zero, fetch from both but return StoreKit results for display
+        if timeout == .zero {
+            // Call primary to prepare products for purchase
+            primaryFetcher.fetch { _ in }
+            // Return StoreKit results for display (faster)
+            fallbackFetcher.fetch(completion: completion)
+            return
+        }
+
+        // Thread-safe state management using serial queue
+        let stateQueue = DispatchQueue(label: "com.iapkit.fetchstate")
+        var isPrimaryTimedOut = false
+        var isPrimaryCompleted = false
+        var timeoutTimer: Timer?
+
+        // Start timeout timer on main thread
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            timeoutTimer = Timer.scheduledTimer(withTimeInterval: self.timeout, repeats: false) { [weak self] _ in
+                guard let self = self else { return }
+                stateQueue.sync {
+                    guard !isPrimaryCompleted else { return }
+                    isPrimaryTimedOut = true
+                }
+                self.logger?.log("Primary fetcher timed out, falling back to StoreKit")
+                self.fallbackFetcher.fetch(completion: completion)
+            }
+        }
+
+        // Fetch from primary
+        primaryFetcher.fetch { result in
+            var shouldComplete = false
+            stateQueue.sync {
+                guard !isPrimaryTimedOut else { return }
+                isPrimaryCompleted = true
+                shouldComplete = true
+            }
+
+            if shouldComplete {
+                // Invalidate timer on main thread since it was created there
+                DispatchQueue.main.async {
+                    timeoutTimer?.invalidate()
+                }
+                completion(result)
+            }
+        }
+    }
+
+    /// Fetch paywall/offering name
     func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
-        adaptyFetcher.fetchPaywall { result in
+        primaryFetcher?.fetchPaywall { result in
             switch result {
-            case let .success(paywallName):
-                completion(paywallName)
+            case let .success(name):
+                completion(name)
             case let .failure(error):
                 completion(error.localizedDescription)
             }
         }
     }
 
-    func fetchAdaptyOrTimeOut(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
-        if adaptyTimeout == .zero {
-            // call adaptyFetcher.fetch to prepare products for purchase on selection
-            adaptyFetcher.fetch(completion: { _ in })
-            // call skFetcher.fetch to load products to display (which we assume is faster than adapty).
-            skFetcher.fetch(completion: completion)
+    // MARK: - Profile
+
+    /// Fetch profile from primary fetcher only
+    func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
+        guard let primaryFetcher = primaryFetcher else {
+            let error = NSError(
+                domain: "IAPProductFetcher",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "No primary fetcher configured"]
+            )
+            completion(.failure(error))
             return
         }
-        var isAdaptyTimedOut = false
-        var isAdaptyFetched = false
-        Timer.scheduledTimer(withTimeInterval: adaptyTimeout, repeats: false) { [weak self] _ in
-            isAdaptyTimedOut = true
-            guard !isAdaptyFetched else { return }
-            guard let self else { return }
-            skFetcher.fetch(completion: completion)
-        }
-        adaptyFetcher.fetch { result in
-            guard !isAdaptyTimedOut else { return }
-            isAdaptyFetched = true
-            completion(result)
-        }
+        primaryFetcher.fetchProfile(completion: completion)
     }
 
-    func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
-        adaptyFetcher.fetchProfile(completion: completion)
+    // MARK: - Purchases
+
+    /// Buy product using primary fetcher
+    func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
+        guard let primaryFetcher = primaryFetcher else {
+            let error = NSError(
+                domain: "IAPProductFetcher",
+                code: -1,
+                userInfo: [NSLocalizedDescriptionKey: "No primary fetcher configured"]
+            )
+            completion(.failure(error))
+            return
+        }
+        primaryFetcher.buy(product: product, completion: completion)
     }
 
+    /// Restore purchases from both primary and StoreKit in parallel
+    /// Returns success if either returns true
     func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
+        guard let primaryFetcher = primaryFetcher else {
+            // No primary, just use StoreKit
+            fallbackFetcher.restorePurchases(completion: completion)
+            return
+        }
+
         let group = DispatchGroup()
-        var adaptyResult: Result<Bool, Error>?
+        var primaryResult: Result<Bool, Error>?
         var storeKitResult: Result<Bool, Error>?
-        
-        // Call Adapty restore
+
+        // Call primary restore
         group.enter()
-        adaptyFetcher.restorePurchases { result in
-            adaptyResult = result
+        primaryFetcher.restorePurchases { result in
+            primaryResult = result
             group.leave()
         }
-        
+
         // Call StoreKit restore
         group.enter()
-        skFetcher.restorePurchases { result in
+        fallbackFetcher.restorePurchases { result in
             storeKitResult = result
             group.leave()
         }
-        
+
         // Wait for both to complete
         group.notify(queue: .main) {
-            let adaptySuccess = (try? adaptyResult?.get()) ?? false
+            let primarySuccess = (try? primaryResult?.get()) ?? false
             let storeKitSuccess = (try? storeKitResult?.get()) ?? false
-            
-            // If either returns true, return true
-            if adaptySuccess || storeKitSuccess {
+
+            // If either returns true, return success
+            if primarySuccess || storeKitSuccess {
                 completion(.success(true))
                 return
             }
-            
-            // Check if any service returned an error
-            if case let .failure(error) = adaptyResult ?? storeKitResult {
-                completion(.failure(error))
-                return
+
+            // Both returned false or error - return primary's result
+            if let primaryResult = primaryResult {
+                completion(primaryResult)
+            } else {
+                completion(.success(false))
             }
-            
-            // Both services returned false and no error was provided
-            completion(.success(false))
         }
     }
 
-    func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
-        adaptyFetcher.buy(product: product, completion: completion)
-    }
+    // MARK: - User Management
 
     func logout() {
-        adaptyFetcher.logout()
+        primaryFetcher?.logout()
     }
 
     func identify(_ userID: String) {
-        adaptyFetcher.identify(userID)
+        primaryFetcher?.identify(userID)
     }
 
+    // MARK: - Attribution
+
     func setPlayerId(_ playerId: String?) {
-        adaptyFetcher.setPlayerId(playerId)
+        primaryFetcher?.setPlayerId(playerId)
     }
-    
+
     func setFirebaseId(_ id: String?) {
-        adaptyFetcher.setFirebaseId(id)
+        primaryFetcher?.setFirebaseId(id)
     }
-    
+
     func setAdjustDeviceId(_ adjustId: String?) {
-        adaptyFetcher.setAdjustDeviceId(adjustId)
+        primaryFetcher?.setAdjustDeviceId(adjustId)
     }
 }

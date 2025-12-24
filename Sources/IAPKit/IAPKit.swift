@@ -38,13 +38,21 @@ public final class IAPKit: NSObject {
 
     private var productFetcher = IAPProductFetcher()
 
-    public var adaptyTimeoutDuration: Int {
+    /// Timeout duration in seconds for primary fetcher before falling back to StoreKit
+    public var primaryTimeoutDuration: Int {
         get {
-            Int(productFetcher.adaptyTimeout)
+            Int(productFetcher.timeout)
         }
         set {
-            productFetcher.adaptyTimeout = TimeInterval(newValue)
+            productFetcher.timeout = TimeInterval(newValue)
         }
+    }
+
+    /// Backward compatibility alias for primaryTimeoutDuration
+    @available(*, deprecated, renamed: "primaryTimeoutDuration")
+    public var adaptyTimeoutDuration: Int {
+        get { primaryTimeoutDuration }
+        set { primaryTimeoutDuration = newValue }
     }
 
     override init() {
@@ -52,10 +60,35 @@ public final class IAPKit: NSObject {
         super.init()
     }
 
+    // MARK: - Activation
+    
+    /// Activate IAPKit with Adapty provider (backward compatible)
+    /// - Parameters:
+    ///   - apiKey: Adapty API key
+    ///   - paywallName: Adapty placement name
     public func activate(adaptyApiKey apiKey: String, paywallName: String) {
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
     }
     
+    /// Activate IAPKit with Adapty provider and custom entitlement ID
+    /// - Parameters:
+    ///   - apiKey: Adapty API key
+    ///   - paywallName: Adapty placement name
+    ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId)
+    }
+    
+    /// Activate IAPKit with RevenueCat provider
+    /// - Parameters:
+    ///   - apiKey: RevenueCat public API key
+    ///   - offeringId: The offering identifier to use (empty string for current offering)
+    ///   - entitlementId: The entitlement ID to check for premium status
+    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String) {
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId)
+    }
+    
+    /// Set the placement (Adapty) or offering ID (RevenueCat)
     public func setPlacement(_ placementName: String) {
         productFetcher.setPlacement(placementName)
     }

@@ -19,7 +19,7 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
     
     private var offerings: Offerings?
     private var currentOffering: Offering?
-    private var offeringIdentifier: String = ""
+    private var placementId: String = ""
     private var entitlementId: String = "premium"
     
     private var isRevenueCatFetchingProducts: Bool = false
@@ -30,9 +30,9 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
     // MARK: - Lifecycle
     
     func activate(apiKey: String, placementName: String, entitlementId: String) {
-        self.offeringIdentifier = placementName
+        self.placementId = placementName
         self.entitlementId = entitlementId
-        
+
         // Map IAPKit log level to RevenueCat log level
         switch IAPKitLogLevel.logLevel {
         case .debug:
@@ -41,12 +41,12 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
             Purchases.logLevel = .error
         }
         Purchases.configure(withAPIKey: apiKey)
-        
-        logger?.log("RevenueCat activated with offering: \(placementName), entitlement: \(entitlementId)")
+
+        logger?.log("RevenueCat activated with placement: \(placementName), entitlement: \(entitlementId)")
     }
     
     func setPlacement(_ placementName: String) {
-        self.offeringIdentifier = placementName
+        self.placementId = placementName
     }
     
     func logout() {
@@ -82,17 +82,17 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
             }
             
             self.offerings = offerings
-            
-            // Get the specified offering or fall back to current
+
+            // Get offering for placement or fall back to current
             let offering: Offering?
-            if !self.offeringIdentifier.isEmpty {
-                offering = offerings.offering(identifier: self.offeringIdentifier)
+            if !self.placementId.isEmpty {
+                offering = offerings.currentOffering(forPlacement: self.placementId)
             } else {
                 offering = offerings.current
             }
-            
+
             guard let currentOffering = offering else {
-                self.logger?.log("RevenueCat: No offering found for identifier: \(self.offeringIdentifier)")
+                self.logger?.log("RevenueCat: No offering found for placement: \(self.placementId)")
                 completion(.success(IAPProducts(products: [])))
                 return
             }
@@ -127,14 +127,14 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
                 completion(.failure(error))
                 return
             }
-            
+
             let offering: Offering?
-            if let identifier = self?.offeringIdentifier, !identifier.isEmpty {
-                offering = offerings?.offering(identifier: identifier)
+            if let placementId = self?.placementId, !placementId.isEmpty {
+                offering = offerings?.currentOffering(forPlacement: placementId)
             } else {
                 offering = offerings?.current
             }
-            
+
             completion(.success(offering?.identifier ?? ""))
         }
     }

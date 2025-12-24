@@ -25,10 +25,10 @@ public protocol IAPFetcherProtocol: AnyObject {
     
     // MARK: - Lifecycle
     
-    /// Activate the provider with the given API key and placement/offering name
+    /// Activate the provider with the given API key and placement ID
     /// - Parameters:
     ///   - apiKey: The API key for the provider
-    ///   - placementName: The placement name (Adapty) or offering identifier (RevenueCat)
+    ///   - placementName: The placement ID used to fetch the appropriate offering
     ///   - entitlementId: The entitlement identifier to check for premium status
     func activate(apiKey: String, placementName: String, entitlementId: String)
     
@@ -41,8 +41,8 @@ public protocol IAPFetcherProtocol: AnyObject {
     
     // MARK: - Products
     
-    /// Set the placement/offering name for fetching products
-    /// - Parameter placementName: The placement name (Adapty) or offering identifier (RevenueCat)
+    /// Set the placement ID for fetching products
+    /// - Parameter placementName: The placement ID used to fetch the appropriate offering
     func setPlacement(_ placementName: String)
     
     /// Fetch products from the provider

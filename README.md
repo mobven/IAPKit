@@ -1,14 +1,14 @@
 # IAPKit
 
-A Swift package for handling In-App Purchases with support for both StoreKit and Adapty, featuring flexible logging capabilities.
+A Swift package for handling In-App Purchases with support for StoreKit, Adapty, and RevenueCat, featuring flexible logging capabilities.
 
 ## Overview
 
-IAPKit provides a unified interface for managing in-app purchases across different platforms and services. It supports both StoreKit (Apple's native framework) and Adapty (third-party service) with automatic fallback mechanisms and configurable timeout handling.
+IAPKit provides a unified interface for managing in-app purchases across different platforms and services. It supports StoreKit (Apple's native framework), Adapty, and RevenueCat with automatic fallback mechanisms and configurable timeout handling.
 
 ## Features
 
-- 🛒 **Unified IAP Interface**: Single API for both StoreKit and Adapty
+- 🛒 **Unified IAP Interface**: Single API for StoreKit, Adapty, and RevenueCat
 - ⏱️ **Timeout Handling**: Configurable timeout with automatic fallback
 - 🔄 **Purchase Restoration**: Easy purchase restoration functionality
 - 👤 **User Management**: User identification and logout support
@@ -36,15 +36,40 @@ Or add it through Xcode:
 
 ### 1. Initialize IAPKit
 
+IAPKit supports two IAP providers: **Adapty** and **RevenueCat**. Choose one based on your preference.
+
+#### Option A: Using Adapty
+
 ```swift
 import IAPKit
 
 // Configure IAPKit with Adapty
 IAPKit.store.activate(adaptyApiKey: "your_adapty_api_key", paywallName: "your_paywall_name")
 
-// Set timeout for Adapty (optional, default: 5 seconds)
+// With custom entitlement ID (optional, default: "premium")
+IAPKit.store.activate(adaptyApiKey: "your_adapty_api_key", paywallName: "your_paywall_name", entitlementId: "pro")
+
+// Set timeout for primary fetcher (optional, default: 5 seconds)
 IAPKit.store.adaptyTimeoutDuration = 3
 ```
+
+#### Option B: Using RevenueCat
+
+```swift
+import IAPKit
+
+// Configure IAPKit with RevenueCat
+IAPKit.store.activate(
+    revenueCatApiKey: "your_revenuecat_api_key",
+    offeringId: "your_offering_id",
+    entitlementId: "premium"
+)
+
+// Set timeout for primary fetcher (optional, default: 5 seconds)
+IAPKit.store.adaptyTimeoutDuration = 3
+```
+
+> **Note:** Both providers use StoreKit as a fallback when the primary provider times out.
 
 ### 2. Set Up Delegate
 
@@ -278,9 +303,20 @@ IAPKit.store.restorePurchases { result in
 
 IAPKit provides comprehensive error handling through the logging system. Common error contexts include:
 
+### Adapty Contexts
 - **"Adapty Activate"**: Issues during Adapty SDK initialization
 - **Paywall Names**: Errors related to specific paywalls
 - **"Cancelled payment by closing it"**: User cancelled the payment flow
+
+### RevenueCat Contexts
+- **"RevenueCat identify"**: Issues during user identification
+- **"RevenueCat getOfferings"**: Errors fetching offerings
+- **"RevenueCat fetchPaywall"**: Errors fetching paywall configuration
+- **"RevenueCat fetchProfile"**: Errors fetching customer info
+- **"RevenueCat purchase"**: Purchase transaction errors
+- **"RevenueCat purchase cancelled"**: User cancelled the purchase
+- **"RevenueCat restorePurchases"**: Restore purchases errors
+- **"RevenueCat buy - product not found"**: Product not found in current offering
 
 ## Requirements
 
@@ -290,7 +326,8 @@ IAPKit provides comprehensive error handling through the logging system. Common 
 
 ## Dependencies
 
-- [Adapty SDK](https://github.com/adaptyteam/AdaptySDK-iOS) (3.8.0)
+- [Adapty SDK](https://github.com/adaptyteam/AdaptySDK-iOS) (3.8.0) - *Required for Adapty integration*
+- [RevenueCat SDK](https://github.com/RevenueCat/purchases-ios) (5.21.1+) - *Required for RevenueCat integration*
 - [RxSwift](https://github.com/ReactiveX/RxSwift) (6.6.0+)
 
 ## License

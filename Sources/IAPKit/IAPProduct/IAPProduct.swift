@@ -41,6 +41,7 @@ public class IAPProduct: IAPProductProtocol {
     public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
     public var introductoryPricePaymentMode: UInt { product.introductoryPricePaymentMode }
     public var periodUnit: IAPPeriodUnit.PeriodUnit { product.periodUnit }
+    public var localizedPrice: String { product.localizedPrice }
 }
 
 extension IAPProduct: Equatable {
@@ -67,6 +68,7 @@ public protocol IAPProductProtocol {
     var subscriptionPeriodUnitRawValue: UInt { get }
     var introductoryPricePaymentMode: UInt { get }
     var periodUnit: IAPPeriodUnit.PeriodUnit { get }
+    var localizedPrice: String { get }
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {
@@ -199,6 +201,10 @@ public protocol IAPProductProtocol {
         default: .day
         }
     }
+
+    public var localizedPrice: String {
+        displayPrice
+    }
 }
 
 extension SKProduct: IAPProductProtocol {
@@ -315,5 +321,12 @@ extension SKProduct: IAPProductProtocol {
         case .year: .year
         default: .day
         }
+    }
+
+    public var localizedPrice: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = priceLocale
+        return formatter.string(from: price) ?? ""
     }
 }

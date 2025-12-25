@@ -21,7 +21,7 @@ public protocol IAPKitLoggable: AnyObject {
 
 public enum IAPKitLogLevel {
     case prod, debug
-    internal static var logLevel: IAPKitLogLevel = .prod
+    public static var logLevel: IAPKitLogLevel = .prod
 }
 
 public extension IAPKitLoggable {

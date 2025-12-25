@@ -46,7 +46,14 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
     }
     
     func setPlacement(_ placementName: String) {
+        let wasLoaded = self.currentOffering != nil
         self.placementId = placementName
+        self.currentOffering = nil
+
+        // Re-fetch if offerings were previously loaded
+        if wasLoaded {
+            fetch { _ in }
+        }
     }
     
     func logout() {

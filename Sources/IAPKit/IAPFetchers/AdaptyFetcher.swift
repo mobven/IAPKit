@@ -113,8 +113,8 @@ final class AdaptyFetcher: NSObject, IAPFetcherProtocol {
             guard let self = self else { return }
             switch result {
             case let .success(profile):
-                let isSubscribed = profile.isPremium
-                let expireDate = profile.subscriptions.first(where: { $0.value.isActive })?.value.expiresAt
+                let isSubscribed = profile.accessLevels[self.entitlementId]?.isActive ?? false
+                let expireDate = profile.accessLevels[self.entitlementId]?.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
                 self.logger?.logError(error, context: self.placementName)
@@ -128,7 +128,8 @@ final class AdaptyFetcher: NSObject, IAPFetcherProtocol {
             guard let self else { return }
             switch result {
             case let .success(profile):
-                if profile.isPremium {
+                let isPremium = profile.accessLevels[self.entitlementId]?.isActive ?? false
+                if isPremium {
                     completion(.success(true))
                 } else {
                     fetchProfile { result in

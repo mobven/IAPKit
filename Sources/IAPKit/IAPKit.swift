@@ -8,6 +8,8 @@
 import RxRelay
 import RxSwift
 import StoreKit
+import SwiftUI
+import UIKit
 
 typealias ProductIdentifier = String
 
@@ -123,6 +125,28 @@ public final class IAPKit: NSObject {
     
     public func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
         productFetcher.fetchPaywallName(completion: completion)
+    }
+
+    // MARK: - Paywall UI (RevenueCat only)
+
+    /// Returns a SwiftUI PaywallView for the current placement
+    /// Automatically fetches offerings if not already loaded
+    /// Only works when using RevenueCat as the IAP provider
+    /// - Parameter completion: Completion handler with the paywall view, or nil if not using RevenueCat
+    @available(iOS 15.0, *)
+    public func getPaywallView(completion: @escaping (AnyView?) -> Void) {
+        productFetcher.getPaywallView(completion: completion)
+    }
+
+    /// Returns a UIViewController for the paywall
+    /// Automatically fetches offerings if not already loaded
+    /// Only works when using RevenueCat as the IAP provider
+    /// - Parameters:
+    ///   - delegate: Optional PaywallViewControllerDelegate for handling events
+    ///   - completion: Completion handler with the view controller, or nil if not using RevenueCat
+    @available(iOS 15.0, *)
+    public func getPaywallViewController(delegate: Any? = nil, completion: @escaping (UIViewController?) -> Void) {
+        productFetcher.getPaywallViewController(delegate: delegate, completion: completion)
     }
 
     public static func getReceiptToken() -> String? {

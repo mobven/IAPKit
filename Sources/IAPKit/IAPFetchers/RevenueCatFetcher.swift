@@ -7,7 +7,11 @@
 
 import Foundation
 import RevenueCat
+import RevenueCatUI
 import StoreKit
+import SwiftUI
+
+import UIKit
 
 /// RevenueCat implementation of IAPFetcherProtocol
 final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
@@ -300,12 +304,70 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
                 return IAPProduct(product: sk2Product)
             }
         }
-        
+
         // Fallback to SK1
         if let sk1Product = storeProduct.sk1Product {
             return IAPProduct(product: sk1Product)
         }
-        
+
         return nil
+    }
+
+}
+
+// MARK: - PaywallProvidable
+
+@available(iOS 15.0, *)
+extension RevenueCatFetcher: PaywallProvidable {
+
+    func getPaywallView(completion: @escaping (AnyView) -> Void) {
+        ensureOfferingLoaded { [weak self] offering in
+            guard let self = self else { return }
+            completion(self.createPaywallView(offering: offering))
+        }
+    }
+
+    func getPaywallViewController(delegate: Any?, completion: @escaping (UIViewController) -> Void) {
+        ensureOfferingLoaded { [weak self] offering in
+            guard let self = self else { return }
+            completion(self.createPaywallViewController(offering: offering, delegate: delegate))
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func ensureOfferingLoaded(completion: @escaping (Offering?) -> Void) {
+        if let offering = currentOffering {
+            completion(offering)
+            return
+        }
+
+        fetch { [weak self] _ in
+            DispatchQueue.main.async {
+                completion(self?.currentOffering)
+            }
+        }
+    }
+
+    private func createPaywallView(offering: Offering?) -> AnyView {
+        if let offering = offering {
+            return AnyView(PaywallView(offering: offering))
+        }
+        return AnyView(PaywallView())
+    }
+
+    private func createPaywallViewController(offering: Offering?, delegate: Any?) -> PaywallViewController {
+        let controller: PaywallViewController
+        if let offering = offering {
+            controller = PaywallViewController(offering: offering)
+        } else {
+            controller = PaywallViewController()
+        }
+
+        if let paywallDelegate = delegate as? PaywallViewControllerDelegate {
+            controller.delegate = paywallDelegate
+        }
+
+        return controller
     }
 }

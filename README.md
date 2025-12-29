@@ -9,6 +9,7 @@ IAPKit provides a unified interface for managing in-app purchases across differe
 ## Features
 
 - 🛒 **Unified IAP Interface**: Single API for StoreKit, Adapty, and RevenueCat
+- 🎨 **Live Paywall Support**: RevenueCat remote paywall UI (iOS 15+)
 - ⏱️ **Timeout Handling**: Configurable timeout with automatic fallback
 - 🔄 **Purchase Restoration**: Easy purchase restoration functionality
 - 👤 **User Management**: User identification and logout support
@@ -299,6 +300,82 @@ IAPKit.store.restorePurchases { result in
 }
 ```
 
+### Live Paywall (RevenueCat Only)
+
+RevenueCat's remote paywall feature allows you to design and update your paywall UI from the RevenueCat dashboard without app updates. This feature requires iOS 15.0+.
+
+#### SwiftUI
+
+```swift
+import SwiftUI
+
+struct ContentView: View {
+    @State private var paywallView: AnyView?
+    @State private var showPaywall = false
+
+    var body: some View {
+        Button("Show Paywall") {
+            IAPKit.store.getPaywallView { view in
+                if let view = view {
+                    self.paywallView = view
+                    self.showPaywall = true
+                }
+            }
+        }
+        .sheet(isPresented: $showPaywall) {
+            paywallView
+        }
+    }
+}
+```
+
+#### UIKit
+
+```swift
+import UIKit
+
+class ViewController: UIViewController {
+
+    @IBAction func showPaywallTapped(_ sender: Any) {
+        IAPKit.store.getPaywallViewController { [weak self] viewController in
+            if let vc = viewController {
+                self?.present(vc, animated: true)
+            }
+        }
+    }
+
+    // With delegate for purchase events
+    @IBAction func showPaywallWithDelegateTapped(_ sender: Any) {
+        IAPKit.store.getPaywallViewController(delegate: self) { [weak self] viewController in
+            if let vc = viewController {
+                self?.present(vc, animated: true)
+            }
+        }
+    }
+}
+
+// Implement PaywallViewControllerDelegate from RevenueCatUI
+extension ViewController: PaywallViewControllerDelegate {
+    func paywallViewController(_ controller: PaywallViewController,
+                               didFinishPurchasingWith customerInfo: CustomerInfo) {
+        // Handle successful purchase
+    }
+}
+```
+
+#### Changing Placement
+
+```swift
+// Change placement/offering and show new paywall
+IAPKit.store.setPlacement("settings_paywall")
+
+IAPKit.store.getPaywallView { view in
+    // Shows paywall for "settings_paywall" placement
+}
+```
+
+> **Note:** `getPaywallView` and `getPaywallViewController` automatically fetch offerings if not already loaded. No need to call `requestProducts()` first.
+
 ## Error Handling
 
 IAPKit provides comprehensive error handling through the logging system. Common error contexts include:
@@ -326,8 +403,9 @@ IAPKit provides comprehensive error handling through the logging system. Common 
 
 ## Dependencies
 
-- [Adapty SDK](https://github.com/adaptyteam/AdaptySDK-iOS) (3.8.0) - *Required for Adapty integration*
-- [RevenueCat SDK](https://github.com/RevenueCat/purchases-ios) (5.21.1+) - *Required for RevenueCat integration*
+- [Adapty SDK](https://github.com/adaptyteam/AdaptySDK-iOS) (3.11.0) - *Required for Adapty integration*
+- [RevenueCat SDK](https://github.com/RevenueCat/purchases-ios) (5.50.0+) - *Required for RevenueCat integration*
+- [RevenueCatUI](https://github.com/RevenueCat/purchases-ios) - *Required for Live Paywall feature*
 - [RxSwift](https://github.com/ReactiveX/RxSwift) (6.6.0+)
 
 ## License

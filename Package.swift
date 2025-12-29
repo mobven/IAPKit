@@ -25,8 +25,7 @@ let package = Package(
                 .product(name: "RxSwift", package: "RxSwift"),
                 .product(name: "RxRelay", package: "RxSwift"),
                 .product(name: "RevenueCat", package: "purchases-ios-spm"),
-                // TODO: Uncomment when paywall generation feature is implemented
-                // .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
+                .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
             ]
         ),
         .testTarget(

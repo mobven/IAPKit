@@ -8,6 +8,8 @@
 
 import Foundation
 import StoreKit
+import SwiftUI
+import UIKit
 
 /// Coordinator that manages primary (Adapty/RevenueCat) and fallback (StoreKit) fetchers
 final class IAPProductFetcher {
@@ -240,5 +242,29 @@ final class IAPProductFetcher {
 
     func setAdjustDeviceId(_ adjustId: String?) {
         primaryFetcher?.setAdjustDeviceId(adjustId)
+    }
+
+    // MARK: - Paywall UI
+
+    @available(iOS 15.0, *)
+    func getPaywallView(completion: @escaping (AnyView?) -> Void) {
+        guard let paywallProvider = primaryFetcher as? PaywallProvidable else {
+            completion(nil)
+            return
+        }
+        paywallProvider.getPaywallView { view in
+            completion(view)
+        }
+    }
+
+    @available(iOS 15.0, *)
+    func getPaywallViewController(delegate: Any?, completion: @escaping (UIViewController?) -> Void) {
+        guard let paywallProvider = primaryFetcher as? PaywallProvidable else {
+            completion(nil)
+            return
+        }
+        paywallProvider.getPaywallViewController(delegate: delegate) { viewController in
+            completion(viewController)
+        }
     }
 }

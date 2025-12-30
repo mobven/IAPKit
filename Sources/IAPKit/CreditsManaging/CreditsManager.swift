@@ -20,7 +20,7 @@ public protocol CreditsManaging: AnyObject, Sendable {
 // MARK: - Implementation
 
 public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked Sendable {
-    @Published private(set) var credits: UserCredit?
+    @Published private(set) public var credits: UserCredit?
 
     private let creditsService: CreditsAPIServiceProtocol
 
@@ -28,14 +28,14 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
         self.creditsService = creditsService
     }
 
-    func refresh() async throws {
+    public func refresh() async throws {
         let response = try await creditsService.getCredits()
         await MainActor.run {
             credits = response
         }
     }
 
-    func claimGiftCoins() async -> Bool {
+    public func claimGiftCoins() async -> Bool {
         do {
             let response = try await creditsService.claimGiftCoins()
             return !response.giftClaimed
@@ -44,11 +44,11 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
         }
     }
 
-    func getCreditProducts() async throws -> GetCreditProductsResponse {
+    public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await creditsService.getCreditProducts()
     }
 
-    func checkCreditAndSubsStatus() -> Bool {
+    public func checkCreditAndSubsStatus() -> Bool {
         guard let credits else { return true }
 
         // 1. Gift coin varsa subscription olmadan da contente erişebilir.

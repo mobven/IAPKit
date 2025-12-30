@@ -60,6 +60,18 @@ public final class IAPKit: NSObject {
     override init() {
         skProducts = BehaviorRelay(value: productFetcher.defaultProducts)
         super.init()
+        setupLivePaywallCallbacks()
+    }
+
+    private func setupLivePaywallCallbacks() {
+        productFetcher.onLivePaywallPurchase = { [weak self] product, paywallId in
+            self?.delegate?.iapKitDidBuy(product: product, paywallId: paywallId)
+        }
+        productFetcher.onLivePaywallFailure = { [weak self] product, error in
+            if let product = product {
+                self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)
+            }
+        }
     }
 
     // MARK: - Activation

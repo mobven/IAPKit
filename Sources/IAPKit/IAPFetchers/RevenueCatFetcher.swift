@@ -13,14 +13,23 @@ import SwiftUI
 
 import UIKit
 
+/// Callback type for live paywall purchase events
+typealias LivePaywallPurchaseHandler = (IAPProduct, String?) -> Void
+typealias LivePaywallFailureHandler = (IAPProduct?, Error) -> Void
+
 /// RevenueCat implementation of IAPFetcherProtocol
 final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
-    
+
     // MARK: - Properties
-    
+
     var fetcherType: IAPFetcherType { .revenueCat }
     weak var logger: IAPKitLoggable?
-    
+
+    /// Called when a purchase is completed through the live paywall
+    var onLivePaywallPurchase: LivePaywallPurchaseHandler?
+    /// Called when a purchase fails through the live paywall
+    var onLivePaywallFailure: LivePaywallFailureHandler?
+
     private var offerings: Offerings?
     private var currentOffering: Offering?
     private var placementId: String = ""
@@ -350,10 +359,23 @@ extension RevenueCatFetcher: PaywallProvidable {
     }
 
     private func createPaywallView(offering: Offering?) -> AnyView {
+        let paywallView: PaywallView
         if let offering = offering {
-            return AnyView(PaywallView(offering: offering))
+            paywallView = PaywallView(offering: offering)
+        } else {
+            paywallView = PaywallView()
         }
-        return AnyView(PaywallView())
+
+        // Wrap with purchase handler
+        let wrappedView = paywallView
+            .onPurchaseCompleted { [weak self] customerInfo in
+                self?.handleLivePaywallPurchaseFromCustomerInfo(customerInfo: customerInfo)
+            }
+            .onPurchaseFailure { [weak self] error in
+                self?.handleLivePaywallFailure(error: error)
+            }
+
+        return AnyView(wrappedView)
     }
 
     private func createPaywallViewController(offering: Offering?, delegate: Any?) -> PaywallViewController {
@@ -364,10 +386,104 @@ extension RevenueCatFetcher: PaywallProvidable {
             controller = PaywallViewController()
         }
 
-        if let paywallDelegate = delegate as? PaywallViewControllerDelegate {
-            controller.delegate = paywallDelegate
-        }
+        // Create internal delegate wrapper to intercept purchase events
+        let delegateWrapper = PaywallDelegateWrapper(
+            fetcher: self,
+            userDelegate: delegate as? PaywallViewControllerDelegate
+        )
+        controller.delegate = delegateWrapper
+
+        // Store wrapper to prevent deallocation
+        objc_setAssociatedObject(
+            controller,
+            &AssociatedKeys.delegateWrapper,
+            delegateWrapper,
+            .OBJC_ASSOCIATION_RETAIN_NONATOMIC
+        )
 
         return controller
     }
+
+    fileprivate func handleLivePaywallPurchaseFromCustomerInfo(customerInfo: CustomerInfo) {
+        // Try to find the most recently purchased product from the entitlement
+        let activeEntitlement = customerInfo.entitlements[entitlementId]
+        guard let productId = activeEntitlement?.productIdentifier else {
+            logger?.log("Live paywall purchase completed but no product identifier found in entitlement")
+            // Still notify with nil product info - purchase happened
+            notifyPurchaseSuccess(productId: nil)
+            return
+        }
+
+        notifyPurchaseSuccess(productId: productId)
+    }
+
+    fileprivate func handleLivePaywallPurchase(customerInfo: CustomerInfo, productId: String?) {
+        guard let productId = productId else {
+            handleLivePaywallPurchaseFromCustomerInfo(customerInfo: customerInfo)
+            return
+        }
+        notifyPurchaseSuccess(productId: productId)
+    }
+
+    private func notifyPurchaseSuccess(productId: String?) {
+        let paywallId = currentOffering?.identifier
+
+        guard let productId = productId else {
+            // Create a placeholder product when we don't know the exact product
+            let product = IAPProduct(identifier: "unknown")
+            logger?.log("Live paywall purchase completed (unknown product)")
+            onLivePaywallPurchase?(product, paywallId)
+            return
+        }
+
+        // Find the IAPProduct from current offering
+        if let package = currentOffering?.availablePackages.first(where: {
+            $0.storeProduct.productIdentifier == productId
+        }),
+           let iapProduct = createIAPProduct(from: package.storeProduct) {
+            logger?.log("Live paywall purchase completed: \(productId)")
+            onLivePaywallPurchase?(iapProduct, paywallId)
+        } else {
+            // Create a minimal product with just the identifier
+            let product = IAPProduct(identifier: productId)
+            logger?.log("Live paywall purchase completed (minimal): \(productId)")
+            onLivePaywallPurchase?(product, paywallId)
+        }
+    }
+
+    fileprivate func handleLivePaywallFailure(error: Error) {
+        logger?.logError(error, context: "Live paywall purchase")
+        onLivePaywallFailure?(nil, error)
+    }
 }
+
+// MARK: - Associated Keys
+
+private struct AssociatedKeys {
+    static var delegateWrapper = "delegateWrapper"
+}
+
+// MARK: - Paywall Delegate Wrapper
+
+@available(iOS 15.0, *)
+private class PaywallDelegateWrapper: NSObject, PaywallViewControllerDelegate {
+    private weak var fetcher: RevenueCatFetcher?
+    private var userDelegate: PaywallViewControllerDelegate?
+
+    init(fetcher: RevenueCatFetcher, userDelegate: PaywallViewControllerDelegate?) {
+        self.fetcher = fetcher
+        self.userDelegate = userDelegate
+        super.init()
+    }
+
+    func paywallViewController(
+        _ controller: PaywallViewController,
+        didFinishPurchasingWith customerInfo: CustomerInfo
+    ) {
+        // Notify IAPKit delegate
+        fetcher?.handleLivePaywallPurchaseFromCustomerInfo(customerInfo: customerInfo)
+        // Forward to user delegate if provided
+        userDelegate?.paywallViewController?(controller, didFinishPurchasingWith: customerInfo)
+    }
+}
+

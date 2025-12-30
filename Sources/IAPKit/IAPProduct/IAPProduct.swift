@@ -21,6 +21,12 @@ public class IAPProduct: IAPProductProtocol {
         self.product = product
     }
 
+    /// Creates a minimal product with only an identifier (used for live paywall callbacks)
+    public convenience init(identifier: String) {
+        self.init()
+        self.product = PlaceholderProduct(identifier: identifier)
+    }
+
     public var identifier: String { product.identifier }
     public func hasFreeTrial() -> Bool { product.hasFreeTrial() }
     public func isWeekly() -> Bool { product.isWeekly() }
@@ -329,4 +335,29 @@ extension SKProduct: IAPProductProtocol {
         formatter.locale = priceLocale
         return formatter.string(from: price) ?? ""
     }
+}
+
+// MARK: - Placeholder Product
+
+/// A minimal product implementation used when only the identifier is known
+struct PlaceholderProduct: IAPProductProtocol {
+    let identifier: String
+
+    func hasFreeTrial() -> Bool { false }
+    func isWeekly() -> Bool { false }
+    func isMonthly() -> Bool { false }
+    func is2Monthly() -> Bool { false }
+    func is3Monthly() -> Bool { false }
+    func is6Monthly() -> Bool { false }
+    func isYearly() -> Bool { false }
+    var subscriptionPeriodText: String { "" }
+    func weeklyPrice() -> Double? { nil }
+    var priceLocale: Locale { .current }
+    var units: Int? { nil }
+    var subsciptionPrice: NSDecimalNumber { 0 }
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String { "" }
+    var subscriptionPeriodUnitRawValue: UInt { 0 }
+    var introductoryPricePaymentMode: UInt { 0 }
+    var periodUnit: IAPPeriodUnit.PeriodUnit { .day }
+    var localizedPrice: String { "" }
 }

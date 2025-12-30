@@ -19,6 +19,20 @@ final class IAPProductFetcher {
     private var primaryFetcher: IAPFetcherProtocol?
     private let fallbackFetcher: StoreKitFetcher
 
+    /// Called when a purchase is completed through the live paywall
+    var onLivePaywallPurchase: LivePaywallPurchaseHandler? {
+        didSet {
+            (primaryFetcher as? RevenueCatFetcher)?.onLivePaywallPurchase = onLivePaywallPurchase
+        }
+    }
+
+    /// Called when a purchase fails through the live paywall
+    var onLivePaywallFailure: LivePaywallFailureHandler? {
+        didSet {
+            (primaryFetcher as? RevenueCatFetcher)?.onLivePaywallFailure = onLivePaywallFailure
+        }
+    }
+
     /// Timeout for primary fetcher before falling back to StoreKit
     var timeout: TimeInterval = 5
 
@@ -62,6 +76,8 @@ final class IAPProductFetcher {
     func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String) {
         let revenueCatFetcher = RevenueCatFetcher()
         revenueCatFetcher.logger = logger
+        revenueCatFetcher.onLivePaywallPurchase = onLivePaywallPurchase
+        revenueCatFetcher.onLivePaywallFailure = onLivePaywallFailure
         revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId)
         primaryFetcher = revenueCatFetcher
     }

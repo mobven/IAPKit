@@ -14,20 +14,20 @@ public protocol CreditsAPIServiceProtocol: Sendable {
     func purchaseCredits(productId: String) async throws -> PurchaseCreditsResponse
 }
 
-struct CreditsAPIService: CreditsAPIServiceProtocol {
-    func claimGiftCoins() async throws -> ClaimGiftCoinsResponse {
+public struct CreditsAPIService: CreditsAPIServiceProtocol {
+    public func claimGiftCoins() async throws -> ClaimGiftCoinsResponse {
         try await API.Credits.claimGiftCoins.fetchResponse()
     }
 
-    func getCredits() async throws -> GetCreditsResponse {
+    public func getCredits() async throws -> GetCreditsResponse {
         try await API.Credits.getCredits.fetchResponse()
     }
 
-    func getCreditProducts() async throws -> GetCreditProductsResponse {
+    public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await API.Credits.getProducts.fetchResponse()
     }
 
-    func purchaseCredits(productId: String) async throws -> PurchaseCreditsResponse {
+    public func purchaseCredits(productId: String) async throws -> PurchaseCreditsResponse {
         let request = PurchaseCreditRequest(productId: productId)
         return try await API.Credits.purchase(request: request).fetchResponse()
     }

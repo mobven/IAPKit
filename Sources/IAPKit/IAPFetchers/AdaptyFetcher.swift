@@ -18,11 +18,14 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
     private var isAdaptyFetchingProducts: Bool = false
     private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
 
-    func activate(adaptyApiKey apiKey: String, paywallName: String) {
+    func activate(adaptyApiKey apiKey: String, paywallName: String, completion: @escaping (Result<Void, Error>) -> Void) {
         setPlacement(paywallName)
         Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
             }
         }
     }
@@ -189,8 +192,15 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.logout()
     }
 
-    func identify(_ userID: String) {
-        Adapty.identify(userID)
+    func identify(_ userID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        Adapty.identify(userID) { [weak self] error in
+            if let error = error {
+                self?.logger?.logError(error, context: "Adapty Identify")
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
     }
 
     func setPlayerId(_ playerId: String?) {

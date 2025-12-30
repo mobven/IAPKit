@@ -32,8 +32,8 @@ final class IAPProductFetcher {
 
     var completion: (([IAPProduct]) -> Void)?
 
-    func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
+    func activate(adaptyApiKey apiKey: String, paywallName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        adaptyFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, completion: completion)
     }
     
     func setPlacement(_ placementName: String) {
@@ -134,8 +134,8 @@ final class IAPProductFetcher {
         adaptyFetcher.logout()
     }
 
-    func identify(_ userID: String) {
-        adaptyFetcher.identify(userID)
+    func identify(_ userID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        adaptyFetcher.identify(userID, completion: completion)
     }
 
     func setPlayerId(_ playerId: String?) {

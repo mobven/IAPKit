@@ -52,8 +52,8 @@ public final class IAPKit: NSObject {
         super.init()
     }
 
-    public func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, completion: completion)
     }
     
     public func setPlacement(_ placementName: String) {
@@ -64,8 +64,8 @@ public final class IAPKit: NSObject {
         productFetcher.logout()
     }
 
-    public func identify(_ userID: String) {
-        productFetcher.identify(userID)
+    public func identify(_ userID: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        productFetcher.identify(userID, completion: completion)
     }
 
     public func setPlayerId(_ playerId: String?) {

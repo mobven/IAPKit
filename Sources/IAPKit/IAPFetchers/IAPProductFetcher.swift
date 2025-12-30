@@ -16,7 +16,10 @@ final class IAPProductFetcher {
 
     // MARK: - Properties
 
-    private var primaryFetcher: IAPFetcherProtocol?
+    /// Primary fetcher - managed providers like Adapty or RevenueCat
+    private var primaryFetcher: ManagedIAPProvider?
+
+    /// Fallback fetcher - native StoreKit (only conforms to ProductFetchable)
     private let fallbackFetcher: StoreKitFetcher
 
     /// Called when a purchase is completed through the live paywall

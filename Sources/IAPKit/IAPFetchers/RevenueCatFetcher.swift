@@ -17,8 +17,8 @@ import UIKit
 typealias LivePaywallPurchaseHandler = (IAPProduct, String?) -> Void
 typealias LivePaywallFailureHandler = (IAPProduct?, Error) -> Void
 
-/// RevenueCat implementation of IAPFetcherProtocol
-final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
+/// RevenueCat implementation of ManagedIAPProvider
+final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
 
     // MARK: - Properties
 

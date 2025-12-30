@@ -13,14 +13,16 @@ enum StoreError: Error {
     case failedVerification
 }
 
-/// StoreKit implementation of IAPFetcherProtocol (used as fallback)
-final class StoreKitFetcher: NSObject, IAPFetcherProtocol {
-    
+/// StoreKit implementation of ProductFetchable (used as fallback)
+/// This fetcher only conforms to ProductFetchable, not ManagedIAPProvider,
+/// because StoreKit doesn't support activation, user management, or placements
+final class StoreKitFetcher: NSObject, ProductFetchable {
+
     // MARK: - Properties
-    
+
     var fetcherType: IAPFetcherType { .storeKit }
     weak var logger: IAPKitLoggable?
-    
+
     // swiftlint:disable implicitly_unwrapped_optional
     var request: SKProductsRequest!
     // swiftlint:enable implicitly_unwrapped_optional
@@ -33,26 +35,6 @@ final class StoreKitFetcher: NSObject, IAPFetcherProtocol {
             MonthlyProduct.productIdentifier,
         ]
     )
-    
-    // MARK: - Lifecycle
-
-    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)?) {
-        // StoreKit doesn't need activation
-        completion?(.success(()))
-    }
-
-    func setPlacement(_ placementName: String) {
-        // StoreKit doesn't use placements
-    }
-
-    func logout() {
-        // StoreKit doesn't have logout
-    }
-
-    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)?) {
-        // StoreKit doesn't have identify
-        completion?(.success(()))
-    }
 
     // MARK: - Products
 

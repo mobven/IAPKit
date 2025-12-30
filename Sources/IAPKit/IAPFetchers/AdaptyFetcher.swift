@@ -10,8 +10,8 @@ import Adapty
 import Foundation
 import StoreKit
 
-/// Adapty implementation of IAPFetcherProtocol
-final class AdaptyFetcher: NSObject, IAPFetcherProtocol {
+/// Adapty implementation of ManagedIAPProvider
+final class AdaptyFetcher: NSObject, ManagedIAPProvider {
     
     // MARK: - Properties
     

@@ -9,7 +9,7 @@ import Foundation
 
 // MARK: - Protocol
 
-protocol CreditsManaging: AnyObject, Sendable {
+public protocol CreditsManaging: AnyObject, Sendable {
     var credits: UserCredit? { get }
     func refresh() async throws
     func claimGiftCoins() async -> Bool
@@ -19,7 +19,7 @@ protocol CreditsManaging: AnyObject, Sendable {
 
 // MARK: - Implementation
 
-final class CreditsManager: ObservableObject, CreditsManaging, @unchecked Sendable {
+public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked Sendable {
     @Published private(set) var credits: UserCredit?
 
     private let creditsService: CreditsAPIServiceProtocol

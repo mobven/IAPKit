@@ -36,20 +36,22 @@ final class StoreKitFetcher: NSObject, IAPFetcherProtocol {
     
     // MARK: - Lifecycle
 
-    func activate(apiKey: String, placementName: String, entitlementId: String) {
+    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)?) {
         // StoreKit doesn't need activation
+        completion?(.success(()))
     }
-    
+
     func setPlacement(_ placementName: String) {
         // StoreKit doesn't use placements
     }
-    
+
     func logout() {
         // StoreKit doesn't have logout
     }
-    
-    func identify(_ userID: String) {
+
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)?) {
         // StoreKit doesn't have identify
+        completion?(.success(()))
     }
 
     // MARK: - Products

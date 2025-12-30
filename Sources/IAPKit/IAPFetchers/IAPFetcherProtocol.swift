@@ -30,14 +30,17 @@ public protocol IAPFetcherProtocol: AnyObject {
     ///   - apiKey: The API key for the provider
     ///   - placementName: The placement ID used to fetch the appropriate offering
     ///   - entitlementId: The entitlement identifier to check for premium status
-    func activate(apiKey: String, placementName: String, entitlementId: String)
-    
+    ///   - completion: Optional completion handler with success/failure result
+    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)?)
+
     /// Log out the current user
     func logout()
-    
+
     /// Identify the current user with a user ID
-    /// - Parameter userID: The user ID to identify
-    func identify(_ userID: String)
+    /// - Parameters:
+    ///   - userID: The user ID to identify
+    ///   - completion: Optional completion handler with success/failure result
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)?)
     
     // MARK: - Products
     

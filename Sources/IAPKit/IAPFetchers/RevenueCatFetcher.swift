@@ -42,7 +42,7 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
     
     // MARK: - Lifecycle
     
-    func activate(apiKey: String, placementName: String, entitlementId: String) {
+    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         self.placementId = placementName
         self.entitlementId = entitlementId
 
@@ -56,6 +56,9 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
         Purchases.configure(withAPIKey: apiKey)
 
         logger?.log("RevenueCat activated with placement: \(placementName), entitlement: \(entitlementId)")
+
+        // RevenueCat configure is synchronous, so we can immediately return success
+        completion?(.success(()))
     }
     
     func setPlacement(_ placementName: String) {
@@ -73,10 +76,13 @@ final class RevenueCatFetcher: NSObject, IAPFetcherProtocol {
         Purchases.shared.logOut { _, _ in }
     }
     
-    func identify(_ userID: String) {
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         Purchases.shared.logIn(userID) { [weak self] _, _, error in
             if let error = error {
                 self?.logger?.logError(error, context: "RevenueCat identify")
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
             }
         }
     }

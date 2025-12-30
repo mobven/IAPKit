@@ -60,25 +60,25 @@ final class IAPProductFetcher {
     // MARK: - Activation
 
     /// Activate with Adapty as primary fetcher
-    func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium")
+    func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium", completion: completion)
     }
 
     /// Activate with Adapty as primary fetcher with custom entitlement
-    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String) {
+    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let adaptyFetcher = AdaptyFetcher()
         adaptyFetcher.logger = logger
-        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId)
+        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId, completion: completion)
         primaryFetcher = adaptyFetcher
     }
 
     /// Activate with RevenueCat as primary fetcher
-    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String) {
+    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let revenueCatFetcher = RevenueCatFetcher()
         revenueCatFetcher.logger = logger
         revenueCatFetcher.onLivePaywallPurchase = onLivePaywallPurchase
         revenueCatFetcher.onLivePaywallFailure = onLivePaywallFailure
-        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId)
+        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId, completion: completion)
         primaryFetcher = revenueCatFetcher
     }
 
@@ -242,8 +242,8 @@ final class IAPProductFetcher {
         primaryFetcher?.logout()
     }
 
-    func identify(_ userID: String) {
-        primaryFetcher?.identify(userID)
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        primaryFetcher?.identify(userID, completion: completion)
     }
 
     // MARK: - Attribution

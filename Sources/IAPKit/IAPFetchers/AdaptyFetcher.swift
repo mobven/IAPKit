@@ -27,13 +27,16 @@ final class AdaptyFetcher: NSObject, IAPFetcherProtocol {
 
     // MARK: - Lifecycle
     
-    func activate(apiKey: String, placementName: String, entitlementId: String) {
+    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         self.placementName = placementName
         self.entitlementId = entitlementId
         
         Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
             }
         }
     }
@@ -206,8 +209,15 @@ final class AdaptyFetcher: NSObject, IAPFetcherProtocol {
         Adapty.logout()
     }
 
-    func identify(_ userID: String) {
-        Adapty.identify(userID)
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        Adapty.identify(userID) { [weak self] error in
+            if let error = error {
+                self?.logger?.logError(error, context: "Adapty Identify")
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
+            }
+        }
     }
 
     func setPlayerId(_ playerId: String?) {

@@ -80,26 +80,29 @@ public final class IAPKit: NSObject {
     /// - Parameters:
     ///   - apiKey: Adapty API key
     ///   - paywallName: Adapty placement name
-    public func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, completion: completion)
     }
-    
+
     /// Activate IAPKit with Adapty provider and custom entitlement ID
     /// - Parameters:
     ///   - apiKey: Adapty API key
     ///   - paywallName: Adapty placement name
     ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId)
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, completion: completion)
     }
-    
+
     /// Activate IAPKit with RevenueCat provider
     /// - Parameters:
     ///   - apiKey: RevenueCat public API key
     ///   - offeringId: The offering identifier to use (empty string for current offering)
     ///   - entitlementId: The entitlement ID to check for premium status
-    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String) {
-        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId)
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, completion: completion)
     }
     
     /// Set the placement (Adapty) or offering ID (RevenueCat)
@@ -111,8 +114,8 @@ public final class IAPKit: NSObject {
         productFetcher.logout()
     }
 
-    public func identify(_ userID: String) {
-        productFetcher.identify(userID)
+    public func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.identify(userID, completion: completion)
     }
 
     public func setPlayerId(_ playerId: String?) {

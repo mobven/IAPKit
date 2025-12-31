@@ -109,40 +109,42 @@ final class IAPProductFetcher {
             return
         }
 
-        // Thread-safe state management using serial queue
+        // Thread-safe state management
         let stateQueue = DispatchQueue(label: "com.iapkit.fetchstate")
-        var isPrimaryTimedOut = false
-        var isPrimaryCompleted = false
-        var timeoutTimer: Timer?
+        var hasCompleted = false
 
-        // Start timeout timer on main thread
-        DispatchQueue.main.async { [weak self] in
+        // Use DispatchWorkItem for cancellable timeout
+        let timeoutWorkItem = DispatchWorkItem { [weak self] in
             guard let self = self else { return }
-            timeoutTimer = Timer.scheduledTimer(withTimeInterval: self.timeout, repeats: false) { [weak self] _ in
-                guard let self = self else { return }
-                stateQueue.sync {
-                    guard !isPrimaryCompleted else { return }
-                    isPrimaryTimedOut = true
-                }
+
+            var shouldFallback = false
+            stateQueue.sync {
+                guard !hasCompleted else { return }
+                hasCompleted = true
+                shouldFallback = true
+            }
+
+            if shouldFallback {
                 self.logger?.log("Primary fetcher timed out, falling back to StoreKit")
                 self.fallbackFetcher.fetch(completion: completion)
             }
         }
 
+        // Schedule timeout on main queue
+        DispatchQueue.main.asyncAfter(deadline: .now() + timeout, execute: timeoutWorkItem)
+
         // Fetch from primary
         primaryFetcher.fetch { result in
             var shouldComplete = false
             stateQueue.sync {
-                guard !isPrimaryTimedOut else { return }
-                isPrimaryCompleted = true
+                guard !hasCompleted else { return }
+                hasCompleted = true
                 shouldComplete = true
             }
 
             if shouldComplete {
-                // Invalidate timer on main thread since it was created there
-                DispatchQueue.main.async {
-                    timeoutTimer?.invalidate()
-                }
+                // Cancel timeout work item
+                timeoutWorkItem.cancel()
                 completion(result)
             }
         }
@@ -150,7 +152,11 @@ final class IAPProductFetcher {
 
     /// Fetch paywall/offering name
     func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
-        primaryFetcher?.fetchPaywall { result in
+        guard let primaryFetcher = primaryFetcher else {
+            completion(nil)
+            return
+        }
+        primaryFetcher.fetchPaywall { result in
             switch result {
             case let .success(name):
                 completion(name)

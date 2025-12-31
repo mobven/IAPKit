@@ -162,6 +162,7 @@ final class IAPProductFetcher {
                 completion(name)
             case let .failure(error):
                 completion(error.localizedDescription)
+                // TODO: IAPKit hatalarını özel bir Error tipinde döndürebiliriz.
             }
         }
     }
@@ -274,6 +275,7 @@ final class IAPProductFetcher {
     @available(iOS 15.0, *)
     func getPaywallView(completion: @escaping (AnyView?) -> Void) {
         guard let paywallProvider = primaryFetcher as? PaywallProvidable else {
+            // TODO: sadece revenuecat ile çalışıyor hatası verilebilir. aşağıda da aynı şekilde. 
             completion(nil)
             return
         }

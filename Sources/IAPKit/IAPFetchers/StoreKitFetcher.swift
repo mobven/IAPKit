@@ -1,8 +1,9 @@
 //
 //  StoreKitFetcher.swift
-//  Rink
+//  IAPKit
 //
 //  Created by Rashid Ramazanov on 23.01.2024.
+//  Refactored to IAPFetcherProtocol on 22.12.2024.
 //
 
 import Foundation
@@ -12,7 +13,16 @@ enum StoreError: Error {
     case failedVerification
 }
 
-final class StoreKitFetcher: NSObject, IAPProductFetchable {
+/// StoreKit implementation of ProductFetchable (used as fallback)
+/// This fetcher only conforms to ProductFetchable, not ManagedIAPProvider,
+/// because StoreKit doesn't support activation, user management, or placements
+final class StoreKitFetcher: NSObject, ProductFetchable {
+
+    // MARK: - Properties
+
+    var fetcherType: IAPFetcherType { .storeKit }
+    weak var logger: IAPKitLoggable?
+
     // swiftlint:disable implicitly_unwrapped_optional
     var request: SKProductsRequest!
     // swiftlint:enable implicitly_unwrapped_optional
@@ -25,6 +35,8 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
             MonthlyProduct.productIdentifier,
         ]
     )
+
+    // MARK: - Products
 
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         if #available(iOS 15, *) {
@@ -40,10 +52,10 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
             request.start()
         }
     }
+    
+    // MARK: - Profile
 
-    @available(
-        *, unavailable, message: "Not implemented or used currently! Would be alternative to Adapty to give timeout"
-    ) func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
+    func fetchProfile(completion: @escaping (Result<IAPProfile, Error>) -> Void) {
         if #available(iOS 15, *) {
             Task {
                 let products = try await Product.products(for: productIdentifiers)
@@ -65,37 +77,128 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             }
         } else {
-            // TODO: fallback?
+            // StoreKit 1 doesn't provide reliable subscription status
+            completion(.success(IAPProfile(isSubscribed: false, expireDate: nil)))
+        }
+    }
+    
+    // MARK: - Purchases
+
+    func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
+        if #available(iOS 15, *) {
+            // Use StoreKit 2 for purchases on iOS 15+
+            Task {
+                await buyWithStoreKit2(product: product, completion: completion)
+            }
+        } else {
+            // StoreKit 1 purchase requires more complex implementation with payment queue observer
+            // This is a fallback-only fetcher, so we recommend using Adapty or RevenueCat for purchases
+            let error = NSError(
+                domain: SKErrorDomain,
+                code: SKError.unknown.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: "StoreKit 1 direct purchases are not supported. Please configure Adapty or RevenueCat as your primary fetcher for purchase functionality."]
+            )
+            completion(.failure(error))
+        }
+    }
+
+    @available(iOS 15, *)
+    private func buyWithStoreKit2(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) async {
+        do {
+            // Find the StoreKit 2 Product
+            let products = try await Product.products(for: [product.identifier])
+            guard let storeProduct = products.first else {
+                let error = NSError(
+                    domain: SKErrorDomain,
+                    code: SKError.invalidOfferIdentifier.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "Product not found: \(product.identifier)"]
+                )
+                completion(.failure(error))
+                return
+            }
+
+            // Attempt purchase
+            let result = try await storeProduct.purchase()
+
+            switch result {
+            case .success(let verification):
+                let transaction = try checkVerified(verification)
+
+                // Finish the transaction
+                await transaction.finish()
+
+                let subscription = IAPSubscription(
+                    vendorTransactionId: String(transaction.id),
+                    activatedAt: transaction.purchaseDate,
+                    isInGracePeriod: false,
+                    activeIntroductoryOfferType: nil,
+                    vendorProductId: product.identifier,
+                    vendorOriginalTransactionId: String(transaction.originalID)
+                )
+
+                logger?.log("StoreKit 2 purchase successful: \(transaction.id)")
+                completion(.success(subscription))
+
+            case .userCancelled:
+                let error = NSError(
+                    domain: SKErrorDomain,
+                    code: SKError.paymentCancelled.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "Purchase cancelled by user"]
+                )
+                completion(.failure(error))
+
+            case .pending:
+                let error = NSError(
+                    domain: SKErrorDomain,
+                    code: SKError.unknown.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "Purchase is pending approval (e.g., Ask to Buy)"]
+                )
+                completion(.failure(error))
+
+            @unknown default:
+                let error = NSError(
+                    domain: SKErrorDomain,
+                    code: SKError.unknown.rawValue,
+                    userInfo: [NSLocalizedDescriptionKey: "Unknown purchase result"]
+                )
+                completion(.failure(error))
+            }
+        } catch StoreError.failedVerification {
+            let error = NSError(
+                domain: SKErrorDomain,
+                code: SKError.unknown.rawValue,
+                userInfo: [NSLocalizedDescriptionKey: "Transaction verification failed"]
+            )
+            logger?.logError(error, context: "StoreKit 2 purchase verification")
+            completion(.failure(error))
+        } catch {
+            logger?.logError(error, context: "StoreKit 2 purchase")
+            completion(.failure(error))
         }
     }
 
     func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
         if #available(iOS 15, *) {
             Task {
-                do {
-                    
-                    var hasActiveEntitlement = false
-                    for await result in Transaction.currentEntitlements {
-                        do {
-                            let transaction = try checkVerified(result)
-                            // If we have any verified entitlement, user has an active purchase
-                            hasActiveEntitlement = true
-                            await transaction.finish()
-                            break
-                        } catch {
-                            // Failed to verify this transaction, continue checking others
-                            continue
-                        }
+                var hasActiveEntitlement = false
+                for await result in Transaction.currentEntitlements {
+                    do {
+                        let transaction = try checkVerified(result)
+                        // If we have any verified entitlement, user has an active purchase
+                        hasActiveEntitlement = true
+                        await transaction.finish()
+                        break
+                    } catch {
+                        // Failed to verify this transaction, continue checking others
+                        continue
                     }
-                    completion(.success(hasActiveEntitlement))
-                } catch {
-                    completion(.failure(error))
                 }
+                completion(.success(hasActiveEntitlement))
             }
         } else {
             // For iOS 14 and earlier, StoreKit 1 doesn't provide a reliable way to check
             // subscription status without server-side receipt validation.
-            // We trigger restore but return false to let Adapty handle the actual verification
+            // We trigger restore but return false to let the main provider handle the actual verification
             SKPaymentQueue.default().restoreCompletedTransactions()
             completion(.success(false))
         }
@@ -112,12 +215,16 @@ final class StoreKitFetcher: NSObject, IAPProductFetchable {
     }
 }
 
+// MARK: - SKProductsRequestDelegate
+
 extension StoreKitFetcher: SKProductsRequestDelegate {
     func productsRequest(_: SKProductsRequest, didReceive response: SKProductsResponse) {
         let products = response.products.compactMap { IAPProduct(product: $0) }
         completion?(.success(IAPProducts(products: getSortedProducts(products))))
     }
 }
+
+// MARK: - Helpers
 
 extension StoreKitFetcher {
     func getSortedProducts(_ products: [IAPProduct]) -> [IAPProduct] {
@@ -131,14 +238,3 @@ extension StoreKitFetcher {
         }
     }
 }
-
-/*
- extension StoreKitFetcher: SKRequestDelegate {
-     func requestDidFinish(_ request: SKRequest) {
-         // TODO: restore purchases?
-     }
-     func request(_ request: SKRequest, didFailWithError error: Error) {
-         // TODO: fail to restore purchases
-     }
- }
- */

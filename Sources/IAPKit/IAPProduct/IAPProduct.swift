@@ -21,6 +21,12 @@ public class IAPProduct: IAPProductProtocol {
         self.product = product
     }
 
+    /// Creates a minimal product with only an identifier (used for live paywall callbacks)
+    public convenience init(identifier: String) {
+        self.init()
+        self.product = PlaceholderProduct(identifier: identifier)
+    }
+
     public var identifier: String { product.identifier }
     public func hasFreeTrial() -> Bool { product.hasFreeTrial() }
     public func isWeekly() -> Bool { product.isWeekly() }
@@ -41,6 +47,7 @@ public class IAPProduct: IAPProductProtocol {
     public var subscriptionPeriodUnitRawValue: UInt { product.subscriptionPeriodUnitRawValue }
     public var introductoryPricePaymentMode: UInt { product.introductoryPricePaymentMode }
     public var periodUnit: IAPPeriodUnit.PeriodUnit { product.periodUnit }
+    public var localizedPrice: String { product.localizedPrice }
 }
 
 extension IAPProduct: Equatable {
@@ -67,6 +74,7 @@ public protocol IAPProductProtocol {
     var subscriptionPeriodUnitRawValue: UInt { get }
     var introductoryPricePaymentMode: UInt { get }
     var periodUnit: IAPPeriodUnit.PeriodUnit { get }
+    var localizedPrice: String { get }
 }
 
 @available(iOS 15.0, *) extension Product: IAPProductProtocol {
@@ -199,6 +207,10 @@ public protocol IAPProductProtocol {
         default: .day
         }
     }
+
+    public var localizedPrice: String {
+        displayPrice
+    }
 }
 
 extension SKProduct: IAPProductProtocol {
@@ -316,4 +328,36 @@ extension SKProduct: IAPProductProtocol {
         default: .day
         }
     }
+
+    public var localizedPrice: String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .currency
+        formatter.locale = priceLocale
+        return formatter.string(from: price) ?? ""
+    }
+}
+
+// MARK: - Placeholder Product
+
+/// A minimal product implementation used when only the identifier is known
+struct PlaceholderProduct: IAPProductProtocol {
+    let identifier: String
+
+    func hasFreeTrial() -> Bool { false }
+    func isWeekly() -> Bool { false }
+    func isMonthly() -> Bool { false }
+    func is2Monthly() -> Bool { false }
+    func is3Monthly() -> Bool { false }
+    func is6Monthly() -> Bool { false }
+    func isYearly() -> Bool { false }
+    var subscriptionPeriodText: String { "" }
+    func weeklyPrice() -> Double? { nil }
+    var priceLocale: Locale { .current }
+    var units: Int? { nil }
+    var subsciptionPrice: NSDecimalNumber { 0 }
+    func subscriptionPeriodUnit(withWeekly weekly: String, monthly: String, yearly: String) -> String { "" }
+    var subscriptionPeriodUnitRawValue: UInt { 0 }
+    var introductoryPricePaymentMode: UInt { 0 }
+    var periodUnit: IAPPeriodUnit.PeriodUnit { .day }
+    var localizedPrice: String { "" }
 }

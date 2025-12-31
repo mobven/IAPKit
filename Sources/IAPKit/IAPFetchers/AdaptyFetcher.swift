@@ -1,28 +1,42 @@
 //
 //  AdaptyFetcher.swift
-//  Rink
+//  IAPKit
 //
 //  Created by Rashid Ramazanov on 23.01.2024.
+//  Refactored to IAPFetcherProtocol on 22.12.2024.
 //
 
 import Adapty
 import Foundation
+import StoreKit
 
-final class AdaptyFetcher: NSObject, IAPProductFetchable {
-    var products: [AdaptyPaywallProduct] = []
-
+/// Adapty implementation of ManagedIAPProvider
+final class AdaptyFetcher: NSObject, ManagedIAPProvider {
+    
+    // MARK: - Properties
+    
+    var fetcherType: IAPFetcherType { .adapty }
     weak var logger: IAPKitLoggable?
-
+    
+    var products: [AdaptyPaywallProduct] = []
     var placementName = ""
-
+    private var entitlementId: String = "premium"
+    
     private var isAdaptyFetchingProducts: Bool = false
     private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
 
-    func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        setPlacement(paywallName)
+    // MARK: - Lifecycle
+    
+    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        self.placementName = placementName
+        self.entitlementId = entitlementId
+        
         Adapty.activate(apiKey) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
             }
         }
     }
@@ -97,15 +111,16 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         }
     }
 
-    func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
+    func fetchProfile(completion: @escaping (Result<IAPProfile, Error>) -> Void) {
         Adapty.getProfile { [weak self] result in
+            guard let self = self else { return }
             switch result {
             case let .success(profile):
-                let isSubscribed = profile.isPremium
-                let expireDate = profile.subscriptions.first(where: { $0.value.isActive })?.value.expiresAt
+                let isSubscribed = profile.accessLevels[self.entitlementId]?.isActive ?? false
+                let expireDate = profile.accessLevels[self.entitlementId]?.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
-                self?.logger?.logError(error, context: self?.placementName)
+                self.logger?.logError(error, context: self.placementName)
                 completion(.failure(error))
             }
         }
@@ -116,7 +131,8 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             guard let self else { return }
             switch result {
             case let .success(profile):
-                if profile.isPremium {
+                let isPremium = profile.accessLevels[self.entitlementId]?.isActive ?? false
+                if isPremium {
                     completion(.success(true))
                 } else {
                     fetchProfile { result in
@@ -147,7 +163,11 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
             switch result {
             case let .success(info):
                 guard !info.isPurchaseCancelled else {
-                    let error = NSError(domain: "Cancelled payment by closing it", code: 404)
+                    let error = NSError(
+                        domain: SKErrorDomain,
+                        code: SKError.paymentCancelled.rawValue,
+                        userInfo: [NSLocalizedDescriptionKey: "Purchase cancelled by user"]
+                    )
                     self?.logger?.logError(error, context: self?.placementName)
                     completion(.failure(error))
                     return
@@ -189,8 +209,15 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
         Adapty.logout()
     }
 
-    func identify(_ userID: String) {
-        Adapty.identify(userID)
+    func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        Adapty.identify(userID) { [weak self] error in
+            if let error = error {
+                self?.logger?.logError(error, context: "Adapty Identify")
+                completion?(.failure(error))
+            } else {
+                completion?(.success(()))
+            }
+        }
     }
 
     func setPlayerId(_ playerId: String?) {
@@ -231,16 +258,5 @@ final class AdaptyFetcher: NSObject, IAPProductFetchable {
                 logger?.logError(error, context: "setAdjustDeviceId - Failed to send Adjust device ID")
             }
         }
-    }
-}
-
-public struct IAPProfile {
-    public let isSubscribed: Bool
-    public let expireDate: Date?
-}
-
-extension AdaptyProfile {
-    var isPremium: Bool {
-        accessLevels["premium"]?.isActive ?? false
     }
 }

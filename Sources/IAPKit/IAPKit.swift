@@ -8,6 +8,8 @@
 import RxRelay
 import RxSwift
 import StoreKit
+import SwiftUI
+import UIKit
 
 typealias ProductIdentifier = String
 
@@ -38,24 +40,72 @@ public final class IAPKit: NSObject {
 
     private var productFetcher = IAPProductFetcher()
 
-    public var adaptyTimeoutDuration: Int {
+    /// Timeout duration in seconds for primary fetcher before falling back to StoreKit
+    public var primaryTimeoutDuration: Int {
         get {
-            Int(productFetcher.adaptyTimeout)
+            Int(productFetcher.timeout)
         }
         set {
-            productFetcher.adaptyTimeout = TimeInterval(newValue)
+            productFetcher.timeout = TimeInterval(newValue)
         }
+    }
+
+    /// Backward compatibility alias for primaryTimeoutDuration
+    @available(*, deprecated, renamed: "primaryTimeoutDuration")
+    public var adaptyTimeoutDuration: Int {
+        get { primaryTimeoutDuration }
+        set { primaryTimeoutDuration = newValue }
     }
 
     override init() {
         skProducts = BehaviorRelay(value: productFetcher.defaultProducts)
         super.init()
+        setupLivePaywallCallbacks()
     }
 
-    public func activate(adaptyApiKey apiKey: String, paywallName: String) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName)
+    private func setupLivePaywallCallbacks() {
+        productFetcher.onLivePaywallPurchase = { [weak self] product, paywallId in
+            self?.delegate?.iapKitDidBuy(product: product, paywallId: paywallId)
+        }
+        productFetcher.onLivePaywallFailure = { [weak self] product, error in
+            if let product = product {
+                self?.delegate?.iapKitDidFailToBuy(product: product, withError: error)
+            }
+        }
+    }
+
+    // MARK: - Activation
+    
+    /// Activate IAPKit with Adapty provider (backward compatible)
+    /// - Parameters:
+    ///   - apiKey: Adapty API key
+    ///   - paywallName: Adapty placement name
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, completion: completion)
+    }
+
+    /// Activate IAPKit with Adapty provider and custom entitlement ID
+    /// - Parameters:
+    ///   - apiKey: Adapty API key
+    ///   - paywallName: Adapty placement name
+    ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, completion: completion)
+    }
+
+    /// Activate IAPKit with RevenueCat provider
+    /// - Parameters:
+    ///   - apiKey: RevenueCat public API key
+    ///   - offeringId: The offering identifier to use (empty string for current offering)
+    ///   - entitlementId: The entitlement ID to check for premium status
+    ///   - completion: Optional completion handler with success/failure result
+    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, completion: completion)
     }
     
+    /// Set the placement (Adapty) or offering ID (RevenueCat)
     public func setPlacement(_ placementName: String) {
         productFetcher.setPlacement(placementName)
     }
@@ -64,8 +114,8 @@ public final class IAPKit: NSObject {
         productFetcher.logout()
     }
 
-    public func identify(_ userID: String) {
-        productFetcher.identify(userID)
+    public func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.identify(userID, completion: completion)
     }
 
     public func setPlayerId(_ playerId: String?) {
@@ -90,6 +140,28 @@ public final class IAPKit: NSObject {
     
     public func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
         productFetcher.fetchPaywallName(completion: completion)
+    }
+
+    // MARK: - Paywall UI (RevenueCat only)
+
+    /// Returns a SwiftUI PaywallView for the current placement
+    /// Automatically fetches offerings if not already loaded
+    /// Only works when using RevenueCat as the IAP provider
+    /// - Parameter completion: Completion handler with the paywall view, or nil if not using RevenueCat
+    @available(iOS 15.0, *)
+    public func getPaywallView(completion: @escaping (AnyView?) -> Void) {
+        productFetcher.getPaywallView(completion: completion)
+    }
+
+    /// Returns a UIViewController for the paywall
+    /// Automatically fetches offerings if not already loaded
+    /// Only works when using RevenueCat as the IAP provider
+    /// - Parameters:
+    ///   - delegate: Optional PaywallViewControllerDelegate for handling events
+    ///   - completion: Completion handler with the view controller, or nil if not using RevenueCat
+    @available(iOS 15.0, *)
+    public func getPaywallViewController(delegate: Any? = nil, completion: @escaping (UIViewController?) -> Void) {
+        productFetcher.getPaywallViewController(delegate: delegate, completion: completion)
     }
 
     public static func getReceiptToken() -> String? {

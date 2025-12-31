@@ -18,16 +18,6 @@ public enum IAPKitAPI {
         return url
     }
 
-    static func getWSURL(withPath path: String) -> URL {
-        guard let baseURL = Bundle.main.stringFromInfoPlist("BACKEND_URL")?.replacingOccurrences(of: "https", with: "wss") else {
-            fatalError("Could not init url")
-        }
-        guard let url = URL(string: "\(baseURL)\(path)") else {
-            fatalError("Could not prepare url")
-        }
-        return url
-    }
-    
     static func getCertificatePaths() -> [String] {
         var paths: [String] = []
         for certificate in certificateNames {

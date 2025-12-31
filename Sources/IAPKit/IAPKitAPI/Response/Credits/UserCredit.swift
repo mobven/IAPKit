@@ -10,7 +10,6 @@ import Foundation
 // MARK: - Type Aliases
 
 public typealias GetCreditsResponse = UserCredit
-public typealias PurchaseCreditsResponse = UserCredit
 
 public struct UserCredit: Codable, Sendable {
     public let giftCoins: Int

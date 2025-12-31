@@ -8,23 +8,23 @@
 import Foundation
 
 public struct CreditPackage: Identifiable, Equatable {
-    let id: String
-    let productId: String
-    let creditAmount: Int
-    let localizedPrice: String
+    public let id: String
+    public let productId: String
+    public let creditAmount: Int
+    public let localizedPrice: String
 
-    var creditAmountTitle: String {
+    public var creditAmountTitle: String {
         "\(creditAmount) Credits"
     }
 
-    init(from product: CreditProduct, localizedPrice: String) {
+    public init(from product: CreditProduct, localizedPrice: String) {
         id = product.productId
         productId = product.productId
         creditAmount = product.coins
         self.localizedPrice = localizedPrice
     }
 
-    init(id: String, productId: String, creditAmount: Int, localizedPrice: String) {
+    public init(id: String, productId: String, creditAmount: Int, localizedPrice: String) {
         self.id = id
         self.productId = productId
         self.creditAmount = creditAmount

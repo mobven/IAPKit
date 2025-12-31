@@ -16,6 +16,75 @@ IAPKit provides a unified interface for managing in-app purchases across differe
 - 📊 **Flexible Logging**: Pluggable logging system with real-world logger support
 - ✅ **Receipt Validation**: Built-in receipt verification
 
+## Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                           YOUR APP                              │
+│                                                                 │
+│  IAPKit.store.activate(...)  .buy(...)  .verify(...)  .fetch() │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                                 ▼
+┌─────────────────────────────────────────────────────────────────┐
+│                      IAPProductFetcher                          │
+│                        (Coordinator)                            │
+│                                                                 │
+│  • Timeout management (default: 5s)                             │
+│  • Primary/Fallback orchestration                               │
+│  • Thread-safe state management                                 │
+└────────────────────────────────┬────────────────────────────────┘
+                                 │
+                ┌────────────────┴────────────────┐
+                │                                 │
+                ▼                                 ▼
+┌───────────────────────────┐     ┌───────────────────────────┐
+│     PRIMARY FETCHER       │     │    FALLBACK FETCHER       │
+│   (ManagedIAPProvider)    │     │   (ProductFetchable)      │
+│                           │     │                           │
+│  ┌─────────────────────┐  │     │  ┌─────────────────────┐  │
+│  │   AdaptyFetcher     │  │     │  │  StoreKitFetcher    │  │
+│  │   • Paywall fetch   │  │     │  │  • Native StoreKit  │  │
+│  │   • User identify   │  │     │  │  • SK1 / SK2        │  │
+│  │   • Attribution     │  │     │  │  • Always available │  │
+│  └─────────────────────┘  │     │  └─────────────────────┘  │
+│          OR               │     │                           │
+│  ┌─────────────────────┐  │     └───────────────────────────┘
+│  │ RevenueCatFetcher   │  │
+│  │ • Offerings         │  │
+│  │ • Live Paywall UI   │  │
+│  │ • User identify     │  │
+│  └─────────────────────┘  │
+└───────────────────────────┘
+```
+
+### Protocol Hierarchy
+
+```
+ProductFetchable (Base)
+├── fetch(), buy(), restorePurchases(), fetchProfile()
+│
+├── StoreKitFetcher (implements only this)
+│
+└── ManagedIAPProvider (extends ProductFetchable)
+    ├── activate(), logout(), identify()
+    ├── setPlacement(), fetchPaywall()
+    ├── setPlayerId(), setFirebaseId(), setAdjustDeviceId()
+    │
+    ├── AdaptyFetcher
+    └── RevenueCatFetcher
+            └── + PaywallProvidable (iOS 15+)
+                  getPaywallView(), getPaywallViewController()
+```
+
+### Timeout Flow
+
+When `fetch()` is called:
+1. Primary fetcher starts fetching
+2. Timeout timer starts (default: 5 seconds)
+3. **If primary responds first** → Cancel timer, return primary results
+4. **If timeout fires first** → Fallback to StoreKit, return StoreKit results
+
 ## Installation
 
 ### Swift Package Manager

@@ -7,21 +7,30 @@
 
 import Foundation
 import MBAsyncNetworking
-import OSLog
 
-@available(iOS 14.0, *)
-let logger = Logger(subsystem: "API", category: "API Logs")
-
-final class NetworkMonitor: NetworkLogsDelegate {
-    func didReceiveError(request: URLRequest, error: Error?, log: String) {
+final class NetworkMonitor: NetworkLogsDelegate, IAPKitLoggable {
+    func logError(_ error: Error, context: String?) {
         #if DEBUG
-        printLog(getRequestLog(request) + "\n" + (error?.localizedDescription ?? ""), level: .error)
+        let message = context != nil ? "\(context!): \(error.localizedDescription)" : error.localizedDescription
+        log(message)
         #endif
     }
 
-    func didReceiveResponse(request: URLRequest, data: Data?, log: String) {
+    @available(iOS 15.0, *)
+    func logTransaction(_ transaction: IAPKitTransaction) {
+        // Not needed for network logs
+    }
+    func didReceiveError(request: URLRequest, error: Error?, log logMessage: String) {
         #if DEBUG
-        printLog(getRequestLog(request) + "\n" + getResponseLog(data))
+        let message = getRequestLog(request) + "\n" + (error?.localizedDescription ?? "")
+        self.log("[ERROR] \(message)")
+        #endif
+    }
+
+    func didReceiveResponse(request: URLRequest, data: Data?, log logMessage: String) {
+        #if DEBUG
+        let message = getRequestLog(request) + "\n" + getResponseLog(data)
+        self.log(message)
         #endif
     }
 
@@ -42,14 +51,6 @@ final class NetworkMonitor: NetworkLogsDelegate {
         log.append("Response Body: ")
         log.append(getStringFrom(data))
         return log
-    }
-
-    func printLog(_ log: String, level: OSLogType = .info) {
-        if #available(iOS 14.0, *) {
-            logger.log(level: level, "\(log)")
-        } else {
-            print(log)
-        }
     }
 
     private func getStringFrom(_ data: Data?) -> String {

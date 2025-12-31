@@ -16,7 +16,9 @@ final class IAPUserStorage: NetworkingStorable {
         static let accessToken = "iapkit_accessToken"
         static let refreshToken = "iapkit_refreshToken"
         static let userInfo = "userInfo"
-        static var deviceId: String = "iapkit_deviceId"
+        static var deviceId: String {
+            "iapkit_" + (Bundle.main.stringFromInfoPlist("KEYCHAIN_DEVICE_KEY") ?? "device_id")
+        }
     }
 
     var accessToken: String? {

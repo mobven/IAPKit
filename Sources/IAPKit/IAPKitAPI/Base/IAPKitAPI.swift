@@ -27,4 +27,21 @@ public enum IAPKitAPI {
         }
         return url
     }
+    
+    static func getCertificatePaths() -> [String] {
+        var paths: [String] = []
+        for certificate in certificateNames {
+            guard let path = Bundle.main.path(forResource: certificate, ofType: "der") else {
+                fatalError("Could not find certificate file in the bundle!")
+            }
+            paths.append(path)
+        }
+        return paths
+    }
+
+    static var certificateNames: [String] {
+        // TODO: sertifika eklenecek
+        let certificates = (Bundle.main.stringFromInfoPlist("SSL_CERTIFICATE_NAMES") ?? "").components(separatedBy: ",")
+        return certificates
+    }
 }

@@ -10,9 +10,9 @@ import MBAsyncNetworking
 import UIKit
 
 struct NetworkingStorage: NetworkingStorable {
-    static let accessTokenKey = "accessToken"
-    static let refreshTokenKey = "refreshToken"
-    static let deviceIdKey = "deviceId"
+    static let accessTokenKey = "iapkit_accessToken"
+    static let refreshTokenKey = "iapkit_refreshToken"
+    static let deviceIdKey = "iapkit_deviceId"
 
     let keychain: KeychainHelper
 

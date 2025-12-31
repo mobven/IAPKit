@@ -36,7 +36,7 @@ extension NetworkingConfigs: OAuthProviderDelegate {
 
         for attempt in 0 ..< maxRetryCount {
             do {
-                let response: GetRefreshTokenResponse = try await API.Users.refresh(refreshToken: refreshToken)
+                let response: GetRefreshTokenResponse = try await IAP.Users.refresh(refreshToken: refreshToken)
                     .fetchResponse(hasAuthentication: false)
 
                 return OAuthResponse(

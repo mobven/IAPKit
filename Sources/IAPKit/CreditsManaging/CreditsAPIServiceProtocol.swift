@@ -16,19 +16,19 @@ public protocol CreditsAPIServiceProtocol: Sendable {
 
 public struct CreditsAPIService: CreditsAPIServiceProtocol {
     public func claimGiftCoins() async throws -> ClaimGiftCoinsResponse {
-        try await API.Credits.claimGiftCoins.fetchResponse()
+        try await IAPKitAPI.Credits.claimGiftCoins.fetchResponse()
     }
 
     public func getCredits() async throws -> GetCreditsResponse {
-        try await API.Credits.getCredits.fetchResponse()
+        try await IAPKitAPI.Credits.getCredits.fetchResponse()
     }
 
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
-        try await API.Credits.getProducts.fetchResponse()
+        try await IAPKitAPI.Credits.getProducts.fetchResponse()
     }
 
     public func purchaseCredits(productId: String) async throws -> PurchaseCreditsResponse {
         let request = PurchaseCreditRequest(productId: productId)
-        return try await API.Credits.purchase(request: request).fetchResponse()
+        return try await IAPKitAPI.Credits.purchase(request: request).fetchResponse()
     }
 }

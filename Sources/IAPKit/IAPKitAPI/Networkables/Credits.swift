@@ -8,7 +8,7 @@
 import Foundation
 import MBAsyncNetworking
 
-public extension API {
+public extension IAPKitAPI {
     enum Credits: AsyncNetworkable {
         case claimGiftCoins
         case getCredits
@@ -19,23 +19,23 @@ public extension API {
             switch self {
             case .claimGiftCoins:
                 await getRequest(
-                    url: API.getURL(withPath: "v1/users/me/claimGiftCoins"),
+                    url: IAPKitAPI.getURL(withPath: "v1/users/me/claimGiftCoins"),
                     httpMethod: .get
                 )
             case .getCredits:
                 await getRequest(
-                    url: API.getURL(withPath: "v1/users/me/credits"),
+                    url: IAPKitAPI.getURL(withPath: "v1/users/me/credits"),
                     httpMethod: .get
                 )
             case .getProducts:
                 await getRequest(
-                    url: API.getURL(withPath: "v1/users/me/creditProducts"),
+                    url: IAPKitAPI.getURL(withPath: "v1/users/me/creditProducts"),
                     httpMethod: .get
                 )
             case let .purchase(request):
                 await getRequest(
                     body: request,
-                    url: API.getURL(withPath: "v1/me/creditPurchase"),
+                    url: IAPKitAPI.getURL(withPath: "v1/me/creditPurchase"),
                     httpMethod: .post
                 )
             }

@@ -7,7 +7,7 @@
 
 import Foundation
 
-public enum API {
+public enum IAPKitAPI {
     static func getURL(withPath path: String) -> URL {
         guard let baseURL = Bundle.main.infoForKey("BACKEND_URL") else {
             fatalError("Could not init url")

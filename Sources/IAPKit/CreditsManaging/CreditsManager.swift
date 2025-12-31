@@ -24,7 +24,7 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
 
     private let creditsService: CreditsAPIServiceProtocol
 
-    init(creditsService: CreditsAPIServiceProtocol = CreditsAPIService()) {
+    public init(creditsService: CreditsAPIServiceProtocol = CreditsAPIService()) {
         self.creditsService = creditsService
     }
 

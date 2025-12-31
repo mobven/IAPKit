@@ -17,5 +17,12 @@ public extension NetworkingConfigs {
             case .production: true
             }
         }
+
+        var baseURL: String {
+            switch self {
+            case .development: "https://dev-api.example.com"
+            case .production: "https://api.example.com"
+            }
+        }
     }
 }

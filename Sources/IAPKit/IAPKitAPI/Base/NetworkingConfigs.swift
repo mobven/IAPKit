@@ -10,6 +10,8 @@ import MBAsyncNetworking
 import MobKitCore
 
 public final class NetworkingConfigs {
+    public static let shared = NetworkingConfigs()
+
     let networkMonitor = NetworkMonitor()
     var baseDelay: UInt64
     var maxRetryCount: Int

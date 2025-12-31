@@ -12,7 +12,9 @@ import UIKit
 struct NetworkingStorage: NetworkingStorable {
     static let accessTokenKey = "iapkit_accessToken"
     static let refreshTokenKey = "iapkit_refreshToken"
-    static let deviceIdKey = "iapkit_deviceId"
+    static var deviceIdKey: String {
+        "iapkit_" + (Bundle.main.stringFromInfoPlist("KEYCHAIN_DEVICE_KEY") ?? "device_id")
+    }
 
     let keychain: KeychainHelper
 

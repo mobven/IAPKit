@@ -10,7 +10,7 @@ import Foundation
 import MBAsyncNetworking
 
 public extension AsyncNetworkable {
-    func fetchResponse<T: Decodable>(
+    func getResponse<T: Decodable>(
         hasAuthentication: Bool = true,
         isRefreshToken: Bool = false
     ) async throws -> T {

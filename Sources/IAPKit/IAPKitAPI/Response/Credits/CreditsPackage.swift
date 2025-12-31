@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct CreditPackage: Identifiable, Equatable {
+public struct CreditPackage: Identifiable, Equatable {
     let id: String
     let productId: String
     let creditAmount: Int

@@ -15,6 +15,8 @@ public protocol CreditsAPIServiceProtocol: Sendable {
 }
 
 public struct CreditsAPIService: CreditsAPIServiceProtocol {
+    public init() {}
+
     public func claimGiftCoins() async throws -> ClaimGiftCoinsResponse {
         try await IAPKitAPI.Credits.claimGiftCoins.getResponse()
     }

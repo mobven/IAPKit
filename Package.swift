@@ -17,6 +17,7 @@ let package = Package(
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
         .package(url: "https://github.com/mobven/MobKitCore.git", from: "1.0.1"),
         .package(url: "https://github.com/mobven/MBAsyncNetworking.git", from: "0.1.3"),
+        .package(url: "https://github.com/RevenueCat/purchases-ios-spm.git", from: "5.50.0"),
     ],
     targets: [
         .target(
@@ -26,7 +27,9 @@ let package = Package(
                 .product(name: "RxSwift", package: "RxSwift"),
                 .product(name: "RxRelay", package: "RxSwift"),
                 .product(name: "MobKitCore", package: "MobKitCore"),
-                .product(name: "MBAsyncNetworking", package: "MBAsyncNetworking")
+                .product(name: "MBAsyncNetworking", package: "MBAsyncNetworking"),
+                .product(name: "RevenueCat", package: "purchases-ios-spm"),
+                .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
             ]
         ),
         .testTarget(

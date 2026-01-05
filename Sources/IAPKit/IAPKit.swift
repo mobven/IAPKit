@@ -83,7 +83,14 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId, completion: completion)
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId) { [weak self] result in
+            completion?(result)
+            if case .success = result {
+                Task {
+                    await self?.performBackendLogin()
+                }
+            }
+        }
     }
 
     /// Activate IAPKit with Adapty provider and custom entitlement ID
@@ -94,7 +101,14 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
+            completion?(result)
+            if case .success = result {
+                Task {
+                    await self?.performBackendLogin()
+                }
+            }
+        }
     }
 
     /// Activate IAPKit with RevenueCat provider
@@ -105,7 +119,40 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
+            completion?(result)
+            if case .success = result {
+                Task {
+                    await self?.performBackendLogin()
+                }
+            }
+        }
+    }
+
+    private func performBackendLogin() async {
+        guard !IAPUser.current.isAuthenticated else {
+            logger?.log("IAPKit: Already authenticated, skipping login")
+            return
+        }
+
+        let deviceId = await UIDevice.current.identifierForVendor?.uuidString
+        let deviceName = await UIDevice.current.name
+
+        let loginRequest = LoginRequest(
+            identityToken: nil,
+            nameSurname: nil,
+            deviceId: deviceId,
+            deviceName: deviceName,
+            platform: "iOS"
+        )
+
+        do {
+            let response: RefreshTokenResponse = try await IAPKitAPI.Auth.login(request: loginRequest).fetch(hasAuthentication: false)
+            IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
+            logger?.log("IAPKit: Backend authentication successful")
+        } catch {
+            logger?.log("IAPKit: Backend authentication failed: \(error.localizedDescription)")
+        }
     }
     
     /// Set the placement (Adapty) or offering ID (RevenueCat)

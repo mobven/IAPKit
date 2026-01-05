@@ -144,7 +144,13 @@ public final class IAPKit: NSObject {
 
         do {
             let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetch(hasAuthentication: false)
-            IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
+
+            guard let body = response.body else {
+                logger?.log("IAPKit: Backend authentication failed - empty response body")
+                return
+            }
+
+            IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
             logger?.log("IAPKit: Backend authentication successful")
         } catch {
             logger?.log("IAPKit: Backend authentication failed: \(error.localizedDescription)")

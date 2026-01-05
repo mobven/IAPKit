@@ -21,9 +21,9 @@ public extension AsyncNetworkable {
             if let value = response.body {
                 return value
             } else {
-                if T.self is EmptyModel.Type {
+                if T.self is IAPKitEmptyModel.Type {
                     // swiftlint:disable force_cast
-                    return EmptyModel() as! T
+                    return IAPKitEmptyModel() as! T
                     // swiftlint:enable force_cast
                 } else {
                     throw NSError.generic

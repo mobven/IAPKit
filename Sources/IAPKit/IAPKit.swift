@@ -83,13 +83,9 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId) { [weak self] result in
-            completion?(result)
-            if case .success = result {
-                Task {
-                    await self?.performBackendLogin(appId: appId)
-                }
-            }
+            self?.registerApp(result: result, appId: appId, completion: completion)
         }
     }
 
@@ -101,13 +97,9 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            completion?(result)
-            if case .success = result {
-                Task {
-                    await self?.performBackendLogin(appId: appId)
-                }
-            }
+            self?.registerApp(result: result, appId: appId, completion: completion)
         }
     }
 
@@ -119,12 +111,25 @@ public final class IAPKit: NSObject {
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        setupNetworking()
         productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            completion?(result)
-            if case .success = result {
-                Task {
-                    await self?.performBackendLogin(appId: appId)
-                }
+            self?.registerApp(result: result, appId: appId, completion: completion)
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func setupNetworking() {
+        Task { @MainActor in
+            NetworkingConfigs.shared.setup()
+        }
+    }
+
+    private func registerApp(result: Result<Void, Error>, appId: String, completion: ((Result<Void, Error>) -> Void)?) {
+        completion?(result)
+        if case .success = result {
+            Task {
+                await performBackendLogin(appId: appId)
             }
         }
     }

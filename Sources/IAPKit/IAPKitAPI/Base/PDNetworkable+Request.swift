@@ -47,7 +47,7 @@ public extension AsyncNetworkable {
         queryItems: [String: String] = [:],
         headers: [String: String] = [:],
         url: URL,
-        httpMethod: RequestMethod = .get,
+        httpMethod: RequestMethod = .post,
         addBearerToken: Bool = true
     ) async -> URLRequest {
         var request = URLRequest(url: url.adding(parameters: queryItems))
@@ -56,7 +56,7 @@ public extension AsyncNetworkable {
         allHeaders["Content-Type"] = "application/json"
 
         // Use IAPKit's own token instead of UserSession
-        if addBearerToken, let token = IAPUser.current.accessToken {
+        if addBearerToken, let token = IAPUser.current.refreshToken {
             allHeaders["Authorization"] = "Bearer \(token)"
         }
 

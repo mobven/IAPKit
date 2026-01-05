@@ -1,0 +1,33 @@
+//
+//  IAP.swift
+//  IAPKit
+//
+//  //  Created by Cansu Özdizlekli on 5.01.2026.
+//
+
+import Foundation
+import MBAsyncNetworking
+
+public extension IAPKitAPI {
+    enum IAP: AsyncNetworkable {
+        case buy(request: ReceiptValidationRequest)
+        case restore(request: ReceiptValidationRequest)
+
+        public func request() async -> URLRequest {
+            switch self {
+            case let .buy(request):
+                await getRequest(
+                    body: request,
+                    url: IAPKitAPI.getURL(withPath: "api/v1/iap/adapty/buy"),
+                    httpMethod: .post
+                )
+            case let .restore(request):
+                await getRequest(
+                    body: request,
+                    url: IAPKitAPI.getURL(withPath: "api/v1/iap/adapty/restore"),
+                    httpMethod: .post
+                )
+            }
+        }
+    }
+}

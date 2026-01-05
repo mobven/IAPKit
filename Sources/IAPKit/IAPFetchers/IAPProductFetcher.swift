@@ -63,25 +63,25 @@ final class IAPProductFetcher {
     // MARK: - Activation
 
     /// Activate with Adapty as primary fetcher
-    func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium", completion: completion)
+    func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium", customerUserId: customerUserId, completion: completion)
     }
 
     /// Activate with Adapty as primary fetcher with custom entitlement
-    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let adaptyFetcher = AdaptyFetcher()
         adaptyFetcher.logger = logger
-        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId, completion: completion)
+        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
         primaryFetcher = adaptyFetcher
     }
 
     /// Activate with RevenueCat as primary fetcher
-    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
         let revenueCatFetcher = RevenueCatFetcher()
         revenueCatFetcher.logger = logger
         revenueCatFetcher.onLivePaywallPurchase = onLivePaywallPurchase
         revenueCatFetcher.onLivePaywallFailure = onLivePaywallFailure
-        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId, completion: completion)
+        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
         primaryFetcher = revenueCatFetcher
     }
 

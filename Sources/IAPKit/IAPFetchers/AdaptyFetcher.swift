@@ -27,11 +27,11 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
 
     // MARK: - Lifecycle
     
-    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(apiKey: String, placementName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
         self.placementName = placementName
         self.entitlementId = entitlementId
         
-        Adapty.activate(apiKey) { [weak self] result in
+        Adapty.activate(apiKey, customerUserId: customerUserId) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
                 completion?(.failure(error))

@@ -42,7 +42,7 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
     
     // MARK: - Lifecycle
     
-    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(apiKey: String, placementName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
         self.placementId = placementName
         self.entitlementId = entitlementId
 
@@ -57,8 +57,13 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
 
         logger?.log("RevenueCat activated with placement: \(placementName), entitlement: \(entitlementId)")
 
-        // RevenueCat configure is synchronous, so we can immediately return success
-        completion?(.success(()))
+        // If customerUserId is provided, identify the user
+        if let customerUserId = customerUserId, !customerUserId.isEmpty {
+            identify(customerUserId, completion: completion)
+        } else {
+            // RevenueCat configure is synchronous, so we can immediately return success
+            completion?(.success(()))
+        }
     }
     
     func setPlacement(_ placementName: String) {

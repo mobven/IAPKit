@@ -80,9 +80,10 @@ public final class IAPKit: NSObject {
     /// - Parameters:
     ///   - apiKey: Adapty API key
     ///   - paywallName: Adapty placement name
+    ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, completion: completion)
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId, completion: completion)
     }
 
     /// Activate IAPKit with Adapty provider and custom entitlement ID
@@ -90,9 +91,10 @@ public final class IAPKit: NSObject {
     ///   - apiKey: Adapty API key
     ///   - paywallName: Adapty placement name
     ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
+    ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, completion: completion)
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
     }
 
     /// Activate IAPKit with RevenueCat provider
@@ -100,9 +102,10 @@ public final class IAPKit: NSObject {
     ///   - apiKey: RevenueCat public API key
     ///   - offeringId: The offering identifier to use (empty string for current offering)
     ///   - entitlementId: The entitlement ID to check for premium status
+    ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, completion: completion)
+    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId, completion: completion)
     }
     
     /// Set the placement (Adapty) or offering ID (RevenueCat)

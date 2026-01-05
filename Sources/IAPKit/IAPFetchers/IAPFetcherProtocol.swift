@@ -58,8 +58,9 @@ public protocol ManagedIAPProvider: ProductFetchable {
     ///   - apiKey: The API key for the provider
     ///   - placementName: The placement ID used to fetch the appropriate offering
     ///   - entitlementId: The entitlement identifier to check for premium status
+    ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)?)
+    func activate(apiKey: String, placementName: String, entitlementId: String, customerUserId: String?, completion: ((Result<Void, Error>) -> Void)?)
 
     /// Log out the current user
     func logout()

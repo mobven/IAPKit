@@ -17,7 +17,7 @@ public extension IAPKitAPI {
             switch self {
             case let .refresh(refreshToken):
                 var request = await getRequest(
-                    url: IAPKitAPI.getURL(withPath: "v1/users/refresh"),
+                    url: IAPKitAPI.getURL(withPath: "api/v1/users/refresh"),
                     addBearerToken: false
                 )
                 if request.allHTTPHeaderFields == nil {
@@ -31,7 +31,7 @@ public extension IAPKitAPI {
             case let .register(request):
                 return await getRequest(
                     body: request,
-                    url: IAPKitAPI.getURL(withPath: "v1/users/register"),
+                    url: IAPKitAPI.getURL(withPath: "api/v1/users/register"),
                     httpMethod: .post,
                     addBearerToken: false
                 )

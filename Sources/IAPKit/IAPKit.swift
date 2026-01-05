@@ -143,7 +143,7 @@ public final class IAPKit: NSObject {
         )
 
         do {
-            let response: RefreshTokenResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetch(hasAuthentication: false)
+            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetch(hasAuthentication: false)
             IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
             logger?.log("IAPKit: Backend authentication successful")
         } catch {

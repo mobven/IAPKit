@@ -91,6 +91,7 @@ public extension AsyncNetworkable {
                     throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
                 }
             case 200...299:
+                printResponse(data, request: request)
                 if T.self is EmptyModel.Type {
                     return EmptyModel() as! T
                 }
@@ -100,9 +101,11 @@ public extension AsyncNetworkable {
                 return try decoder.decode(T.self, from: data)
             default:
                 let error = NSError(domain: "IAPKit", code: httpResponse.statusCode, userInfo: ["data": data])
+                printErrorLog(error, request: request)
                 throw error
             }
         } catch {
+            printErrorLog(error, request: request)
             throw error
         }
     }

@@ -21,14 +21,21 @@ public protocol IAPKitLoggable: AnyObject {
 
 public enum IAPKitLogLevel {
     case prod, debug
-    public static var logLevel: IAPKitLogLevel = .prod
+
+    private static let defaultLevel: IAPKitLogLevel = {
+        #if DEBUG
+        return .debug
+        #else
+        return .prod
+        #endif
+    }()
+
+    public static var logLevel: IAPKitLogLevel = defaultLevel
 }
 
 public extension IAPKitLoggable {
     func log(_ message: String) {
-        #if DEBUG
         guard IAPKitLogLevel.logLevel == .debug else { return }
         print("[IAPKit] \(message)")
-        #endif
     }
 }

@@ -148,7 +148,7 @@ public final class IAPKit: NSObject {
         )
 
         do {
-            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetch(hasAuthentication: false)
+            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetchData(hasAuthentication: false)
 
             guard let body = response.body else {
                 logger?.log("IAPKit: Backend authentication failed - empty response body")

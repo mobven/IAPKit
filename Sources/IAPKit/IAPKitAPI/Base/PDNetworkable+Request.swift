@@ -65,7 +65,7 @@ public extension AsyncNetworkable {
     }
 
     /// Override fetch to handle token refresh independently from UserSession
-    func fetch<T: Decodable>(
+    func fetchData<T: Decodable>(
         hasAuthentication: Bool = true,
         isRefreshToken: Bool = false
     ) async throws -> T {
@@ -86,7 +86,7 @@ public extension AsyncNetworkable {
                 if !isRefreshToken && hasAuthentication {
                     try await refreshIAPKitToken()
                     // Retry original request with new token
-                    return try await fetch(hasAuthentication: hasAuthentication, isRefreshToken: true)
+                    return try await fetchData(hasAuthentication: hasAuthentication, isRefreshToken: true)
                 } else {
                     throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
                 }
@@ -115,7 +115,7 @@ public extension AsyncNetworkable {
 
         // Call refresh endpoint
         let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
-            .fetch(hasAuthentication: false, isRefreshToken: true)
+            .fetchData(hasAuthentication: false, isRefreshToken: true)
 
         // Save new tokens
         IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))

@@ -41,8 +41,17 @@ public final class IAPUser: ObservableObject {
 
     private init() {}
 
-    public func save(tokens: (access: String, refresh: String)) {
+    public func save(tokens: (access: String, refresh: String)) async {
         accessToken = tokens.access
         refreshToken = tokens.refresh
+
+        // Also update UserSession cache so next request uses new token
+        await UserSession.shared.save(
+            OAuthResponse(
+                accessToken: tokens.access,
+                refreshToken: tokens.refresh,
+                expiresIn: -1
+            )
+        )
     }
 }

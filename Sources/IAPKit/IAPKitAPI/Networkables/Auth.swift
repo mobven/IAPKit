@@ -11,7 +11,7 @@ import MBAsyncNetworking
 public extension IAPKitAPI {
     enum Auth: AsyncNetworkable {
         case refresh(refreshToken: String)
-        case login(request: LoginRequest)
+        case register(request: RegisterRequest)
         
         public func request() async -> URLRequest {
             switch self {
@@ -28,10 +28,10 @@ public extension IAPKitAPI {
                     forKey: "Authorization"
                 )
                 return request
-            case let .login(request):
+            case let .register(request):
                 return await getRequest(
                     body: request,
-                    url: IAPKitAPI.getURL(withPath: "v1/users/login"),
+                    url: IAPKitAPI.getURL(withPath: "v1/users/register"),
                     httpMethod: .post,
                     addBearerToken: false
                 )

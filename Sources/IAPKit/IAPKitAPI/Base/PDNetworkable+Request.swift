@@ -40,4 +40,84 @@ public extension AsyncNetworkable {
     func uploadRequest(url: URL, parameters: [String: String] = [:], files: [File] = []) async -> URLRequest {
         await uploadRequest(method: .post, url: url, parameters: parameters, files: files)
     }
+
+    /// Override to inject IAPKit token instead of using UserSession
+    /// This prevents IAPKit from using app's UserSession token
+    func getRequest(
+        queryItems: [String: String] = [:],
+        headers: [String: String] = [:],
+        url: URL,
+        httpMethod: RequestMethod = .get,
+        addBearerToken: Bool = true
+    ) async -> URLRequest {
+        var request = URLRequest(url: url.adding(parameters: queryItems))
+        request.httpMethod = httpMethod.rawValue
+        var allHeaders = headers
+        allHeaders["Content-Type"] = "application/json"
+
+        // Use IAPKit's own token instead of UserSession
+        if addBearerToken, let token = IAPUser.current.accessToken {
+            allHeaders["Authorization"] = "Bearer \(token)"
+        }
+
+        request.allHTTPHeaderFields = allHeaders
+        return request
+    }
+
+    /// Override fetch to handle token refresh independently from UserSession
+    func fetch<T: Decodable>(
+        hasAuthentication: Bool = true,
+        isRefreshToken: Bool = false
+    ) async throws -> T {
+        let request = await request()
+
+        do {
+            let (data, response) = try await Session.shared.session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw URLError(.badServerResponse)
+            }
+
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+
+            switch httpResponse.statusCode {
+            case 401:
+                // Token expired - refresh it
+                if !isRefreshToken && hasAuthentication {
+                    try await refreshIAPKitToken()
+                    // Retry original request with new token
+                    return try await fetch(hasAuthentication: hasAuthentication, isRefreshToken: true)
+                } else {
+                    throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
+                }
+            case 200...299:
+                if T.self is EmptyModel.Type {
+                    return EmptyModel() as! T
+                }
+                if T.self == Data.self {
+                    return data as! T
+                }
+                return try decoder.decode(T.self, from: data)
+            default:
+                let error = NSError(domain: "IAPKit", code: httpResponse.statusCode, userInfo: ["data": data])
+                throw error
+            }
+        } catch {
+            throw error
+        }
+    }
+
+    /// Refresh IAPKit token using its own refresh token
+    private func refreshIAPKitToken() async throws {
+        guard let refreshToken = IAPUser.current.refreshToken else {
+            throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "No refresh token available"])
+        }
+
+        // Call refresh endpoint
+        let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
+            .fetch(hasAuthentication: false, isRefreshToken: true)
+
+        // Save new tokens
+        IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
+    }
 }

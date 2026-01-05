@@ -28,11 +28,11 @@ public final class NetworkingConfigs {
     }
 
     @MainActor public func setup() {
-        UserSession.initialize(with: IAPUser.current.keychain)
+        //UserSession.initialize(with: IAPUser.current.keychain)
         NetworkLogsManager.shared.delegate = networkMonitor
-        Task {
-            await OAuthManager.shared.authManager.setDelegate(self)
-        }
+//        Task {
+//            await OAuthManager.shared.authManager.setDelegate(self)
+//        }
     }
     
     public func setupOAuth2(onUnAuthorized: (() -> Void)?) {

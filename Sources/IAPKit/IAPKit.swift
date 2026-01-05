@@ -154,7 +154,7 @@ public final class IAPKit: NSObject {
                 logger?.log("IAPKit: Backend authentication failed - empty response body")
                 return
             }
-            await IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
+            IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
             logger?.log("IAPKit: Backend authentication successful")
         } catch {
             logger?.log("IAPKit: Backend authentication failed: \(error.localizedDescription)")

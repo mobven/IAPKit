@@ -61,8 +61,8 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         if let customerUserId = customerUserId, !customerUserId.isEmpty {
             identify(customerUserId, completion: completion)
         } else {
-            // RevenueCat configure is synchronous, so we can immediately return success
-            completion?(.success(()))
+        // RevenueCat configure is synchronous, so we can immediately return success
+        completion?(.success(()))
         }
     }
     

@@ -20,8 +20,8 @@ public extension NetworkingConfigs {
 
         var baseURL: String {
             switch self {
-            case .development: "http://209.38.184.176:5431"
-            case .production: "http://209.38.184.176:5431"
+            case .development: "https://ioslab.online"
+            case .production: "http://ioslab.online"
             }
         }
     }

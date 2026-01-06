@@ -24,7 +24,7 @@ public extension IAPKitAPI {
                     request.allHTTPHeaderFields = [:]
                 }
                 request.allHTTPHeaderFields?.updateValue(
-                    refreshToken,
+                    "Bearer \(refreshToken)",
                     forKey: "Authorization"
                 )
                 return request

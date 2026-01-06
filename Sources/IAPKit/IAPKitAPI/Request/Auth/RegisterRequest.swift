@@ -9,13 +9,13 @@ import Foundation
 
 public struct RegisterRequest: Encodable {
     public let userId: String?
-    public let appId: String?
+    public let sdkKey: String?
 
     public init(
         userId: String?,
-        appId: String?,
+        sdkKey: String?,
     ) {
         self.userId = userId
-        self.appId = appId
+        self.sdkKey = sdkKey
     }
 }

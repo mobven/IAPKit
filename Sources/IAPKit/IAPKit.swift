@@ -82,10 +82,10 @@ public final class IAPKit: NSObject {
     ///   - paywallName: Adapty placement name
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
+            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -96,10 +96,10 @@ public final class IAPKit: NSObject {
     ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
+            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -110,10 +110,10 @@ public final class IAPKit: NSObject {
     ///   - entitlementId: The entitlement ID to check for premium status
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
+            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -125,24 +125,24 @@ public final class IAPKit: NSObject {
         }
     }
 
-    private func registerApp(result: Result<Void, Error>, appId: String, deviceId: String?, completion: ((Result<Void, Error>) -> Void)?) {
+    private func registerApp(result: Result<Void, Error>, sdkKey: String, deviceId: String?, completion: ((Result<Void, Error>) -> Void)?) {
         completion?(result)
         if case .success = result {
             Task {
-                await performBackendLogin(appId: appId, deviceId: deviceId)
+                await performBackendLogin(sdkKey: sdkKey, deviceId: deviceId)
             }
         }
     }
 
-    private func performBackendLogin(appId: String, deviceId: String?) async {
-//        guard !IAPUser.current.isAuthenticated else {
-//            logger?.log("IAPKit: Already authenticated, skipping login")
-//            return
-//        }
+    private func performBackendLogin(sdkKey: String, deviceId: String?) async {
+        guard !IAPUser.current.isAuthenticated else {
+            logger?.log("IAPKit: Already authenticated, skipping login")
+            return
+        }
 
         let registerRequest = RegisterRequest(
             userId: deviceId,
-            appId: appId
+            sdkKey: sdkKey
         )
 
         do {

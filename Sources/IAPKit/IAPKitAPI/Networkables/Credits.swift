@@ -19,7 +19,7 @@ public extension IAPKitAPI {
             switch self {
             case .claimGiftCoins:
                 await getRequest(
-                    url: IAPKitAPI.getURL(withPath: "api/v1/credits/claim-gift"),
+                    url: IAPKitAPI.getURL(withPath: "api/v1/users/me/credits/claim-gift"),
                     httpMethod: .get
                 )
             case .getCredits:

@@ -85,7 +85,7 @@ public final class IAPKit: NSObject {
     public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, completion: completion)
+            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -99,7 +99,7 @@ public final class IAPKit: NSObject {
     public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, completion: completion)
+            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -113,7 +113,7 @@ public final class IAPKit: NSObject {
     public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, appId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         setupNetworking()
         productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, appId: appId, completion: completion)
+            self?.registerApp(result: result, appId: appId, deviceId: customerUserId, completion: completion)
         }
     }
 
@@ -125,22 +125,20 @@ public final class IAPKit: NSObject {
         }
     }
 
-    private func registerApp(result: Result<Void, Error>, appId: String, completion: ((Result<Void, Error>) -> Void)?) {
+    private func registerApp(result: Result<Void, Error>, appId: String, deviceId: String?, completion: ((Result<Void, Error>) -> Void)?) {
         completion?(result)
         if case .success = result {
             Task {
-                await performBackendLogin(appId: appId)
+                await performBackendLogin(appId: appId, deviceId: deviceId)
             }
         }
     }
 
-    private func performBackendLogin(appId: String) async {
-        guard !IAPUser.current.isAuthenticated else {
-            logger?.log("IAPKit: Already authenticated, skipping login")
-            return
-        }
-
-        let deviceId = await UIDevice.current.identifierForVendor?.uuidString
+    private func performBackendLogin(appId: String, deviceId: String?) async {
+//        guard !IAPUser.current.isAuthenticated else {
+//            logger?.log("IAPKit: Already authenticated, skipping login")
+//            return
+//        }
 
         let registerRequest = RegisterRequest(
             userId: deviceId,

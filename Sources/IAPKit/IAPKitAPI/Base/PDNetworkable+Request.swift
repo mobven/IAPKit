@@ -64,6 +64,35 @@ public extension AsyncNetworkable {
         return request
     }
 
+    /// Override to inject IAPKit token for POST requests with body
+    /// This prevents IAPKit from using app's UserSession token
+    func getRequest(
+        body: some Encodable,
+        headers: [String: String] = [:],
+        url: URL,
+        httpMethod: RequestMethod = .post,
+        addBearerToken: Bool = true
+    ) async -> URLRequest {
+        var request = URLRequest(url: url)
+        request.httpMethod = httpMethod.rawValue
+        var allHeaders = headers
+        allHeaders["Content-Type"] = "application/json"
+
+        // Use IAPKit's own token instead of UserSession
+        if addBearerToken, let token = IAPUser.current.accessToken {
+            allHeaders["Authorization"] = "Bearer \(token)"
+        }
+
+        request.allHTTPHeaderFields = allHeaders
+
+        // Encode body
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .iso8601
+        request.httpBody = try? encoder.encode(body)
+
+        return request
+    }
+
     /// Override fetch to handle token refresh independently from UserSession
     func fetchData<T: Decodable>(
         hasAuthentication: Bool = true,

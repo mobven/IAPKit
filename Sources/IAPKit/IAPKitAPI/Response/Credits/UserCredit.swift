@@ -19,7 +19,7 @@ public struct UserCredit: Codable, Sendable {
     public let giftClaimed: Bool
     public let subscriptionPackageName: String?
     public let subscriptionRenewPeriod: String?
-    public let subscriptionPotential: Int?
+    public let subscriptionPotentialCoins: Int?
     public let isSubscriptionActive: Bool
 
     public init(
@@ -30,7 +30,7 @@ public struct UserCredit: Codable, Sendable {
         giftClaimed: Bool = false,
         subscriptionPackageName: String? = nil,
         subscriptionRenewPeriod: String? = nil,
-        subscriptionPotential: Int? = nil,
+        subscriptionPotentialCoins: Int? = nil,
         isSubscriptionActive: Bool = false
     ) {
         self.giftCoins = giftCoins
@@ -40,7 +40,7 @@ public struct UserCredit: Codable, Sendable {
         self.giftClaimed = giftClaimed
         self.subscriptionPackageName = subscriptionPackageName
         self.subscriptionRenewPeriod = subscriptionRenewPeriod
-        self.subscriptionPotential = subscriptionPotential
+        self.subscriptionPotentialCoins = subscriptionPotentialCoins
         self.isSubscriptionActive = isSubscriptionActive
     }
 }

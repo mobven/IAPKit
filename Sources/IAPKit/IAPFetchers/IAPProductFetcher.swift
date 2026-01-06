@@ -196,35 +196,7 @@ final class IAPProductFetcher {
             completion(.failure(error))
             return
         }
-        primaryFetcher.buy(product: product) { [weak self] result in
-            switch result {
-            case .success(let subscription):
-                // Send buy request to backend
-                self?.sendBuyToBackend()
-                completion(.success(subscription))
-            case .failure(let error):
-                completion(.failure(error))
-            }
-        }
-    }
-
-    /// Send buy request to backend with receipt data
-    private func sendBuyToBackend() {
-        guard let receiptData = IAPKit.getReceiptToken() else {
-            logger?.log("IAPKit: No receipt data available for buy")
-            return
-        }
-
-        let request = ReceiptValidationRequest(receiptData: receiptData)
-
-        Task {
-            do {
-                let _: IAPKitEmptyModel = try await IAPKitAPI.IAP.buy(request: request).fetchData()
-                logger?.log("IAPKit: Backend buy successful")
-            } catch {
-                logger?.log("IAPKit: Backend buy failed: \(error.localizedDescription)")
-            }
-        }
+        primaryFetcher.buy(product: product, completion: completion)
     }
 
     /// Restore purchases from both primary and StoreKit in parallel
@@ -255,14 +227,12 @@ final class IAPProductFetcher {
         }
 
         // Wait for both to complete
-        group.notify(queue: .main) { [weak self] in
+        group.notify(queue: .main) {
             let primarySuccess = (try? primaryResult?.get()) ?? false
             let storeKitSuccess = (try? storeKitResult?.get()) ?? false
 
             // If either returns true, return success
             if primarySuccess || storeKitSuccess {
-                // Send restore request to backend
-                self?.sendRestoreToBackend()
                 completion(.success(true))
                 return
             }
@@ -272,25 +242,6 @@ final class IAPProductFetcher {
                 completion(primaryResult)
             } else {
                 completion(.success(false))
-            }
-        }
-    }
-
-    /// Send restore request to backend with receipt data
-    private func sendRestoreToBackend() {
-        guard let receiptData = IAPKit.getReceiptToken() else {
-            logger?.log("IAPKit: No receipt data available for restore")
-            return
-        }
-
-        let request = ReceiptValidationRequest(receiptData: receiptData)
-
-        Task {
-            do {
-                let _: IAPKitEmptyModel = try await IAPKitAPI.IAP.restore(request: request).fetchData()
-                logger?.log("IAPKit: Backend restore successful")
-            } catch {
-                logger?.log("IAPKit: Backend restore failed: \(error.localizedDescription)")
             }
         }
     }

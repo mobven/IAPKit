@@ -8,9 +8,6 @@
 public typealias RegisterResponse = AppResponse<RegisterResponseBody>
 
 public struct RegisterResponseBody: Codable, Sendable {
-    public let userId: String
     public let accessToken: String
     public let refreshToken: String
-    public let credits: UserCredit
-    public let subscription: String?
 }

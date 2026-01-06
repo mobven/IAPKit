@@ -15,7 +15,7 @@ public extension AsyncNetworkable {
         isRefreshToken: Bool = false
     ) async throws -> T {
         do {
-            let response: AppResponse<T> = try await fetch(
+            let response: AppResponse<T> = try await fetchData(
                 hasAuthentication: hasAuthentication, isRefreshToken: isRefreshToken
             )
             if let value = response.body {

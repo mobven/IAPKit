@@ -20,7 +20,7 @@ public extension IAPKitAPI {
             case .claimGiftCoins:
                 await getRequest(
                     url: IAPKitAPI.getURL(withPath: "api/v1/users/me/credits/claim-gift"),
-                    httpMethod: .get
+                    httpMethod: .post
                 )
             case .getCredits:
                 await getRequest(

@@ -13,6 +13,7 @@ public extension IAPKitAPI {
         case claimGiftCoins
         case getCredits
         case getProducts
+        case spendCredit(request: SpendCreditRequest)
 
         public func request() async -> URLRequest {
             switch self {
@@ -30,6 +31,12 @@ public extension IAPKitAPI {
                 await getRequest(
                     url: IAPKitAPI.getURL(withPath: "api/v1/products/list"),
                     httpMethod: .get
+                )
+            case .spendCredit(let request):
+                await getRequest(
+                    url: IAPKitAPI.getURL(withPath: "api/v1/users/me/credits/spend"),
+                    httpMethod: .post,
+                    body: request
                 )
             }
         }

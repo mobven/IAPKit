@@ -15,6 +15,7 @@ public protocol CreditsManaging: AnyObject, Sendable {
     func claimGiftCoins() async -> Bool
     func getCreditProducts() async throws -> GetCreditProductsResponse
     func checkCreditAndSubsStatus() -> Bool
+    func spendCredit(amount: Int) async throws -> Int
 }
 
 // MARK: - Implementation
@@ -46,6 +47,14 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
 
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await creditsService.getCreditProducts()
+    }
+    
+    public func spendCredit(amount: Int = 1) async throws -> Int {
+        let response = try await creditsService.spendCredit(amount: amount)
+        await MainActor.run {
+            credits = response.remaining
+        }
+        return response.remaining.totalCoins
     }
 
     public func checkCreditAndSubsStatus() -> Bool {

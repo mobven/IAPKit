@@ -11,6 +11,7 @@ public protocol CreditsAPIServiceProtocol: Sendable {
     func claimGiftCoins() async throws -> ClaimGiftCoinsResponse
     func getCredits() async throws -> GetCreditsResponse
     func getCreditProducts() async throws -> GetCreditProductsResponse
+    func spendCredit(amount: Int) async throws -> SpendCreditResponse
 }
 
 public struct CreditsAPIService: CreditsAPIServiceProtocol {
@@ -26,5 +27,10 @@ public struct CreditsAPIService: CreditsAPIServiceProtocol {
 
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await IAPKitAPI.Credits.getProducts.getResponse()
+    }
+    
+    public func spendCredit(amount: Int) async throws -> SpendCreditResponse {
+        let request = SpendCreditRequest(amount: amount)
+        return try await IAPKitAPI.Credits.spendCredit(request: request).getResponse()
     }
 }

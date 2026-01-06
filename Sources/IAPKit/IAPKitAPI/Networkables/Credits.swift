@@ -34,9 +34,9 @@ public extension IAPKitAPI {
                 )
             case .spendCredit(let request):
                 await getRequest(
+                    body: request,
                     url: IAPKitAPI.getURL(withPath: "api/v1/users/me/credits/spend"),
-                    httpMethod: .post,
-                    body: request
+                    httpMethod: .post
                 )
             }
         }

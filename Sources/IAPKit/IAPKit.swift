@@ -153,6 +153,11 @@ public final class IAPKit: NSObject {
                 return
             }
             IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
+
+            // Save userId and sdkKey for potential re-registration
+            IAPUser.current.userId = deviceId
+            IAPUser.current.sdkKey = sdkKey
+
             logger?.log("IAPKit: Backend authentication successful")
         } catch {
             logger?.log("IAPKit: Backend authentication failed: \(error.localizedDescription)")

@@ -16,6 +16,8 @@ final class IAPUserStorage: NetworkingStorable {
         static let accessToken = "iapkit_accessToken"
         static let refreshToken = "iapkit_refreshToken"
         static let userInfo = "userInfo"
+        static let userId = "iapkit_userId"
+        static let sdkKey = "iapkit_sdkKey"
         static var deviceId: String {
             "iapkit_" + (Bundle.main.stringFromInfoPlist("KEYCHAIN_DEVICE_KEY") ?? "device_id")
         }
@@ -36,6 +38,24 @@ final class IAPUserStorage: NetworkingStorable {
         }
         set {
             save(Keys.refreshToken, value: newValue)
+        }
+    }
+
+    var userId: String? {
+        get {
+            value(forKey: Keys.userId)
+        }
+        set {
+            save(Keys.userId, value: newValue)
+        }
+    }
+
+    var sdkKey: String? {
+        get {
+            value(forKey: Keys.sdkKey)
+        }
+        set {
+            save(Keys.sdkKey, value: newValue)
         }
     }
 
@@ -68,5 +88,7 @@ final class IAPUserStorage: NetworkingStorable {
     func clearAll() {
         keychain.delete(key: Keys.accessToken)
         keychain.delete(key: Keys.refreshToken)
+        keychain.delete(key: Keys.userId)
+        keychain.delete(key: Keys.sdkKey)
     }
 }

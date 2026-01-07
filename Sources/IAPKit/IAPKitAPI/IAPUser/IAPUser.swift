@@ -35,6 +35,16 @@ public final class IAPUser: ObservableObject {
         set { keychain.refreshToken = newValue }
     }
 
+    public var userId: String? {
+        get { (keychain as? IAPUserStorage)?.userId }
+        set { (keychain as? IAPUserStorage)?.userId = newValue }
+    }
+
+    public var sdkKey: String? {
+        get { (keychain as? IAPUserStorage)?.sdkKey }
+        set { (keychain as? IAPUserStorage)?.sdkKey = newValue }
+    }
+
     public var isAuthenticated: Bool {
         accessToken != nil
     }

@@ -49,7 +49,7 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
         for attempt in 0 ..< maxRetryCount {
             do {
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
-                    .fetch(hasAuthentication: false, isRefreshToken: true)
+                    .fetchResponse(hasAuthentication: false, isRefreshToken: true)
 
                 let accessToken = response.accessToken
                 let newRefreshToken = response.refreshToken

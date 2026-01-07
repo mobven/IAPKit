@@ -147,13 +147,9 @@ public final class IAPKit: NSObject {
         )
 
         do {
-            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetch(hasAuthentication: false)
-
-            guard let body = response.body else {
-                logger?.log("IAPKit: Backend authentication failed - empty response body")
-                return
-            }
-            IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
+            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetchResponse(hasAuthentication: false)
+            
+            IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
 
             // Save userId and sdkKey for potential re-registration
             IAPUser.current.userId = deviceId

@@ -72,9 +72,9 @@ public actor IAPRequestQueue {
 
         for attempt in 0 ..< maxRetryCount {
             do {
-                // Call refresh endpoint
+                // Call refresh endpoint without auth handling to prevent recursive loops
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
-                    .fetchData(hasAuthentication: false, isRefreshToken: true)
+                    .fetchDataWithoutAuthHandling()
 
                 // Save new tokens
                 IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
@@ -108,8 +108,9 @@ public actor IAPRequestQueue {
             sdkKey: sdkKey
         )
 
+        // Call register endpoint without auth handling to prevent recursive loops
         let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest)
-            .fetchData(hasAuthentication: false, isRefreshToken: true)
+            .fetchDataWithoutAuthHandling()
 
         guard let body = response.body else {
             throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Re-registration failed - empty response body"])

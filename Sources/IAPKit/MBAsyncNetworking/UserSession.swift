@@ -80,8 +80,8 @@ public struct SignedUserV2 {
     public var expiresIn: Int?
 
     enum CodingKeys: String, CodingKey {
-        case accessToken = "access_token"
-        case refreshToken = "refresh_token"
+        case accessToken = "iapkit_access_token"
+        case refreshToken = "iapkit_refresh_token"
         case tokenType = "token_type"
         case expiresIn = "expires_in"
     }

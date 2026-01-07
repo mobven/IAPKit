@@ -8,18 +8,17 @@
 import Foundation
 
 public final class NetworkingConfigs {
-    public static let shared = NetworkingConfigs()
-
     let networkMonitor = NetworkMonitor()
     var baseDelay: UInt64
     var maxRetryCount: Int
+
     #if DEBUG
     var environment: Environment = .development
     #else
     var environment: Environment = .production
     #endif
 
-    public init(maxRetryCount: Int = 1, baseDelay: UInt64 = 1_000_000_000) {
+    public init(maxRetryCount: Int = 3, baseDelay: UInt64 = 1_000_000_000) {
         self.maxRetryCount = maxRetryCount
         self.baseDelay = baseDelay
     }

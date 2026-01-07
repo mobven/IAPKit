@@ -20,6 +20,7 @@ public protocol IAPKitDelegate: AnyObject {
 
 public final class IAPKit: NSObject {
     public static let store: IAPKit = .init()
+    var networkingConfigs = NetworkingConfigs()
     
     public static var logLevel: IAPKitLogLevel {
         get { IAPKitLogLevel.logLevel }
@@ -121,7 +122,7 @@ public final class IAPKit: NSObject {
 
     private func setupNetworking() {
         Task { @MainActor in
-            NetworkingConfigs.shared.setup()
+            networkingConfigs.setup()
         }
     }
 

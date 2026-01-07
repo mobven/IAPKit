@@ -17,7 +17,9 @@ public extension IAPKitAPI {
             switch self {
             case let .refresh(refreshToken):
                 var request = await getRequest(
+                    queryItems: [:],
                     url: IAPKitAPI.getURL(withPath: "api/v1/users/refresh"),
+                    httpMethod: .post,
                     addBearerToken: false
                 )
                 if request.allHTTPHeaderFields == nil {

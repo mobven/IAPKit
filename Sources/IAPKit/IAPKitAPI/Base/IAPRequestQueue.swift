@@ -12,7 +12,7 @@ import Foundation
 /// This actor ensures that if multiple requests detect an invalid token (e.g., 401 Unauthorized),
 /// only a single token refresh is triggered, and the rest of the requests wait for the result.
 /// It guarantees thread-safe execution and reduces redundant token refresh attempts.
-public actor IAPRequestQueue {
+public actor IAPRequestQueue: OAuthProviderDelegate {
     /// Shared singleton instance of the `IAPRequestQueue` for global access.
     public static let shared = IAPRequestQueue()
 
@@ -27,6 +27,38 @@ public actor IAPRequestQueue {
 
     /// Base delay for exponential backoff (1 second in nanoseconds)
     private let baseDelay: UInt64 = 1_000_000_000
+
+    /// OAuth manager instance for IAPKit authentication
+    @MainActor private lazy var oauthManager: OAuthManager = {
+        let manager = OAuthManager()
+        return manager
+    }()
+
+    public init() {
+        Task { @MainActor in
+            await oauthManager.authProvider.setDelegate(self)
+        }
+    }
+
+    // MARK: - OAuthProviderDelegate
+
+    /// Implementation of OAuthProviderDelegate protocol
+    /// Called when a token refresh is required
+    public func didRequestTokenRefresh() async throws -> OAuthResponse? {
+        try await performTokenRefreshWithRetry()
+
+        guard let accessToken = IAPUser.current.accessToken,
+              let refreshToken = IAPUser.current.refreshToken else {
+            return nil
+        }
+
+        return OAuthResponse(
+            accessToken: accessToken,
+            refreshToken: refreshToken
+        )
+    }
+
+    // MARK: - Token Refresh Operations
 
     /// Executes the given async operation after ensuring a valid token is available.
     ///

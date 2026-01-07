@@ -9,9 +9,6 @@ import Foundation
 import MBAsyncNetworking
 
 public extension AsyncNetworkable {
-    private var maxRetryCount: Int { 3 }
-    private var baseDelay: UInt64 { 1_000_000_000 }
-
     func getRequest(url: URL, encodable data: some Encodable, httpMethod: RequestMethod = .post) async -> URLRequest {
         await getRequest(
             body: data,
@@ -114,13 +111,11 @@ public extension AsyncNetworkable {
 
             switch httpResponse.statusCode {
             case 401:
-                // Token expired - refresh it
-                if !isRefreshToken && hasAuthentication {
-                    try await refreshIAPKitToken()
-                } else {
-                    throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
-                }
-                throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
+                // Token expired - handle unauthorized response
+                return try await handleUnauthorizedResponse(
+                    hasAuthentication: hasAuthentication,
+                    isRefreshToken: isRefreshToken
+                )
             case 200...299:
                 printResponse(data, request: request)
                 if T.self is EmptyModel.Type {
@@ -141,57 +136,37 @@ public extension AsyncNetworkable {
         }
     }
 
-    private func refreshIAPKitToken() async throws {
-        guard let refreshToken = IAPUser.current.refreshToken else {
-            throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "No refresh token available"])
+    /// Handles 401 Unauthorized responses by attempting to refresh the token
+    /// - Parameters:
+    ///   - hasAuthentication: Whether authentication is required for this request
+    ///   - isRefreshToken: Whether this call is already part of a token refresh attempt
+    /// - Returns: The decoded response after handling the authentication issue
+    /// - Throws: Authentication errors if token refresh fails
+    private func handleUnauthorizedResponse<T: Decodable>(
+        hasAuthentication: Bool,
+        isRefreshToken: Bool
+    ) async throws -> T {
+        guard hasAuthentication else {
+            throw NSError(
+                domain: "IAPKit",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "Unauthorized"]
+            )
         }
 
-        for attempt in 0 ..< maxRetryCount {
-            do {
-                // Call refresh endpoint
-                let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
-                    .fetchData(hasAuthentication: false, isRefreshToken: true)
-
-                // Save new tokens
-                IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
-                
-                break
-            } catch {
-                let isLastAttempt = attempt == maxRetryCount - 1
-
-                if isLastAttempt {
-                    // All retries failed, attempt to re-register
-                    try await reregisterUser()
-                    return
-                }
-
-                // Exponential backoff: 1s, 2s, 4s, ...
-                let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
-                try? await Task.sleep(nanoseconds: delay)
+        if !isRefreshToken {
+            return try await IAPRequestQueue.shared.executeAfterTokenRefresh {
+                try await self.fetchData(
+                    hasAuthentication: hasAuthentication,
+                    isRefreshToken: true
+                )
             }
+        } else {
+            throw NSError(
+                domain: "IAPKit",
+                code: 401,
+                userInfo: [NSLocalizedDescriptionKey: "Token refresh failed"]
+            )
         }
-    }
-
-    /// Re-register user when refresh token fails after all retries
-    private func reregisterUser() async throws {
-        guard let userId = IAPUser.current.userId,
-              let sdkKey = IAPUser.current.sdkKey else {
-            throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "No registration credentials available"])
-        }
-
-        let registerRequest = RegisterRequest(
-            userId: userId,
-            sdkKey: sdkKey
-        )
-
-        let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest)
-            .fetchData(hasAuthentication: false, isRefreshToken: true)
-
-        guard let body = response.body else {
-            throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Re-registration failed - empty response body"])
-        }
-
-        // Save new tokens
-        IAPUser.current.save(tokens: (access: body.accessToken, refresh: body.refreshToken))
     }
 }

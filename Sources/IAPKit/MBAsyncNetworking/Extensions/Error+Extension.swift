@@ -12,7 +12,7 @@ public extension Error {
     /// Unwraps NSError objects to find underlying errors
     /// - Returns: The underlying error if found, or self if not
     var unwrappedErrorV2: Error {
-        var error = self as NSError
+        let error = self as NSError
 
         if error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled {
             return error

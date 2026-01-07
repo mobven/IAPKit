@@ -13,9 +13,9 @@ public final class NetworkingConfigs {
     var maxRetryCount: Int
 
     #if DEBUG
-    var environment: Environment = .development
+    static var environment: Environment = .development
     #else
-    var environment: Environment = .production
+    static var environment: Environment = .production
     #endif
 
     public init(maxRetryCount: Int = 3, baseDelay: UInt64 = 1_000_000_000) {
@@ -32,7 +32,7 @@ public final class NetworkingConfigs {
     }
 
     private func setSslPinnig() {
-        if environment.isSSLEnabled {
+        if Self.environment.isSSLEnabled {
             NetworkableConfigsV2.default.setCertificatePathArray(IAPKitAPI.getCertificatePaths())
         } else {
             NetworkableConfigsV2.default.setServerTrustedURLAuthenticationChallenge()

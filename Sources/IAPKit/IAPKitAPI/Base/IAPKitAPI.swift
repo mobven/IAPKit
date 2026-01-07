@@ -9,7 +9,7 @@ import Foundation
 
 public enum IAPKitAPI {
     static func getURL(withPath path: String) -> URL {
-        let baseURL = NetworkingConfigs.shared.environment.baseURL
+        let baseURL = NetworkingConfigs.environment.baseURL
         guard let url = URL(string: "\(baseURL)\(path)") else {
             fatalError("Could not prepare url")
         }

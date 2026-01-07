@@ -63,7 +63,6 @@ Pods/
 # Carthage/Checkouts
 
 Carthage/Build
-vendor
 
 # fastlane
 #

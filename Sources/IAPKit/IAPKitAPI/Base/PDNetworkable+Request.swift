@@ -93,16 +93,10 @@ public extension AsyncNetworkable {
         return request
     }
 
-    /// Fetches data without automatic 401 handling (for use in RequestQueue)
-    func fetchDataWithoutAuthHandling<T: Decodable>() async throws -> T {
-        try await fetchData(hasAuthentication: false, isRefreshToken: false, skipAuthHandling: true)
-    }
-
     /// Override fetch to handle token refresh independently from UserSession
     func fetchData<T: Decodable>(
         hasAuthentication: Bool = true,
-        isRefreshToken: Bool = false,
-        skipAuthHandling: Bool = false
+        isRefreshToken: Bool = false
     ) async throws -> T {
         let request = await request()
 
@@ -120,11 +114,6 @@ public extension AsyncNetworkable {
                 // Token expired - log and handle unauthorized response
                 let error = NSError(domain: "IAPKit", code: 401, userInfo: ["data": data])
                 printErrorLog(error, request: request)
-
-                // Skip auth handling if requested (prevents recursive loops in RequestQueue)
-                if skipAuthHandling {
-                    throw error
-                }
 
                 return try await handleUnauthorizedResponse(
                     hasAuthentication: hasAuthentication,

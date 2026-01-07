@@ -11,7 +11,7 @@ import Foundation
 public extension Error {
     /// Unwraps NSError objects to find underlying errors
     /// - Returns: The underlying error if found, or self if not
-    var unwrappedError: Error {
+    var unwrappedErrorV2: Error {
         var error = self as NSError
 
         if error.domain == NSURLErrorDomain && error.code == NSURLErrorCancelled {
@@ -20,7 +20,7 @@ public extension Error {
 
         // If this is an NSError with NSUnderlyingError, unwrap it
         if let underlyingError = error.userInfo[NSUnderlyingErrorKey] as? Error {
-            return underlyingError.unwrappedError
+            return underlyingError.unwrappedErrorV2
         }
 
         // Special handling for authentication errors
@@ -36,7 +36,7 @@ public extension Error {
 
     /// HTTP Status code for the related error.
     /// Retrieved by casting error to `MBErrorKit`'s `NetworkingError.httpError`
-    var httpStatusCode: Int? {
+    var httpStatusCodeV2: Int? {
         (self as NSError).code
     }
 }

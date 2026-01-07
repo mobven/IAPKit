@@ -79,7 +79,8 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 default:
                     let isLastAttempt = attempt == maxRetryCount - 1
                     if isLastAttempt {
-                        throw error
+                        // After max retries failed, try to re-register
+                        return try await performReRegister()
                     }
                     // Exponential backoff: 1s, 2s, 4s, ...
                     let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
@@ -89,5 +90,34 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
             }
         }
         return nil
+    }
+
+    private func performReRegister() async throws -> OAuthResponseV2? {
+        guard let userId = IAPUser.current.userId,
+              let sdkKey = IAPUser.current.sdkKey else {
+            return nil
+        }
+
+        let registerRequest = RegisterRequest(
+            userId: userId,
+            sdkKey: sdkKey
+        )
+
+        let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest)
+            .fetchResponse(hasAuthentication: false)
+
+        await MainActor.run {
+            IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
+        }
+
+        let oAuthResponse = OAuthResponseV2(
+            accessToken: response.accessToken,
+            refreshToken: response.refreshToken,
+            expiresIn: .zero
+        )
+
+        await UserSessionV2.shared.save(oAuthResponse)
+
+        return oAuthResponse
     }
 }

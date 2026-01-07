@@ -69,9 +69,10 @@ public actor IAPRequestQueue {
         guard let refreshToken = IAPUser.current.refreshToken else {
             throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "No refresh token available"])
         }
-        
+
         for attempt in 0 ..< maxRetryCount {
             do {
+                // Call refresh endpoint without auth handling to prevent recursive loops
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
                     .fetchData(hasAuthentication: false, isRefreshToken: true)
 
@@ -79,15 +80,11 @@ public actor IAPRequestQueue {
                 IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
 
                 return
-            } catch let error as NSError {
-                let shouldRetry = error.domain == NSURLErrorDomain || 
-                                  error.code == 401 || 
-                                  error.code >= 500
-                
+            } catch {
                 let isLastAttempt = attempt == maxRetryCount - 1
 
-                if !shouldRetry || isLastAttempt {
-                    // Can't retry or last attempt - try re-register
+                if isLastAttempt {
+                    // All retries failed, attempt to re-register
                     try await reregisterUser()
                     return
                 }

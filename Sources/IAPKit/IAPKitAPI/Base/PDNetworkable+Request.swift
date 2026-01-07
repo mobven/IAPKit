@@ -117,11 +117,10 @@ public extension AsyncNetworkable {
                 // Token expired - refresh it
                 if !isRefreshToken && hasAuthentication {
                     try await refreshIAPKitToken()
-                    // Retry original request with new token
-                    return try await fetchData(hasAuthentication: hasAuthentication, isRefreshToken: true)
                 } else {
                     throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
                 }
+                throw NSError(domain: "IAPKit", code: 401, userInfo: [NSLocalizedDescriptionKey: "Unauthorized"])
             case 200...299:
                 printResponse(data, request: request)
                 if T.self is EmptyModel.Type {

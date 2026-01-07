@@ -23,7 +23,7 @@ public actor IAPRequestQueue {
     private var pendingRequests: [(Bool) -> Void] = []
 
     /// Maximum number of retry attempts for refresh token
-    private let maxRetryCount: Int = 1
+    private let maxRetryCount: Int = 3
 
     /// Base delay for exponential backoff (1 second in nanoseconds)
     private let baseDelay: UInt64 = 1_000_000_000

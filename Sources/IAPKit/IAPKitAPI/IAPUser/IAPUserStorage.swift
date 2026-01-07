@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MBAsyncNetworkingV2
 import UIKit
 
 final class IAPUserStorage: NetworkingStorableV2 {

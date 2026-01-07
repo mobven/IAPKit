@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MBAsyncNetworkingV2
 
 final class NetworkMonitor: NetworkLogsDelegateV2, IAPKitLoggable {
     func logError(_ error: Error, context: String?) {

@@ -5,6 +5,7 @@ import PackageDescription
 
 let package = Package(
     name: "IAPKit",
+    defaultLocalization: "en",
     platforms: [.iOS(.v13)],
     products: [
         .library(
@@ -15,8 +16,8 @@ let package = Package(
     dependencies: [
         .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.11.0"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
+        .package(url: "https://github.com/mobven/MobKitCore.git", from: "1.0.1"),
         .package(url: "https://github.com/RevenueCat/purchases-ios-spm.git", from: "5.50.0"),
-        .package(path: "./Vendor/MBAsyncNetworkingV2"),
     ],
     targets: [
         .target(
@@ -25,9 +26,9 @@ let package = Package(
                 .product(name: "Adapty", package: "AdaptySDK-iOS"),
                 .product(name: "RxSwift", package: "RxSwift"),
                 .product(name: "RxRelay", package: "RxSwift"),
+                .product(name: "MobKitCore", package: "MobKitCore"),
                 .product(name: "RevenueCat", package: "purchases-ios-spm"),
                 .product(name: "RevenueCatUI", package: "purchases-ios-spm"),
-                .product(name: "MBAsyncNetworkingV2", package: "MBAsyncNetworkingV2"),
             ]
         ),
         .testTarget(

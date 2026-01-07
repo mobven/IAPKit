@@ -7,7 +7,6 @@
 
 
 import Foundation
-import MBAsyncNetworkingV2
 
 /// Singleton manager for user session.
 public final class IAPUser: ObservableObject {

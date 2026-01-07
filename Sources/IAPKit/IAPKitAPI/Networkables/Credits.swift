@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MBAsyncNetworkingV2
 
 public extension IAPKitAPI {
     enum Credits: AsyncNetworkableV2 {

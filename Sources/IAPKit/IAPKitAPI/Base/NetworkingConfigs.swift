@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import MBAsyncNetworkingV2
 
 public final class NetworkingConfigs {
     public static let shared = NetworkingConfigs()

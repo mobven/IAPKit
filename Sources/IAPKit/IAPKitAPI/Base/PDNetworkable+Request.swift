@@ -154,8 +154,8 @@ public extension AsyncNetworkable {
 
                 // Save new tokens
                 IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
-
-                return
+                
+                break
             } catch {
                 let isLastAttempt = attempt == maxRetryCount - 1
 

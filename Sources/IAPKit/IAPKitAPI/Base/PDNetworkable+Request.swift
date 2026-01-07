@@ -111,7 +111,9 @@ public extension AsyncNetworkable {
 
             switch httpResponse.statusCode {
             case 401:
-                // Token expired - handle unauthorized response
+                // Token expired - log and handle unauthorized response
+                let error = NSError(domain: "IAPKit", code: 401, userInfo: ["data": data])
+                printErrorLog(error, request: request)
                 return try await handleUnauthorizedResponse(
                     hasAuthentication: hasAuthentication,
                     isRefreshToken: isRefreshToken

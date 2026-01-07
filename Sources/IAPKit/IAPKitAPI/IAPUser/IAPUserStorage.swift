@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 import UIKit
 
-final class IAPUserStorage: NetworkingStorable {
+final class IAPUserStorage: NetworkingStorableV2 {
     private let keychain = KeychainHelper()
 
     private enum Keys {

@@ -6,8 +6,7 @@
 //
 
 import Foundation
-import MBAsyncNetworking
-import MobKitCore
+import MBAsyncNetworkingV2
 
 public final class NetworkingConfigs {
     public static let shared = NetworkingConfigs()
@@ -27,14 +26,14 @@ public final class NetworkingConfigs {
     }
 
     @MainActor public func setup() {
-        NetworkLogsManager.shared.delegate = networkMonitor
+        NetworkLogsManagerV2.shared.delegate = networkMonitor
     }
 
     private func setSslPinnig() {
         if environment.isSSLEnabled {
-            NetworkableConfigs.default.setCertificatePathArray(IAPKitAPI.getCertificatePaths())
+            NetworkableConfigsV2.default.setCertificatePathArray(IAPKitAPI.getCertificatePaths())
         } else {
-            NetworkableConfigs.default.setServerTrustedURLAuthenticationChallenge()
+            NetworkableConfigsV2.default.setServerTrustedURLAuthenticationChallenge()
         }
     }
 }

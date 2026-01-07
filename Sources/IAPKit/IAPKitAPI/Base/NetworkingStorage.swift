@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 import UIKit
 
-struct NetworkingStorage: NetworkingStorable {
+struct NetworkingStorage: NetworkingStorableV2 {
     static let accessTokenKey = "iapkit_access_token"
     static let refreshTokenKey = "iapkit_refresh_token"
     static var deviceIdKey: String {

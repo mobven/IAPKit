@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
 public extension IAPKitAPI {
-    enum IAP: AsyncNetworkable {
+    enum IAP: AsyncNetworkableV2 {
         case buy(request: ReceiptValidationRequest)
         case restore(request: ReceiptValidationRequest)
 

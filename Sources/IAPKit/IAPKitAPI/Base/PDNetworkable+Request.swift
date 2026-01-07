@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
-public extension AsyncNetworkable {
-    func getRequest(url: URL, encodable data: some Encodable, httpMethod: RequestMethod = .post) async -> URLRequest {
+public extension AsyncNetworkableV2 {
+    func getRequest(url: URL, encodable data: some Encodable, httpMethod: RequestMethodV2 = .post) async -> URLRequest {
         await getRequest(
             body: data,
             url: url,
@@ -32,12 +32,12 @@ public extension AsyncNetworkable {
         url: URL,
         queryItems: [String: String] = [:],
         headers: [String: String] = [:],
-        httpMethod: RequestMethod = .get
+        httpMethod: RequestMethodV2 = .get
     ) async -> URLRequest {
         await getRequest(queryItems: queryItems, headers: headers, url: url, httpMethod: httpMethod)
     }
 
-    func uploadRequest(url: URL, parameters: [String: String] = [:], files: [File] = []) async -> URLRequest {
+    func uploadRequest(url: URL, parameters: [String: String] = [:], files: [FileV2] = []) async -> URLRequest {
         await uploadRequest(method: .post, url: url, parameters: parameters, files: files)
     }
 
@@ -47,7 +47,7 @@ public extension AsyncNetworkable {
         queryItems: [String: String] = [:],
         headers: [String: String] = [:],
         url: URL,
-        httpMethod: RequestMethod = .get,
+        httpMethod: RequestMethodV2 = .get,
         addBearerToken: Bool = true
     ) async -> URLRequest {
         var request = URLRequest(url: url.adding(parameters: queryItems))
@@ -70,7 +70,7 @@ public extension AsyncNetworkable {
         body: some Encodable,
         headers: [String: String] = [:],
         url: URL,
-        httpMethod: RequestMethod = .post,
+        httpMethod: RequestMethodV2 = .post,
         addBearerToken: Bool = true
     ) async -> URLRequest {
         var request = URLRequest(url: url)
@@ -101,7 +101,7 @@ public extension AsyncNetworkable {
         let request = await request()
 
         do {
-            let (data, response) = try await Session.shared.session.data(for: request)
+            let (data, response) = try await SessionV2.shared.session.data(for: request)
             guard let httpResponse = response as? HTTPURLResponse else {
                 throw URLError(.badServerResponse)
             }
@@ -158,7 +158,7 @@ public extension AsyncNetworkable {
         }
 
         if !isRefreshToken {
-            return try await IAPRequestQueue.shared.executeAfterTokenRefresh {
+            return try await RequestQueueV2.shared.executeAfterTokenRefresh {
                 try await self.fetchData(
                     hasAuthentication: hasAuthentication,
                     isRefreshToken: true

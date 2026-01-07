@@ -5,9 +5,9 @@
 //  Created by Eser Kucuker on 14.06.2025.
 //
 
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
-public extension File {
+public extension FileV2 {
     var fileNameWithExtension: String {
         var fileName = fileName
         if !fileExtension.isEmpty {

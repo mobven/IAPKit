@@ -7,13 +7,13 @@
 
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
 /// Singleton manager for user session.
 public final class IAPUser: ObservableObject {
     private nonisolated(unsafe) static var instance = IAPUser()
 
-    public var keychain: NetworkingStorable = IAPUserStorage()
+    public var keychain: NetworkingStorableV2 = IAPUserStorage()
 
     /// Current user info
     public static var current: IAPUser {

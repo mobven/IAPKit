@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
 public extension IAPKitAPI {
-    enum Credits: AsyncNetworkable {
+    enum Credits: AsyncNetworkableV2 {
         case claimGiftCoins
         case getCredits
         case getProducts

@@ -18,19 +18,19 @@ public struct CreditsAPIService: CreditsAPIServiceProtocol {
     public init() {}
 
     public func claimGiftCoins() async throws -> ClaimGiftCoinsResponse {
-        try await IAPKitAPI.Credits.claimGiftCoins.getResponse()
+        try await IAPKitAPI.Credits.claimGiftCoins.fetchData()
     }
 
     public func getCredits() async throws -> GetCreditsResponse {
-        try await IAPKitAPI.Credits.getCredits.getResponse()
+        try await IAPKitAPI.Credits.getCredits.fetchData()
     }
 
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
-        try await IAPKitAPI.Credits.getProducts.getResponse()
+        try await IAPKitAPI.Credits.getProducts.fetchData()
     }
     
     public func spendCredit(amount: Int) async throws -> SpendCreditResponse {
         let request = SpendCreditRequest(amount: amount)
-        return try await IAPKitAPI.Credits.spendCredit(request: request).getResponse()
+        return try await IAPKitAPI.Credits.spendCredit(request: request).fetchData()
     }
 }

@@ -6,9 +6,9 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
-final class NetworkMonitor: NetworkLogsDelegate, IAPKitLoggable {
+final class NetworkMonitor: NetworkLogsDelegateV2, IAPKitLoggable {
     func logError(_ error: Error, context: String?) {
         #if DEBUG
         let message = context != nil ? "\(context!): \(error.localizedDescription)" : error.localizedDescription

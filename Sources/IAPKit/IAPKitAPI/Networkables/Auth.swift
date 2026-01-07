@@ -6,10 +6,10 @@
 //
 
 import Foundation
-import MBAsyncNetworking
+import MBAsyncNetworkingV2
 
 public extension IAPKitAPI {
-    enum Auth: AsyncNetworkable {
+    enum Auth: AsyncNetworkableV2 {
         case refresh(refreshToken: String)
         case register(request: RegisterRequest)
         

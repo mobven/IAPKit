@@ -130,6 +130,19 @@ public final class IAPKit: NSObject {
         productFetcher.setAdjustDeviceId(adjustId)
     }
 
+    /// Set attribution data (campaign, creative, ad group, media source, etc.)
+    /// - Parameter data: The attribution data to send to the IAP provider
+    public func setAttributionData(_ data: IAPAttributionData) {
+        productFetcher.setAttributionData(data)
+    }
+
+    /// Sync attributes and offerings with the provider
+    /// For RevenueCat: calls syncAttributesAndOfferingsIfNeeded
+    /// - Parameter completion: Completion handler with optional error
+    public func syncAttributesAndOfferings(completion: @escaping (Error?) -> Void) {
+        productFetcher.syncAttributesAndOfferings(completion: completion)
+    }
+
     public func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
         productFetcher.restorePurchases(completion: completion)
     }

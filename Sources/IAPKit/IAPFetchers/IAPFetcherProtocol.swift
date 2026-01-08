@@ -90,6 +90,7 @@ public protocol ManagedIAPProvider: ProductFetchable {
 
     /// Set the Adjust device ID for attribution
     func setAdjustDeviceId(_ adjustId: String?)
+
 }
 
 // MARK: - Default Implementations
@@ -111,6 +112,21 @@ public extension ManagedIAPProvider {
         // Default empty implementation
         completion(.success(""))
     }
+
+}
+
+// MARK: - AttributionProvidable
+
+/// Protocol for providers that support detailed attribution data (RevenueCat)
+/// Not all providers support these features - use `as? AttributionProvidable` to check
+public protocol AttributionProvidable: AnyObject {
+
+    /// Set attribution data (campaign, creative, ad group, etc.)
+    func setAttributionData(_ data: IAPAttributionData)
+
+    /// Sync attributes and offerings with the provider
+    /// - Parameter completion: Completion handler with optional error
+    func syncAttributesAndOfferings(completion: @escaping (Error?) -> Void)
 }
 
 // MARK: - Backward Compatibility

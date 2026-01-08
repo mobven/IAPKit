@@ -18,7 +18,7 @@ typealias LivePaywallPurchaseHandler = (IAPProduct, String?) -> Void
 typealias LivePaywallFailureHandler = (IAPProduct?, Error) -> Void
 
 /// RevenueCat implementation of ManagedIAPProvider
-final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
+final class RevenueCatFetcher: NSObject, ManagedIAPProvider, AttributionProvidable {
 
     // MARK: - Properties
 
@@ -310,6 +310,55 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         guard let adjustId = adjustId, !adjustId.isEmpty else { return }
         Purchases.shared.attribution.setAdjustID(adjustId)
     }
+
+    func setAttributionData(_ data: IAPAttributionData) {
+        if let creative = data.creative {
+            Purchases.shared.attribution.setCreative(creative)
+        }
+        if let campaign = data.campaign {
+            Purchases.shared.attribution.setCampaign(campaign)
+        }
+        if let adGroup = data.adGroup {
+            Purchases.shared.attribution.setAdGroup(adGroup)
+        }
+        if let mediaSource = data.mediaSource {
+            Purchases.shared.attribution.setMediaSource(mediaSource)
+        }
+        if let customAttributes = data.customAttributes {
+            Purchases.shared.attribution.setAttributes(customAttributes)
+        }
+    }
+
+    func syncAttributesAndOfferings(completion: @escaping (Error?) -> Void) {
+        Purchases.shared.syncAttributesAndOfferingsIfNeeded { [weak self] offerings, error in
+            
+            // 1. self nil ise (RevenueCatFetcher deallocate olduysa) sadece error'u dön
+            guard let self = self else {
+                completion(error)
+                return
+            }
+
+            // 2. RevenueCat yeni offerings döndüyse güncelle
+            if let offerings = offerings {
+                self.offerings = offerings  // tüm offerings'i sakla
+
+                // 3. Placement'a göre doğru offering'i seç
+                if !self.placementId.isEmpty {
+                    // Placement varsa ona göre offering al
+                    self.currentOffering = offerings.currentOffering(forPlacement: self.placementId)
+                } else {
+                    // Placement yoksa default current offering
+                    self.currentOffering = offerings.current
+                }
+
+                self.logger?.log("RevenueCat: Offerings synced...")
+            }
+            // offerings nil ise (değişiklik yoksa) mevcut offerings korunur
+
+            completion(error)
+        }
+    }
+
     
     // MARK: - Private Helpers
     

@@ -270,6 +270,23 @@ final class IAPProductFetcher {
         primaryFetcher?.setAdjustDeviceId(adjustId)
     }
 
+    func setAttributionData(_ data: IAPAttributionData) {
+        guard let attributionProvider = primaryFetcher as? AttributionProvidable else {
+            logger?.log("setAttributionData is not supported with selected provider")
+            return
+        }
+        attributionProvider.setAttributionData(data)
+    }
+
+    func syncAttributesAndOfferings(completion: @escaping (Error?) -> Void) {
+        guard let attributionProvider = primaryFetcher as? AttributionProvidable else {
+            logger?.log("syncAttributesAndOfferings is not supported with selected provider")
+            completion(nil)
+            return
+        }
+        attributionProvider.syncAttributesAndOfferings(completion: completion)
+    }
+
     // MARK: - Paywall UI
 
     @available(iOS 15.0, *)

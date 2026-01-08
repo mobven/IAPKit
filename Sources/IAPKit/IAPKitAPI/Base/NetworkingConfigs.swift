@@ -68,8 +68,6 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 return oAuthResponse
 
             } catch {
-                lastError = error
-
                 let isLastAttempt = attempt == maxRetryCount - 1
 
                 if !isLastAttempt {

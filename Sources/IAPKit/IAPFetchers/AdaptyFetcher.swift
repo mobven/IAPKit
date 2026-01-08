@@ -40,6 +40,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
                 self?.logger?.logError(error, context: "Adapty Activate")
             } else {
                 self?.logger?.log("Adapty Activated successfully.")
+                self?.identify(customerUserId)
             }
         }
     }

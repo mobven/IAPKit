@@ -43,7 +43,6 @@ public final class NetworkingConfigs {
 extension NetworkingConfigs: OAuthProviderDelegateV2 {
     func didRequestTokenRefresh() async throws -> OAuthResponseV2? {
         guard let refreshToken = IAPUser.current.refreshToken else {
-            print("[IAPKit] No refresh token found, attempting re-register")
             return try? await performReRegister()
         }
 
@@ -51,7 +50,6 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
 
         for attempt in 0 ..< maxRetryCount {
             do {
-                print("[IAPKit] Refresh token attempt \(attempt + 1)/\(maxRetryCount)")
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
                     .fetchResponse(hasAuthentication: false, isRefreshToken: true)
 
@@ -69,13 +67,10 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 )
 
                 await UserSessionV2.shared.save(oAuthResponse)
-                print("[IAPKit] Refresh token successful")
-
                 return oAuthResponse
 
             } catch {
                 lastError = error
-                print("[IAPKit] Refresh token attempt \(attempt + 1) failed: \(error)")
 
                 let isLastAttempt = attempt == maxRetryCount - 1
 
@@ -88,13 +83,10 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
         }
 
         // All refresh attempts failed, try to re-register
-        print("[IAPKit] All refresh attempts failed, attempting re-register. Last error: \(String(describing: lastError))")
         do {
             let result = try await performReRegister()
-            print("[IAPKit] Re-register successful")
             return result
         } catch {
-            print("[IAPKit] Re-register failed: \(error)")
             return nil
         }
     }
@@ -102,11 +94,8 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
     private func performReRegister() async throws -> OAuthResponseV2? {
         let userId = IAPUser.current.deviceId
         guard let sdkKey = IAPUser.current.sdkKey else {
-            print("[IAPKit] Re-register failed: No SDK key found")
             return nil
         }
-
-        print("[IAPKit] Attempting re-register with deviceId: \(userId)")
 
         let registerRequest = RegisterRequest(
             userId: userId,
@@ -127,6 +116,11 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
         )
 
         await UserSessionV2.shared.save(oAuthResponse)
+
+        // Re-identify user after re-register
+        await MainActor.run {
+            IAPKit.store.identify()
+        }
 
         return oAuthResponse
     }

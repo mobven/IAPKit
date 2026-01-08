@@ -141,7 +141,7 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
 
             let iapProducts = IAPProducts(
                 products: products,
-                config: currentOffering.metadata as? [String: Any],
+                config: currentOffering.metadata,
                 paywallId: currentOffering.identifier
             )
 

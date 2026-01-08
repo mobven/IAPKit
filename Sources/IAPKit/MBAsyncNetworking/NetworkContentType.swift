@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents Content-Type header values for different types of network requests
-public enum NetworkContentTypeV2 {
+enum NetworkContentTypeV2 {
     /// JSON content type (application/json)
     case json
     /// URL encoded form data (application/x-www-form-urlencoded)

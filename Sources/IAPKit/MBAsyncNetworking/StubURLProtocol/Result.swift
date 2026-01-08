@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension StubURLProtocolV2 {
+extension StubURLProtocolV2 {
     /// Represents different types of mock responses for network requests
     enum Result {
         /// Successful response with the specified data

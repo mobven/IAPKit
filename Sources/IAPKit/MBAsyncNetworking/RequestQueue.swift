@@ -12,9 +12,9 @@ import Foundation
 /// This actor ensures that if multiple requests detect an invalid token (e.g., 401 Unauthorized),
 /// only a single token refresh is triggered, and the rest of the requests wait for the result.
 /// It guarantees thread-safe execution and reduces redundant token refresh attempts.
-public actor RequestQueueV2 {
+actor RequestQueueV2 {
     /// Shared singleton instance of the `RequestQueue` for global access.
-    public static let shared = RequestQueueV2()
+    static let shared = RequestQueueV2()
 
     /// The current ongoing refresh `Task`, if any.
     private var refreshTask: Task<Bool, Error>?
@@ -30,7 +30,7 @@ public actor RequestQueueV2 {
     /// - Parameter operation: The async closure to execute once a valid token is confirmed.
     /// - Returns: The result of the provided async operation.
     /// - Throws: `AuthErrorV2.refreshingFailed` if the token refresh fails, or any error thrown by `operation`.
-    public func executeAfterTokenRefresh<T: Decodable>(
+    func executeAfterTokenRefresh<T: Decodable>(
         _ operation: @escaping () async throws -> T
     ) async throws -> T {
         // If a refresh is already in progress, queue the request

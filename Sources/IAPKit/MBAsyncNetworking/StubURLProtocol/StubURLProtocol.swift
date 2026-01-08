@@ -10,10 +10,10 @@ import Foundation
 /// URLProtocol subclass for mocking network requests in unit tests
 /// Acts as a middleware to intercept network requests and provide predefined responses
 /// Only works in a test environment (when XCTestConfigurationFilePath is defined)
-public final class StubURLProtocolV2: URLProtocol {
+final class StubURLProtocolV2: URLProtocol {
     /// The result to return when intercepting network requests
     /// Setting this to nil disables the stub protocol
-    public static var result: Result? {
+    static var result: Result? {
         didSet {
             if result == nil {
                 SessionV2.shared.setStubProtocolEnabled(false)
@@ -31,7 +31,7 @@ public final class StubURLProtocolV2: URLProtocol {
     }
 }
 
-public extension StubURLProtocolV2 {
+extension StubURLProtocolV2 {
     /// Determines if this protocol can handle the given request
     /// - Parameter request: The URLRequest to check
     /// - Returns: true if stubbing is enabled, false otherwise

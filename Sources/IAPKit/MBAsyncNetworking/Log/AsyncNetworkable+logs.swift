@@ -12,7 +12,7 @@ import OSLog
 @available(iOS 14.0, *) let logger = Logger(subsystem: "MBAsyncNetworking", category: "Network Logs")
 
 /// Extension that provides logging functionality for network requests and responses
-public extension AsyncNetworkableV2 {
+extension AsyncNetworkableV2 {
     /// Prints the response data to the console for debugging purposes.
     /// Also notifies the NetworkLogsManager delegate with the response data and the generated log.
     /// - Parameters:

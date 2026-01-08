@@ -8,7 +8,7 @@
 import Foundation
 
 /// Extension that provides helper methods for creating URLRequests with different configurations
-public extension AsyncNetworkableV2 {
+extension AsyncNetworkableV2 {
     /// Creates a URLRequest for GET requests with query parameters
     /// - Parameters:
     ///   - queryItems: Dictionary of query parameters to be added to the URL

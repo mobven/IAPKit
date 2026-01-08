@@ -8,7 +8,7 @@
 import Foundation
 
 /// Delegate protocol for handling token refresh operations
-public protocol OAuthProviderDelegateV2: AnyObject {
+protocol OAuthProviderDelegateV2: AnyObject {
     /// Called when a token refresh is required
     /// - Returns: A new OAuth token response or nil if refresh fails
     /// - Throws: Authentication errors if token refresh fails
@@ -16,20 +16,20 @@ public protocol OAuthProviderDelegateV2: AnyObject {
 }
 
 /// Structure representing OAuth authentication tokens and expiration
-public struct OAuthResponseV2 {
+struct OAuthResponseV2 {
     /// The OAuth access token used for authenticating requests
-    public let accessToken: String
+    let accessToken: String
     /// The OAuth refresh token used to obtain a new access token
-    public let refreshToken: String
+    let refreshToken: String
     /// Time in seconds until the access token expires
-    public let expiresIn: Int
+    let expiresIn: Int
 
     /// Initialize a new OAuth response
     /// - Parameters:
     ///   - accessToken: The access token
     ///   - refreshToken: The refresh token
     ///   - expiresIn: Expiration time in seconds
-    public init(accessToken: String, refreshToken: String, expiresIn: Int) {
+    init(accessToken: String, refreshToken: String, expiresIn: Int) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         self.expiresIn = expiresIn
@@ -37,21 +37,21 @@ public struct OAuthResponseV2 {
 }
 
 /// Actor that manages OAuth token validation and refresh
-public actor OAuthProviderV2 {
+actor OAuthProviderV2 {
     private var refreshTask: Task<OAuthResponseV2, Error>?
     /// Delegate that handles the actual token refresh implementation
-    public weak var delegate: OAuthProviderDelegateV2?
+    weak var delegate: OAuthProviderDelegateV2?
 
     /// Sets the delegate responsible for token refresh
     /// - Parameter delegate: The delegate implementing the token refresh logic
-    public func setDelegate(_ delegate: OAuthProviderDelegateV2) {
+    func setDelegate(_ delegate: OAuthProviderDelegateV2) {
         self.delegate = delegate
     }
 
     /// Gets a valid token, refreshing if necessary
     /// - Returns: A valid OAuth response with tokens
     /// - Throws: Authentication errors if token validation fails
-    public func validToken() async throws -> OAuthResponseV2 {
+    func validToken() async throws -> OAuthResponseV2 {
         if let handle = refreshTask {
             return try await handle.value
         }
@@ -70,7 +70,7 @@ public actor OAuthProviderV2 {
     /// Refreshes the OAuth token
     /// - Returns: A new OAuth response with refreshed tokens
     /// - Throws: Authentication errors if token refresh fails
-    @discardableResult public func refreshToken() async throws -> OAuthResponseV2 {
+    @discardableResult func refreshToken() async throws -> OAuthResponseV2 {
         if let refreshTask {
             return try await refreshTask.value
         }

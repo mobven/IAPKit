@@ -8,12 +8,12 @@
 import Foundation
 
 /// Singleton class to manage network logs delegation
-public class NetworkLogsManagerV2 {
+class NetworkLogsManagerV2 {
     /// Shared instance
-    public static let shared = NetworkLogsManagerV2()
+    static let shared = NetworkLogsManagerV2()
 
     /// Delegate for network logs
-    public weak var delegate: NetworkLogsDelegateV2?
+    weak var delegate: NetworkLogsDelegateV2?
 
     /// Private initializer for singleton
     private init() {}

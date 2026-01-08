@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension AsyncNetworkableV2 {
+extension AsyncNetworkableV2 {
     func fetchResponse<T: Decodable>(
         hasAuthentication: Bool = true,
         isRefreshToken: Bool = false

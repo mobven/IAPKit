@@ -8,14 +8,14 @@
 import Foundation
 
 /// Manages URLSession configuration and handles network session setup
-public final class SessionV2 {
+final class SessionV2 {
     /// Shared singleton instance of the Session
-    public static let shared: SessionV2 = .init()
+    static let shared: SessionV2 = .init()
 
     /// The URLSession used for making network requests
-    public var session: URLSession
+    var session: URLSession
     /// The delegate handling URLSession callbacks
-    public var delegate: URLSessionDelegate
+    var delegate: URLSessionDelegate
 
     /// Tasks currently in progress, keyed by identifier
     var tasksInProgress: [String: URLSessionDataTask] = [:]

@@ -8,17 +8,17 @@
 import Foundation
 
 /// Represents a file to be uploaded in a multipart form data request
-public struct FileV2 {
+struct FileV2 {
     /// Key name for the file in the multipart form data
-    public var name: String
+    var name: String
     /// Name of the file without extension
-    public var fileName: String
+    var fileName: String
     /// Extension of the file (without the dot)
-    public var fileExtension: String
+    var fileExtension: String
     /// MIME type of the file (e.g., "image/jpeg")
-    public var mimeType: String
+    var mimeType: String
     /// The binary data of the file
-    public var data: Data
+    var data: Data
 
     /// The complete filename with extension
     var fileNameWithExtension: String {
@@ -37,7 +37,7 @@ public struct FileV2 {
     ///   - fileExtension: Extension of the file (without the dot)
     ///   - mimeType: MIME type of the file (e.g., "image/jpeg")
     ///   - data: The binary data of the file
-    public init(name: String, fileName: String, fileExtension: String, mimeType: String, data: Data) {
+    init(name: String, fileName: String, fileExtension: String, mimeType: String, data: Data) {
         self.name = name
         self.fileName = fileName
         self.fileExtension = fileExtension

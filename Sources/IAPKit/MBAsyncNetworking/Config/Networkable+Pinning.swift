@@ -8,18 +8,18 @@
 import Foundation
 import Security
 
-public protocol PinnableSessionDelegateV2: URLSessionDelegate {
+protocol PinnableSessionDelegateV2: URLSessionDelegate {
     var certificatePaths: [String] { get set }
 }
 
-public final class URLSessionPinnableDelegateAsyncV2: NSObject, PinnableSessionDelegateV2 {
-    public var certificatePaths: [String] = []
+final class URLSessionPinnableDelegateAsyncV2: NSObject, PinnableSessionDelegateV2 {
+    var certificatePaths: [String] = []
 
-    public init(certificatePaths: [String] = []) {
+    init(certificatePaths: [String] = []) {
         self.certificatePaths = certificatePaths
     }
 
-    public func urlSession(
+    func urlSession(
         _ session: URLSession,
         didReceive challenge: URLAuthenticationChallenge
     )
@@ -71,7 +71,7 @@ public final class URLSessionPinnableDelegateAsyncV2: NSObject, PinnableSessionD
 }
 
 extension URLSessionPinnableDelegateAsyncV2: URLSessionTaskDelegate {
-    public func urlSession(
+    func urlSession(
         _ session: URLSession,
         task: URLSessionTask,
         didFinishCollecting metrics: URLSessionTaskMetrics
@@ -80,7 +80,7 @@ extension URLSessionPinnableDelegateAsyncV2: URLSessionTaskDelegate {
     }
 }
 
-public extension PinnableSessionDelegateV2 {
+extension PinnableSessionDelegateV2 {
     func logTask(_ task: URLSessionTask, didFinishCollecting metrics: URLSessionTaskMetrics) {
         // Session.shared.networkLogMonitoringDelegate?.logTask(task: task, didFinishCollecting: metrics)
     }

@@ -9,10 +9,10 @@ import Foundation
 
 /// Manager class for OAuth authentication operations
 /// Provides access to the application's authentication provider
-@MainActor public class OAuthManagerV2 {
+@MainActor class OAuthManagerV2 {
     /// Shared singleton instance of the OAuthManager
-    public static let shared: OAuthManagerV2 = .init()
+    static let shared: OAuthManagerV2 = .init()
 
     /// The authentication provider that handles token refresh and validation
-    public var authManager: OAuthProviderV2 = .init()
+    var authManager: OAuthProviderV2 = .init()
 }

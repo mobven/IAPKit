@@ -10,7 +10,7 @@ import OSLog
 
 /// Protocol that defines methods for receiving network logs
 /// Apps that use MBAsyncNetworking can implement this protocol to receive network requests and responses
-public protocol NetworkLogsDelegateV2: AnyObject {
+protocol NetworkLogsDelegateV2: AnyObject {
     /// Called when a network response is received
     /// - Parameters:
     ///   - request: The URLRequest that was made
@@ -27,7 +27,7 @@ public protocol NetworkLogsDelegateV2: AnyObject {
 }
 
 /// Optional protocol methods
-public extension NetworkLogsDelegateV2 {
+extension NetworkLogsDelegateV2 {
     func didReceiveResponse(request: URLRequest, data: Data?, log: String) {}
     func didReceiveError(request: URLRequest, error: Error?, log: String) {}
 }

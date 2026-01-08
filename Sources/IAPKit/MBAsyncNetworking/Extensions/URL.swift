@@ -9,7 +9,7 @@
 import Foundation
 
 /// Extensions for the URL type to assist with network requests
-public extension URL {
+extension URL {
     /// Initializes a URL with a string, causing a fatal error if parsing fails
     /// - Parameter string: The URL string to parse
     /// - Returns: A valid URL

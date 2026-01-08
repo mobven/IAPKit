@@ -9,7 +9,7 @@ import Combine
 import Foundation
 
 /// Extension that provides the main data fetching functionality for the networking layer
-public extension AsyncNetworkableV2 {
+extension AsyncNetworkableV2 {
     /// Fetches and decodes data from the network into the specified Decodable type
     /// - Parameters:
     ///   - hasAuthentication: Indicates if the request requires authentication (defaults to true)

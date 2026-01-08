@@ -41,7 +41,7 @@ public final class NetworkingConfigs {
 }
 
 extension NetworkingConfigs: OAuthProviderDelegateV2 {
-    public func didRequestTokenRefresh() async throws -> OAuthResponseV2? {
+    func didRequestTokenRefresh() async throws -> OAuthResponseV2? {
         guard let refreshToken = IAPUser.current.refreshToken else {
             return nil
         }

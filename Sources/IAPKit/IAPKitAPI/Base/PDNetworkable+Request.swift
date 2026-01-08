@@ -7,7 +7,7 @@
 
 import Foundation
 
-public extension AsyncNetworkableV2 {
+extension AsyncNetworkableV2 {
     func getRequest(url: URL, encodable data: some Encodable, httpMethod: RequestMethodV2 = .post) async -> URLRequest {
         await getRequest(
             body: data,

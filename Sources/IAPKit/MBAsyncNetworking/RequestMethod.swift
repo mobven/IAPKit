@@ -8,7 +8,7 @@
 import Foundation
 
 /// Represents HTTP request methods supported by the networking layer
-public enum RequestMethodV2: String {
+enum RequestMethodV2: String {
     /// HTTP DELETE method
     case delete = "DELETE"
     /// HTTP GET method

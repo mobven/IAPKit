@@ -8,7 +8,7 @@
 import Foundation
 
 /// Extensions for Error type to assist with error handling
-public extension Error {
+extension Error {
     /// Unwraps NSError objects to find underlying errors
     /// - Returns: The underlying error if found, or self if not
     var unwrappedErrorV2: Error {
@@ -25,8 +25,7 @@ public extension Error {
 
         // Special handling for authentication errors
         if error.domain == "com.alamofire.error" && error.code == 4,
-           let info = error.userInfo as? [String: Any],
-           let data = info["NSErrorFailingURLKey"] as? Data,
+           let data = error.userInfo["NSErrorFailingURLKey"] as? Data,
            let response = String(data: data, encoding: .utf8) {
             return NSError(domain: "OAuthError", code: -1, userInfo: [NSLocalizedDescriptionKey: response])
         }
@@ -42,7 +41,7 @@ public extension Error {
 }
 
 /// Networking error codes
-public enum ErrorCodeV2 {
+enum ErrorCodeV2 {
     /// 400 bad request.
     static let badRequest: Int = 400
     /// 401 unauthorized.

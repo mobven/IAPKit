@@ -9,7 +9,7 @@ import Foundation
 
 /// Protocol for storing and retrieving authentication-related data
 /// Implementations should handle the secure storage of tokens and credentials
-public protocol NetworkingStorableV2 {
+protocol NetworkingStorableV2 {
     /// The refresh token used for OAuth authentication
     var refreshToken: String? { get set }
 

@@ -12,14 +12,11 @@ final class IAPUserStorage: NetworkingStorableV2 {
     private let keychain = KeychainHelper()
 
     private enum Keys {
-        static let accessToken = "iapkit_accessToken"
-        static let refreshToken = "iapkit_refreshToken"
-        static let userInfo = "userInfo"
-        static let userId = "iapkit_userId"
-        static let sdkKey = "iapkit_sdkKey"
-        static var deviceId: String {
-            "iapkit_" + (Bundle.main.stringFromInfoPlist("KEYCHAIN_DEVICE_KEY") ?? "device_id")
-        }
+        static var accessToken: String { "iapkit_accessToken" }
+        static var refreshToken: String { "iapkit_refreshToken" }
+        static var userId: String { "iapkit_userId" }
+        static var sdkKey: String { "iapkit_sdkKey" }
+        static var deviceId: String { "iapkit_device_id" }
     }
 
     var accessToken: String? {

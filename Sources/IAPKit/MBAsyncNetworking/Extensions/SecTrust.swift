@@ -7,13 +7,13 @@
 
 import Foundation
 
-public extension [SecCertificate] {
+extension [SecCertificate] {
     var publicKeys: [SecKey] {
         compactMap(\.publicKey)
     }
 }
 
-public extension SecCertificate {
+extension SecCertificate {
     var publicKey: SecKey? {
         let policy = SecPolicyCreateBasicX509()
         var trust: SecTrust?
@@ -29,7 +29,7 @@ public extension SecCertificate {
     }
 }
 
-public extension SecTrust {
+extension SecTrust {
     var certificates: [SecCertificate] {
         if #available(iOS 15, macOS 12, watchOS 8, *) {
             (SecTrustCopyCertificateChain(self) as? [SecCertificate]) ?? []

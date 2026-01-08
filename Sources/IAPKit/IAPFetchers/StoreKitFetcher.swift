@@ -17,7 +17,6 @@ enum StoreError: Error {
 /// This fetcher only conforms to ProductFetchable, not ManagedIAPProvider,
 /// because StoreKit doesn't support activation, user management, or placements
 final class StoreKitFetcher: NSObject, ProductFetchable {
-
     // MARK: - Properties
 
     var fetcherType: IAPFetcherType { .storeKit }
@@ -52,7 +51,7 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             request.start()
         }
     }
-    
+
     // MARK: - Profile
 
     func fetchProfile(completion: @escaping (Result<IAPProfile, Error>) -> Void) {
@@ -60,7 +59,7 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             Task {
                 let products = try await Product.products(for: productIdentifiers)
 
-                var isSubscribed: Bool = false
+                var isSubscribed = false
                 var expireDate: Date?
                 for product in products {
                     let subscription = product.subscription
@@ -81,7 +80,7 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             completion(.success(IAPProfile(isSubscribed: false, expireDate: nil)))
         }
     }
-    
+
     // MARK: - Purchases
 
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
@@ -96,14 +95,18 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             let error = NSError(
                 domain: SKErrorDomain,
                 code: SKError.unknown.rawValue,
-                userInfo: [NSLocalizedDescriptionKey: "StoreKit 1 direct purchases are not supported. Please configure Adapty or RevenueCat as your primary fetcher for purchase functionality."]
+                userInfo: [
+                    NSLocalizedDescriptionKey: "StoreKit 1 direct purchases are not supported. Please configure Adapty or RevenueCat as your primary fetcher for purchase functionality."
+                ]
             )
             completion(.failure(error))
         }
     }
 
-    @available(iOS 15, *)
-    private func buyWithStoreKit2(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) async {
+    @available(iOS 15, *) private func buyWithStoreKit2(
+        product: IAPProduct,
+        completion: @escaping ((Result<IAPSubscription, Error>) -> Void)
+    ) async {
         do {
             // Find the StoreKit 2 Product
             let products = try await Product.products(for: [product.identifier])
@@ -121,7 +124,7 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             let result = try await storeProduct.purchase()
 
             switch result {
-            case .success(let verification):
+            case let .success(verification):
                 let transaction = try checkVerified(verification)
 
                 // Finish the transaction
@@ -203,13 +206,12 @@ final class StoreKitFetcher: NSObject, ProductFetchable {
             completion(.success(false))
         }
     }
-    
-    @available(iOS 15, *)
-    private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
+
+    @available(iOS 15, *) private func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {
         switch result {
         case .unverified:
             throw StoreError.failedVerification
-        case .verified(let safe):
+        case let .verified(safe):
             return safe
         }
     }

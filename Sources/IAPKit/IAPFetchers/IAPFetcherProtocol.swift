@@ -50,7 +50,6 @@ public protocol ProductFetchable: AnyObject {
 /// These providers require activation and support user management features
 /// that native StoreKit doesn't provide
 public protocol ManagedIAPProvider: ProductFetchable {
-
     // MARK: - Lifecycle
 
     /// Activate the provider with the given API key and placement ID
@@ -58,8 +57,13 @@ public protocol ManagedIAPProvider: ProductFetchable {
     ///   - apiKey: The API key for the provider
     ///   - placementName: The placement ID used to fetch the appropriate offering
     ///   - entitlementId: The entitlement identifier to check for premium status
-    ///   - completion: Optional completion handler with success/failure result
-    func activate(apiKey: String, placementName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)?)
+    ///   - customerUserId: Optional customer user ID to identify the user during activation
+    func activate(
+        apiKey: String,
+        placementName: String,
+        entitlementId: String,
+        customerUserId: String
+    )
 
     /// Log out the current user
     func logout()

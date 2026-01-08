@@ -11,11 +11,11 @@ public extension IAPPaymentConfig {
     protocol IAPPaywallType: RawRepresentable, Equatable, Hashable where RawValue == String {
         static var defaultValue: Self { get }
     }
-    
+
     protocol IAPOnboardingType: RawRepresentable, Equatable, Hashable where RawValue == String {
         static var defaultValue: Self { get }
     }
-    
+
     protocol IAPOfferType: RawRepresentable, Equatable, Hashable where RawValue == String {
         static var defaultValue: Self { get }
     }
@@ -36,7 +36,7 @@ public enum DefaultOfferType: String, IAPPaymentConfig.IAPOfferType {
     public static var defaultValue: Self { .noOffer }
 }
 
-public struct IAPConfigTypeMapper {
+public enum IAPConfigTypeMapper {
     public static var paywallType: (any IAPPaymentConfig.IAPPaywallType.Type) = DefaultPaywallType.self
     public static var onboardingType: (any IAPPaymentConfig.IAPOnboardingType.Type) = DefaultOnboardingType.self
     public static var offerType: (any IAPPaymentConfig.IAPOfferType.Type) = DefaultOfferType.self

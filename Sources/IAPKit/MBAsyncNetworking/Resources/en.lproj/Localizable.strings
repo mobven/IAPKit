@@ -1,0 +1,4 @@
+auth.error.missingToken = "Authentication failed: No token available.";
+auth.error.refreshingFailed = "Token refresh failed. Unable to obtain a new authentication token.";
+auth.error.storageNotFound = "Token storage is unavailable. Ensure the authentication storage mechanism is correctly implemented.";
+auth.error.tokenQueueResumeFailed = "Failed to resume queued request after token refresh. Please retry.";

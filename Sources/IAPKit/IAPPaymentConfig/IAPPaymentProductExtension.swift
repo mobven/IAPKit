@@ -20,10 +20,12 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
             lhs.productTrialBadge == rhs.productTrialBadge
     }
 
-    /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default time value.
+    /// Returns the subtitle for a given product, considering its subscription price, localized time label, and default
+    /// time value.
     /// - Parameters:
     ///   - skProduct: The `IAPProduct` representing the product
-    ///   - placeholder: The default time value to be used if `productTimeLocalized` is not available..It must be localized string,
+    ///   - placeholder: The default time value to be used if `productTimeLocalized` is not available..It must be
+    /// localized string,
     ///   - productTimeLabelLocalized: The localized time label for the product. It must be localized string,
     /// - Returns:  A string representing the formatted subtitle for the product,
     /// including its price and time information.
@@ -31,7 +33,8 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// Example usage:
     /// ```
     /// let product = IAPProduct(...)
-    /// let localizedSubtitle = subtitleForProduct(product, placeholder: "Month"localized(), productTimeLocalized: "Month")
+    /// let localizedSubtitle = subtitleForProduct(product, placeholder: "Month"localized(), productTimeLocalized:
+    /// "Month")
     /// print(localizedSubtitle) // Output: "$4.99/Month"
     /// ```
     func subTitleForProduct(
@@ -51,7 +54,8 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let divideDecimal = Decimal(productPriceDivide) // Ensure divide is also a Decimal
         let multiplied = floatValue / divideDecimal * Decimal(100)
 
-        let truncatedValue = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) / Decimal(100)
+        let truncatedValue = ((multiplied as NSDecimalNumber).rounding(accordingToBehavior: nil) as Decimal) /
+            Decimal(100)
 
         let formattedPrice = String(format: "%.2f", NSDecimalNumber(decimal: truncatedValue).doubleValue)
             .replacingOccurrences(of: ".", with: ",")
@@ -62,10 +66,13 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         return "\(currencySymbol)\(formattedPrice)" + "/" + timeString
     }
 
-    /// Returns the name for a given product You should use the returned string with the localized function. You should use the returned string with the localized function.
+    /// Returns the name for a given product You should use the returned string with the localized function. You should
+    /// use the returned string with the localized function.
     /// - Parameters:
-    ///   - placeholder: The default localized date text to be used if `productName` is not available.  It must be localized string,
-    /// - Returns:  A string representing the name of the product. If `productName` is nil or empty, returns `defaultlocalizedDateText`.
+    ///   - placeholder: The default localized date text to be used if `productName` is not available.  It must be
+    /// localized string,
+    /// - Returns:  A string representing the name of the product. If `productName` is nil or empty, returns
+    /// `defaultlocalizedDateText`.
     /// Example usage:
     /// ```
     /// let product = IAPProduct(...)
@@ -87,7 +94,8 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// ```
     /// let product = IAPProduct(...)
     /// var config: IAPPaymentConfig.IAPPaymentProduct?
-    /// let defaultUnitName = (config?.productLocale == nil ) ? product.subscriptionPeriodText.localized : (config?.productLocale?.localized ?? "")
+    /// let defaultUnitName = (config?.productLocale == nil ) ? product.subscriptionPeriodText.localized :
+    /// (config?.productLocale?.localized ?? "")
     /// let productPrice = config?.priceTitle(skProduct: product, productLocale: defaultUnitName)
     /// print(productPrice) // Output: "$4.99/USD" (if available) or "0.99/USD" (if not available)
     /// ```
@@ -104,16 +112,16 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
         let doubleCustomPrice = NSDecimalNumber(decimal: customPrice).doubleValue
 
         var formattedPrice = formattedCustomPrice(doubleCustomPrice, alternativePrice: skProduct?.priceString() ?? "")
-        
+
         if formattedPrice.hasSuffix(",98") {
             formattedPrice = String(formattedPrice.dropLast(2)) + "99"
         }
-        
+
         let skCurrency = skProduct?.priceLocale.currencySymbol ?? ""
         let price = (customPrice > 0) ? skCurrency + formattedPrice : formattedPrice
         return price + "/" + productLocale
     }
-    
+
     func formattedPriceTitle(
         skProduct: IAPProduct?,
         productLocale: String,
@@ -133,7 +141,7 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
 
         // Get the currency symbol
         let currencySymbol = skProduct?.priceLocale.currencySymbol ?? ""
-        
+
         // Prepend the currency symbol only if the price is greater than 0
         let priceWithCurrency = (finalPrice > 0) ? currencySymbol + formattedPrice : formattedPrice
 
@@ -156,8 +164,10 @@ public extension IAPPaymentConfig.IAPPaymentProduct {
     /// Returns the button title for a given product. You should use the returned string with the localized function
     /// - Parameters:
     ///   - skProduct: The `IAPProduct` representing the product
-    ///   - defaultButtonTitle: The default button title to be used if `productButtonTitle` is not available.  It must be localized string,
-    /// - Returns: A string representing the button title of the product. Returns `defaultButtonTitle` if `productButtonTitle` is nil or empty.
+    ///   - defaultButtonTitle: The default button title to be used if `productButtonTitle` is not available.  It must
+    /// be localized string,
+    /// - Returns: A string representing the button title of the product. Returns `defaultButtonTitle` if
+    /// `productButtonTitle` is nil or empty.
     /// You should use the returned string with the localized function
     /// Example usage:
     /// ```

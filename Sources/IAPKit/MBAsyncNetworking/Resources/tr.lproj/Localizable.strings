@@ -1,0 +1,4 @@
+auth.error.missingToken = "Kimlik doğrulama başarısız: Token bulunamadı.";
+auth.error.refreshingFailed = "Token yenileme başarısız oldu. Yeni kimlik doğrulama tokenı alınamadı.";
+auth.error.storageNotFound = "Token saklama mekanizması bulunamadı. Kimlik doğrulama depolama sisteminin düzgün çalıştığından emin olun.";
+auth.error.tokenQueueResumeFailed = "Token yenilendikten sonra sıraya alınan istek devam ettirilemedi. Lütfen tekrar deneyin.";

@@ -24,7 +24,7 @@ public class IAPProduct: IAPProductProtocol {
     /// Creates a minimal product with only an identifier (used for live paywall callbacks)
     public convenience init(identifier: String) {
         self.init()
-        self.product = PlaceholderProduct(identifier: identifier)
+        product = PlaceholderProduct(identifier: identifier)
     }
 
     public var identifier: String { product.identifier }
@@ -133,8 +133,7 @@ public protocol IAPProductProtocol {
 
     public func weeklyPrice() -> Double? {
         if let period = subscription?.subscriptionPeriod, period.unit != .week || period.value > 1,
-           period.unit != .day
-        {
+           period.unit != .day {
             var priceDoubleForWeek: Double?
             switch period.unit {
             case .day:
@@ -269,8 +268,7 @@ extension SKProduct: IAPProductProtocol {
 
     public func weeklyPrice() -> Double? {
         if let period = subscriptionPeriod, period.unit != .week || period.numberOfUnits > 1,
-           period.unit != .day
-        {
+           period.unit != .day {
             var priceDoubleForWeek: Double?
             switch period.unit {
             case .day:

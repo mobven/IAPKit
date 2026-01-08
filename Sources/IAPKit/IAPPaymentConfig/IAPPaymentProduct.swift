@@ -25,7 +25,7 @@ public extension IAPPaymentConfig {
         public var hasSubtitle: Bool {
             !(productPriceDivide == nil || productPriceDivide == 0)
         }
-        
+
         // Public initializer tanımı:
         public init(
             productName: String? = nil,

@@ -13,7 +13,6 @@ import UIKit
 
 /// Coordinator that manages primary (Adapty/RevenueCat) and fallback (StoreKit) fetchers
 final class IAPProductFetcher {
-
     // MARK: - Properties
 
     /// Primary fetcher - managed providers like Adapty or RevenueCat
@@ -63,25 +62,30 @@ final class IAPProductFetcher {
     // MARK: - Activation
 
     /// Activate with Adapty as primary fetcher
-    func activate(adaptyApiKey apiKey: String, paywallName: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: "premium", completion: completion)
-    }
-
-    /// Activate with Adapty as primary fetcher with custom entitlement
-    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String = "premium") {
         let adaptyFetcher = AdaptyFetcher()
         adaptyFetcher.logger = logger
-        adaptyFetcher.activate(apiKey: apiKey, placementName: paywallName, entitlementId: entitlementId, completion: completion)
+        adaptyFetcher.activate(
+            apiKey: apiKey,
+            placementName: paywallName,
+            entitlementId: entitlementId,
+            customerUserId: IAPUser.current.deviceId
+        )
         primaryFetcher = adaptyFetcher
     }
 
     /// Activate with RevenueCat as primary fetcher
-    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String = "premium") {
         let revenueCatFetcher = RevenueCatFetcher()
         revenueCatFetcher.logger = logger
         revenueCatFetcher.onLivePaywallPurchase = onLivePaywallPurchase
         revenueCatFetcher.onLivePaywallFailure = onLivePaywallFailure
-        revenueCatFetcher.activate(apiKey: apiKey, placementName: offeringId, entitlementId: entitlementId, completion: completion)
+        revenueCatFetcher.activate(
+            apiKey: apiKey,
+            placementName: offeringId,
+            entitlementId: entitlementId,
+            customerUserId: IAPUser.current.deviceId
+        )
         primaryFetcher = revenueCatFetcher
     }
 
@@ -94,7 +98,7 @@ final class IAPProductFetcher {
 
     /// Fetch products with timeout fallback to StoreKit
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
-        guard let primaryFetcher = primaryFetcher else {
+        guard let primaryFetcher else {
             // No primary fetcher configured, use StoreKit directly
             fallbackFetcher.fetch(completion: completion)
             return
@@ -115,7 +119,7 @@ final class IAPProductFetcher {
 
         // Use DispatchWorkItem for cancellable timeout
         let timeoutWorkItem = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
+            guard let self else { return }
 
             var shouldFallback = false
             stateQueue.sync {
@@ -125,8 +129,8 @@ final class IAPProductFetcher {
             }
 
             if shouldFallback {
-                self.logger?.log("Primary fetcher timed out, falling back to StoreKit")
-                self.fallbackFetcher.fetch(completion: completion)
+                logger?.log("Primary fetcher timed out, falling back to StoreKit")
+                fallbackFetcher.fetch(completion: completion)
             }
         }
 
@@ -152,7 +156,7 @@ final class IAPProductFetcher {
 
     /// Fetch paywall/offering name
     func fetchPaywallName(completion: @escaping ((String?) -> Void)) {
-        guard let primaryFetcher = primaryFetcher else {
+        guard let primaryFetcher else {
             completion(nil)
             return
         }
@@ -171,7 +175,7 @@ final class IAPProductFetcher {
 
     /// Fetch profile from primary fetcher only
     func fetchProfile(completion: @escaping ((Result<IAPProfile, Error>) -> Void)) {
-        guard let primaryFetcher = primaryFetcher else {
+        guard let primaryFetcher else {
             let error = NSError(
                 domain: "IAPProductFetcher",
                 code: -1,
@@ -187,7 +191,7 @@ final class IAPProductFetcher {
 
     /// Buy product using primary fetcher
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
-        guard let primaryFetcher = primaryFetcher else {
+        guard let primaryFetcher else {
             let error = NSError(
                 domain: "IAPProductFetcher",
                 code: -1,
@@ -202,7 +206,7 @@ final class IAPProductFetcher {
     /// Restore purchases from both primary and StoreKit in parallel
     /// Returns success if either returns true
     func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
-        guard let primaryFetcher = primaryFetcher else {
+        guard let primaryFetcher else {
             // No primary, just use StoreKit
             fallbackFetcher.restorePurchases(completion: completion)
             return
@@ -238,7 +242,7 @@ final class IAPProductFetcher {
             }
 
             // Both returned false or error - return primary's result
-            if let primaryResult = primaryResult {
+            if let primaryResult {
                 completion(primaryResult)
             } else {
                 completion(.success(false))
@@ -272,10 +276,9 @@ final class IAPProductFetcher {
 
     // MARK: - Paywall UI
 
-    @available(iOS 15.0, *)
-    func getPaywallView(completion: @escaping (AnyView?) -> Void) {
+    @available(iOS 15.0, *) func getPaywallView(completion: @escaping (AnyView?) -> Void) {
         guard let paywallProvider = primaryFetcher as? PaywallProvidable else {
-            // TODO: sadece revenuecat ile çalışıyor hatası verilebilir. aşağıda da aynı şekilde. 
+            // TODO: sadece revenuecat ile çalışıyor hatası verilebilir. aşağıda da aynı şekilde.
             completion(nil)
             return
         }

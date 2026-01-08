@@ -43,11 +43,15 @@ public final class NetworkingConfigs {
 extension NetworkingConfigs: OAuthProviderDelegateV2 {
     func didRequestTokenRefresh() async throws -> OAuthResponseV2? {
         guard let refreshToken = IAPUser.current.refreshToken else {
-            return nil
+            print("[IAPKit] No refresh token found, attempting re-register")
+            return try? await performReRegister()
         }
+
+        var lastError: Error?
 
         for attempt in 0 ..< maxRetryCount {
             do {
+                print("[IAPKit] Refresh token attempt \(attempt + 1)/\(maxRetryCount)")
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)
                     .fetchResponse(hasAuthentication: false, isRefreshToken: true)
 
@@ -65,34 +69,44 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 )
 
                 await UserSessionV2.shared.save(oAuthResponse)
+                print("[IAPKit] Refresh token successful")
 
-                return OAuthResponseV2(
-                    accessToken: accessToken,
-                    refreshToken: newRefreshToken,
-                    expiresIn: .zero
-                )
+                return oAuthResponse
 
             } catch {
+                lastError = error
+                print("[IAPKit] Refresh token attempt \(attempt + 1) failed: \(error)")
+
                 let isLastAttempt = attempt == maxRetryCount - 1
 
-                if isLastAttempt {
-                    // After max retries failed, try to re-register
-                    return try await performReRegister()
+                if !isLastAttempt {
+                    // Exponential backoff: 1s, 2s, 4s, ...
+                    let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
+                    try? await Task.sleep(nanoseconds: delay)
                 }
-
-                // Exponential backoff: 1s, 2s, 4s, ...
-                let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
-                try? await Task.sleep(nanoseconds: delay)
             }
         }
-        return nil
+
+        // All refresh attempts failed, try to re-register
+        print("[IAPKit] All refresh attempts failed, attempting re-register. Last error: \(String(describing: lastError))")
+        do {
+            let result = try await performReRegister()
+            print("[IAPKit] Re-register successful")
+            return result
+        } catch {
+            print("[IAPKit] Re-register failed: \(error)")
+            return nil
+        }
     }
 
     private func performReRegister() async throws -> OAuthResponseV2? {
         let userId = IAPUser.current.deviceId
         guard let sdkKey = IAPUser.current.sdkKey else {
+            print("[IAPKit] Re-register failed: No SDK key found")
             return nil
         }
+
+        print("[IAPKit] Attempting re-register with deviceId: \(userId)")
 
         let registerRequest = RegisterRequest(
             userId: userId,

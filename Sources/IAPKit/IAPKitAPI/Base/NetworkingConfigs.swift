@@ -43,7 +43,7 @@ public final class NetworkingConfigs {
 extension NetworkingConfigs: OAuthProviderDelegateV2 {
     func didRequestTokenRefresh() async throws -> OAuthResponseV2? {
         guard let refreshToken = IAPUser.current.refreshToken else {
-            return nil
+            return try? await performReRegister()
         }
 
         for attempt in 0 ..< maxRetryCount {
@@ -65,31 +65,26 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 )
 
                 await UserSessionV2.shared.save(oAuthResponse)
-
-                return OAuthResponseV2(
-                    accessToken: accessToken,
-                    refreshToken: newRefreshToken,
-                    expiresIn: .zero
-                )
+                return oAuthResponse
 
             } catch {
-                switch error.httpStatusCodeV2 {
-                case 401:
-                    throw error
-                default:
-                    let isLastAttempt = attempt == maxRetryCount - 1
-                    if isLastAttempt {
-                        // After max retries failed, try to re-register
-                        return try await performReRegister()
-                    }
+                let isLastAttempt = attempt == maxRetryCount - 1
+
+                if !isLastAttempt {
                     // Exponential backoff: 1s, 2s, 4s, ...
                     let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
                     try? await Task.sleep(nanoseconds: delay)
                 }
-                return nil
             }
         }
-        return nil
+
+        // All refresh attempts failed, try to re-register
+        do {
+            let result = try await performReRegister()
+            return result
+        } catch {
+            return nil
+        }
     }
 
     private func performReRegister() async throws -> OAuthResponseV2? {
@@ -117,6 +112,11 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
         )
 
         await UserSessionV2.shared.save(oAuthResponse)
+
+        // Re-identify user after re-register
+        await MainActor.run {
+            IAPKit.store.identify()
+        }
 
         return oAuthResponse
     }

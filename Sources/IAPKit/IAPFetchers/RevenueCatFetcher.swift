@@ -404,6 +404,7 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         )
         controller.delegate = delegateWrapper
 
+        // TODO: başka yollarla yapılabilir mi bakalım.
         // Store wrapper to prevent deallocation
         objc_setAssociatedObject(
             controller,

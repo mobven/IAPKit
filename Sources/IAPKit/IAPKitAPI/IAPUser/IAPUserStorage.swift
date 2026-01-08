@@ -46,13 +46,18 @@ final class IAPUserStorage: NetworkingStorableV2 {
     }
 
     var deviceId: String {
-        if let storedDeviceId = value(forKey: Keys.deviceId) {
-            return storedDeviceId
-        }
+        get {
+            if let storedDeviceId = value(forKey: Keys.deviceId) {
+                return storedDeviceId
+            }
 
-        let newDeviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-        save(Keys.deviceId, value: newDeviceId)
-        return newDeviceId
+            let newDeviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+            save(Keys.deviceId, value: newDeviceId)
+            return newDeviceId
+        }
+        set {
+            save(Keys.deviceId, value: newValue)
+        }
     }
 
     func save(_ key: String, value: String?) {

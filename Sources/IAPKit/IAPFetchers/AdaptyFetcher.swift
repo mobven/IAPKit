@@ -178,6 +178,10 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
                 }
                 if #available(iOS 15.0, *), let transaction = info.sk2Transaction {
                     self?.logger?.logTransaction(IAPKitTransaction(transaction: transaction))
+                    // Re-register with appAccountToken as new deviceId
+                    if let appAccountToken = transaction.appAccountToken {
+                        self?.reRegisterWithAppAccountToken(appAccountToken.uuidString)
+                    }
                 }
                 let subscription = info.profile?.subscriptions[adaptyProduct.vendorProductId]
                 completion(
@@ -195,6 +199,38 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
             case let .failure(error):
                 self?.logger?.logError(error, context: self?.placementName)
                 completion(.failure(error))
+            }
+        }
+    }
+
+    private func reRegisterWithAppAccountToken(_ appAccountToken: String) {
+        Task {
+            // Update deviceId with appAccountToken
+            await MainActor.run {
+                IAPUser.current.deviceId = appAccountToken
+            }
+
+            guard let sdkKey = IAPUser.current.sdkKey else {
+                logger?.log("Re-register failed: No SDK key found")
+                return
+            }
+
+            let registerRequest = RegisterRequest(
+                userId: appAccountToken,
+                sdkKey: sdkKey
+            )
+
+            do {
+                let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest)
+                    .fetchResponse(hasAuthentication: false)
+
+                await MainActor.run {
+                    IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
+                }
+
+                logger?.log("Re-registered with appAccountToken: \(appAccountToken)")
+            } catch {
+                logger?.logError(error, context: "Re-register with appAccountToken")
             }
         }
     }

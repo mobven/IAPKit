@@ -34,7 +34,8 @@ final class IAPUser: ObservableObject {
     }
 
     var deviceId: String {
-        keychain.deviceId
+        get { keychain.deviceId }
+        set { keychain.deviceId = newValue }
     }
 
     var sdkKey: String? {

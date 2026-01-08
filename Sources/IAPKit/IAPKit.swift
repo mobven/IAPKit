@@ -115,6 +115,7 @@ public final class IAPKit: NSObject {
         sdkKey: String,
         completion: ((Result<Void, Error>) -> Void)? = nil
     ) {
+        // TODO: @cansu: yukarıdakı fonksiyonla tekilleştirilebilinir.
         setupNetworking()
         productFetcher.activate(
             adaptyApiKey: apiKey,
@@ -141,6 +142,10 @@ public final class IAPKit: NSObject {
         sdkKey: String,
         completion: ((Result<Void, Error>) -> Void)? = nil
     ) {
+        // TODO: @cansu: şöyle bir yapı kurgulayabiliriz.
+        // func activate(iapSystem: any IAPActivatable)
+        // ve disari bu tipte public struct'lar sunabiliriz, ki bunlardan birisiyle ama tek fonskiyon ile
+        // activate cagirilabilsin.
         setupNetworking()
         productFetcher.activate(
             revenueCatApiKey: apiKey,

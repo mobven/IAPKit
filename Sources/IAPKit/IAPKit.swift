@@ -171,6 +171,7 @@ public final class IAPKit: NSObject {
         deviceId: String?,
         completion: ((Result<Void, Error>) -> Void)?
     ) {
+        // TODO: activate calisir da backend hata donerse, handle etmemiz gerekir mi? dusunelim.
         completion?(result)
         if case .success = result {
             Task {

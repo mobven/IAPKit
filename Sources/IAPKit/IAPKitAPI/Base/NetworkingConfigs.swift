@@ -93,8 +93,8 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
     }
 
     private func performReRegister() async throws -> OAuthResponseV2? {
-        guard let userId = IAPUser.current.userId,
-              let sdkKey = IAPUser.current.sdkKey else {
+        let userId = IAPUser.current.deviceId
+        guard let sdkKey = IAPUser.current.sdkKey else {
             return nil
         }
 

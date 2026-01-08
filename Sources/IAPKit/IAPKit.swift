@@ -74,87 +74,39 @@ public final class IAPKit: NSObject {
         }
     }
 
-    // MARK: - Activation
-
-    /// Activate IAPKit with Adapty provider (backward compatible)
-    /// - Parameters:
-    ///   - apiKey: Adapty API key
-    ///   - paywallName: Adapty placement name
-    ///   - customerUserId: Optional customer user ID to identify the user during activation
-    ///   - completion: Optional completion handler with success/failure result
-    public func activate(
-        adaptyApiKey apiKey: String,
-        paywallName: String,
-        customerUserId: String? = nil,
-        sdkKey: String,
-        completion: ((Result<Void, Error>) -> Void)? = nil
-    ) {
-        setupNetworking()
-        productFetcher
-            .activate(
-                adaptyApiKey: apiKey,
-                paywallName: paywallName,
-                customerUserId: customerUserId
-            ) { [weak self] result in
-                self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
-            }
-    }
-
     /// Activate IAPKit with Adapty provider and custom entitlement ID
     /// - Parameters:
     ///   - apiKey: Adapty API key
     ///   - paywallName: Adapty placement name
     ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
-    ///   - customerUserId: Optional customer user ID to identify the user during activation
-    ///   - completion: Optional completion handler with success/failure result
     public func activate(
-        adaptyApiKey apiKey: String,
-        paywallName: String,
-        entitlementId: String,
-        customerUserId: String? = nil,
-        sdkKey: String,
-        completion: ((Result<Void, Error>) -> Void)? = nil
+        adaptyApiKey apiKey: String, paywallName: String, entitlementId: String = "premium", sdkKey: String
     ) {
-        // TODO: @cansu: yukarıdakı fonksiyonla tekilleştirilebilinir.
         setupNetworking()
-        productFetcher.activate(
-            adaptyApiKey: apiKey,
-            paywallName: paywallName,
-            entitlementId: entitlementId,
-            customerUserId: customerUserId
-        ) { [weak self] result in
-            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
-        }
+        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId)
+        registerApp(sdkKey: sdkKey, deviceId: IAPUser.current.deviceId)
     }
 
     /// Activate IAPKit with RevenueCat provider
     /// - Parameters:
     ///   - apiKey: RevenueCat public API key
     ///   - offeringId: The offering identifier to use (empty string for current offering)
-    ///   - entitlementId: The entitlement ID to check for premium status
+    ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
     public func activate(
         revenueCatApiKey apiKey: String,
         offeringId: String = "",
-        entitlementId: String,
-        customerUserId: String? = nil,
-        sdkKey: String,
-        completion: ((Result<Void, Error>) -> Void)? = nil
+        entitlementId: String = "premium",
+        sdkKey: String
     ) {
         // TODO: @cansu: şöyle bir yapı kurgulayabiliriz.
         // func activate(iapSystem: any IAPActivatable)
         // ve disari bu tipte public struct'lar sunabiliriz, ki bunlardan birisiyle ama tek fonskiyon ile
         // activate cagirilabilsin.
         setupNetworking()
-        productFetcher.activate(
-            revenueCatApiKey: apiKey,
-            offeringId: offeringId,
-            entitlementId: entitlementId,
-            customerUserId: customerUserId
-        ) { [weak self] result in
-            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
-        }
+        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId)
+        registerApp(sdkKey: sdkKey, deviceId: IAPUser.current.deviceId)
     }
 
     // MARK: - Private Helpers
@@ -165,18 +117,9 @@ public final class IAPKit: NSObject {
         }
     }
 
-    private func registerApp(
-        result: Result<Void, Error>,
-        sdkKey: String,
-        deviceId: String?,
-        completion: ((Result<Void, Error>) -> Void)?
-    ) {
-        // TODO: activate calisir da backend hata donerse, handle etmemiz gerekir mi? dusunelim.
-        completion?(result)
-        if case .success = result {
-            Task {
-                await performBackendLogin(sdkKey: sdkKey, deviceId: deviceId)
-            }
+    private func registerApp(sdkKey: String, deviceId: String) {
+        Task {
+            await performBackendLogin(sdkKey: sdkKey, deviceId: deviceId)
         }
     }
 
@@ -197,8 +140,6 @@ public final class IAPKit: NSObject {
 
             IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
 
-            // Save userId and sdkKey for potential re-registration
-            IAPUser.current.userId = deviceId
             IAPUser.current.sdkKey = sdkKey
 
             logger?.log("IAPKit: Backend authentication successful")

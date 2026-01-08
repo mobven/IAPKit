@@ -45,8 +45,7 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         apiKey: String,
         placementName: String,
         entitlementId: String,
-        customerUserId: String? = nil,
-        completion: ((Result<Void, Error>) -> Void)? = nil
+        customerUserId: String
     ) {
         placementId = placementName
         self.entitlementId = entitlementId
@@ -58,17 +57,11 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         case .prod:
             Purchases.logLevel = .error
         }
-        Purchases.configure(withAPIKey: apiKey)
+        Purchases.configure(withAPIKey: apiKey, appUserID: customerUserId)
 
         logger?.log("RevenueCat activated with placement: \(placementName), entitlement: \(entitlementId)")
 
-        // If customerUserId is provided, identify the user
-        if let customerUserId, !customerUserId.isEmpty {
-            identify(customerUserId, completion: completion)
-        } else {
-            // RevenueCat configure is synchronous, so we can immediately return success
-            completion?(.success(()))
-        }
+        identify(customerUserId)
     }
 
     func setPlacement(_ placementName: String) {
@@ -92,6 +85,7 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
                 self?.logger?.logError(error, context: "RevenueCat identify")
                 completion?(.failure(error))
             } else {
+                self?.logger?.log("RevenueCat identified the user")
                 completion?(.success(()))
             }
         }

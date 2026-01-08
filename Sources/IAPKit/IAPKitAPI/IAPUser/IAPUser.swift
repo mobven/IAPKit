@@ -11,7 +11,7 @@ import Foundation
 final class IAPUser: ObservableObject {
     private nonisolated(unsafe) static var instance = IAPUser()
 
-    var keychain: NetworkingStorableV2 = IAPUserStorage()
+    var keychain: IAPUserStorage = .init()
 
     /// Current user info
     static var current: IAPUser {
@@ -33,14 +33,13 @@ final class IAPUser: ObservableObject {
         set { keychain.refreshToken = newValue }
     }
 
-    var userId: String? {
-        get { (keychain as? IAPUserStorage)?.userId }
-        set { (keychain as? IAPUserStorage)?.userId = newValue }
+    var deviceId: String {
+        keychain.deviceId
     }
 
     var sdkKey: String? {
-        get { (keychain as? IAPUserStorage)?.sdkKey }
-        set { (keychain as? IAPUserStorage)?.sdkKey = newValue }
+        get { keychain.sdkKey }
+        set { keychain.sdkKey = newValue }
     }
 
     var isAuthenticated: Bool {

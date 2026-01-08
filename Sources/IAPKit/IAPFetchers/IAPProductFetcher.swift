@@ -62,49 +62,20 @@ final class IAPProductFetcher {
     // MARK: - Activation
 
     /// Activate with Adapty as primary fetcher
-    func activate(
-        adaptyApiKey apiKey: String,
-        paywallName: String,
-        customerUserId: String? = nil,
-        completion: ((Result<Void, Error>) -> Void)? = nil
-    ) {
-        activate(
-            adaptyApiKey: apiKey,
-            paywallName: paywallName,
-            entitlementId: "premium",
-            customerUserId: customerUserId,
-            completion: completion
-        )
-    }
-
-    /// Activate with Adapty as primary fetcher with custom entitlement
-    func activate(
-        adaptyApiKey apiKey: String,
-        paywallName: String,
-        entitlementId: String,
-        customerUserId: String? = nil,
-        completion: ((Result<Void, Error>) -> Void)? = nil
-    ) {
+    func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String = "premium") {
         let adaptyFetcher = AdaptyFetcher()
         adaptyFetcher.logger = logger
         adaptyFetcher.activate(
             apiKey: apiKey,
             placementName: paywallName,
             entitlementId: entitlementId,
-            customerUserId: customerUserId,
-            completion: completion
+            customerUserId: IAPUser.current.deviceId
         )
         primaryFetcher = adaptyFetcher
     }
 
     /// Activate with RevenueCat as primary fetcher
-    func activate(
-        revenueCatApiKey apiKey: String,
-        offeringId: String,
-        entitlementId: String,
-        customerUserId: String? = nil,
-        completion: ((Result<Void, Error>) -> Void)? = nil
-    ) {
+    func activate(revenueCatApiKey apiKey: String, offeringId: String, entitlementId: String = "premium") {
         let revenueCatFetcher = RevenueCatFetcher()
         revenueCatFetcher.logger = logger
         revenueCatFetcher.onLivePaywallPurchase = onLivePaywallPurchase
@@ -113,8 +84,7 @@ final class IAPProductFetcher {
             apiKey: apiKey,
             placementName: offeringId,
             entitlementId: entitlementId,
-            customerUserId: customerUserId,
-            completion: completion
+            customerUserId: IAPUser.current.deviceId
         )
         primaryFetcher = revenueCatFetcher
     }

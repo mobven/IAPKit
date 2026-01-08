@@ -14,7 +14,6 @@ final class IAPUserStorage: NetworkingStorableV2 {
     private enum Keys {
         static var accessToken: String { "iapkit_accessToken" }
         static var refreshToken: String { "iapkit_refreshToken" }
-        static var userId: String { "iapkit_userId" }
         static var sdkKey: String { "iapkit_sdkKey" }
         static var deviceId: String { "iapkit_device_id" }
     }
@@ -37,15 +36,6 @@ final class IAPUserStorage: NetworkingStorableV2 {
         }
     }
 
-    var userId: String? {
-        get {
-            value(forKey: Keys.userId)
-        }
-        set {
-            save(Keys.userId, value: newValue)
-        }
-    }
-
     var sdkKey: String? {
         get {
             value(forKey: Keys.sdkKey)
@@ -56,15 +46,13 @@ final class IAPUserStorage: NetworkingStorableV2 {
     }
 
     var deviceId: String {
-        get async {
-            if let storedDeviceId = value(forKey: Keys.deviceId) {
-                return storedDeviceId
-            }
-
-            let newDeviceId = await UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
-            save(Keys.deviceId, value: newDeviceId)
-            return newDeviceId
+        if let storedDeviceId = value(forKey: Keys.deviceId) {
+            return storedDeviceId
         }
+
+        let newDeviceId = UIDevice.current.identifierForVendor?.uuidString ?? UUID().uuidString
+        save(Keys.deviceId, value: newDeviceId)
+        return newDeviceId
     }
 
     func save(_ key: String, value: String?) {
@@ -84,7 +72,6 @@ final class IAPUserStorage: NetworkingStorableV2 {
     func clearAll() {
         keychain.delete(key: Keys.accessToken)
         keychain.delete(key: Keys.refreshToken)
-        keychain.delete(key: Keys.userId)
         keychain.delete(key: Keys.sdkKey)
     }
 }

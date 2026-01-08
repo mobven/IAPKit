@@ -30,8 +30,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
         apiKey: String,
         placementName: String,
         entitlementId: String,
-        customerUserId: String? = nil,
-        completion: ((Result<Void, Error>) -> Void)? = nil
+        customerUserId: String
     ) {
         self.placementName = placementName
         self.entitlementId = entitlementId
@@ -39,9 +38,8 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
         Adapty.activate(apiKey, customerUserId: customerUserId) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
-                completion?(.failure(error))
             } else {
-                completion?(.success(()))
+                self?.logger?.log("Adapty Activated successfully.")
             }
         }
     }

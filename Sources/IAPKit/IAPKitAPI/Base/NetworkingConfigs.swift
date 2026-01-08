@@ -46,8 +46,6 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
             return try? await performReRegister()
         }
 
-        var lastError: Error?
-
         for attempt in 0 ..< maxRetryCount {
             do {
                 let response: RefreshTokenResponse = try await IAPKitAPI.Auth.refresh(refreshToken: refreshToken)

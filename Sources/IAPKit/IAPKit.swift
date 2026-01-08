@@ -157,8 +157,8 @@ public final class IAPKit: NSObject {
         productFetcher.logout()
     }
 
-    public func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        productFetcher.identify(userID, completion: completion)
+    public func identify(completion: ((Result<Void, Error>) -> Void)? = nil) {
+        productFetcher.identify(IAPUser.current.deviceId, completion: completion)
     }
 
     public func setPlayerId(_ playerId: String?) {

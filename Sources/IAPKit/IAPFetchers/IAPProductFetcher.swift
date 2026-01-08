@@ -36,7 +36,7 @@ final class IAPProductFetcher {
     }
 
     /// Timeout for primary fetcher before falling back to StoreKit
-    var timeout: TimeInterval = 20
+    var timeout: TimeInterval = 5
 
     /// Backward compatibility alias
     var adaptyTimeout: TimeInterval {

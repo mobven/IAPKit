@@ -12,25 +12,30 @@ import StoreKit
 
 /// Adapty implementation of ManagedIAPProvider
 final class AdaptyFetcher: NSObject, ManagedIAPProvider {
-    
     // MARK: - Properties
-    
+
     var fetcherType: IAPFetcherType { .adapty }
     weak var logger: IAPKitLoggable?
-    
+
     var products: [AdaptyPaywallProduct] = []
     var placementName = ""
     private var entitlementId: String = "premium"
-    
+
     private var isAdaptyFetchingProducts: Bool = false
     private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
 
     // MARK: - Lifecycle
-    
-    func activate(apiKey: String, placementName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
+
+    func activate(
+        apiKey: String,
+        placementName: String,
+        entitlementId: String,
+        customerUserId: String? = nil,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
         self.placementName = placementName
         self.entitlementId = entitlementId
-        
+
         Adapty.activate(apiKey, customerUserId: customerUserId) { [weak self] result in
             if let error = result {
                 self?.logger?.logError(error, context: "Adapty Activate")
@@ -40,7 +45,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
             }
         }
     }
-    
+
     func setPlacement(_ placementName: String) {
         self.placementName = placementName
     }
@@ -113,14 +118,14 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
 
     func fetchProfile(completion: @escaping (Result<IAPProfile, Error>) -> Void) {
         Adapty.getProfile { [weak self] result in
-            guard let self = self else { return }
+            guard let self else { return }
             switch result {
             case let .success(profile):
-                let isSubscribed = profile.accessLevels[self.entitlementId]?.isActive ?? false
-                let expireDate = profile.accessLevels[self.entitlementId]?.expiresAt
+                let isSubscribed = profile.accessLevels[entitlementId]?.isActive ?? false
+                let expireDate = profile.accessLevels[entitlementId]?.expiresAt
                 completion(.success(IAPProfile(isSubscribed: isSubscribed, expireDate: expireDate)))
             case let .failure(error):
-                self.logger?.logError(error, context: self.placementName)
+                logger?.logError(error, context: placementName)
                 completion(.failure(error))
             }
         }
@@ -131,7 +136,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
             guard let self else { return }
             switch result {
             case let .success(profile):
-                let isPremium = profile.accessLevels[self.entitlementId]?.isActive ?? false
+                let isPremium = profile.accessLevels[entitlementId]?.isActive ?? false
                 if isPremium {
                     completion(.success(true))
                 } else {
@@ -211,7 +216,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
 
     func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         Adapty.identify(userID) { [weak self] error in
-            if let error = error {
+            if let error {
                 self?.logger?.logError(error, context: "Adapty Identify")
                 completion?(.failure(error))
             } else {
@@ -228,7 +233,7 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
             )
         }
     }
-    
+
     func setFirebaseId(_ id: String?) {
         Task {
             try? await Adapty.setIntegrationIdentifier(
@@ -237,16 +242,20 @@ final class AdaptyFetcher: NSObject, ManagedIAPProvider {
             )
         }
     }
-    
+
     func setAdjustDeviceId(_ adjustId: String?) {
-        guard let adjustId = adjustId, !adjustId.isEmpty else {
+        guard let adjustId, !adjustId.isEmpty else {
             logger?.logError(
-                NSError(domain: "IAPKit", code: -1, userInfo: [NSLocalizedDescriptionKey: "Adjust device ID is nil or empty"]),
+                NSError(
+                    domain: "IAPKit",
+                    code: -1,
+                    userInfo: [NSLocalizedDescriptionKey: "Adjust device ID is nil or empty"]
+                ),
                 context: "setAdjustDeviceId"
             )
             return
         }
-        
+
         Task {
             do {
                 try await Adapty.setIntegrationIdentifier(

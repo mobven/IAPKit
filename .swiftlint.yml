@@ -1,0 +1,36 @@
+disabled_rules:
+- trailing_whitespace
+- identifier_name
+- inclusive_language
+
+excluded:
+- Pods
+- KocAilemTests
+- reports
+- vendor
+- .build
+- fastlane
+- Gemfile.locked
+- Gemfile
+- Build
+- Carthage
+- Frameworks/Sources/Frameworks/LockSmith
+- Frameworks/Sources/Frameworks/PieCharts
+- Frameworks/Sources/Frameworks/Karte
+- Frameworks/Sources/Frameworks/ImageSlideShow
+- SPM
+
+identifier_name:
+ min_length: # only min_length
+  error: 3 # only error
+ max_length:
+  warning: 50
+ excluded: # excluded via string array
+  - id
+
+type_name:
+ max_length: 50
+
+type_body_length:
+  - 300 # warning
+  - 400 # error

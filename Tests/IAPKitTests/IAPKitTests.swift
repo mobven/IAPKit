@@ -1,5 +1,5 @@
-@testable import IAPKit
 import XCTest
+@testable import IAPKit
 
 final class IAPKitTests: XCTestCase {
     func testExample() throws {

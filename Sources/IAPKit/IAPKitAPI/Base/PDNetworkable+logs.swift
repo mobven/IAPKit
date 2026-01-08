@@ -15,21 +15,21 @@ final class NetworkMonitor: NetworkLogsDelegateV2, IAPKitLoggable {
         #endif
     }
 
-    @available(iOS 15.0, *)
-    func logTransaction(_ transaction: IAPKitTransaction) {
+    @available(iOS 15.0, *) func logTransaction(_ transaction: IAPKitTransaction) {
         // Not needed for network logs
     }
+
     func didReceiveError(request: URLRequest, error: Error?, log logMessage: String) {
         #if DEBUG
         let message = getRequestLog(request) + "\n" + (error?.localizedDescription ?? "")
-        self.log("[ERROR] \(message)")
+        log("[ERROR] \(message)")
         #endif
     }
 
     func didReceiveResponse(request: URLRequest, data: Data?, log logMessage: String) {
         #if DEBUG
         let message = getRequestLog(request) + "\n" + getResponseLog(data)
-        self.log(message)
+        log(message)
         #endif
     }
 

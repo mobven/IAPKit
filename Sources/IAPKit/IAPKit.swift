@@ -52,8 +52,7 @@ public final class IAPKit: NSObject {
     }
 
     /// Backward compatibility alias for primaryTimeoutDuration
-    @available(*, deprecated, renamed: "primaryTimeoutDuration")
-    public var adaptyTimeoutDuration: Int {
+    @available(*, deprecated, renamed: "primaryTimeoutDuration") public var adaptyTimeoutDuration: Int {
         get { primaryTimeoutDuration }
         set { primaryTimeoutDuration = newValue }
     }
@@ -83,11 +82,22 @@ public final class IAPKit: NSObject {
     ///   - paywallName: Adapty placement name
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(
+        adaptyApiKey apiKey: String,
+        paywallName: String,
+        customerUserId: String? = nil,
+        sdkKey: String,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
         setupNetworking()
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, customerUserId: customerUserId) { [weak self] result in
-            self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
-        }
+        productFetcher
+            .activate(
+                adaptyApiKey: apiKey,
+                paywallName: paywallName,
+                customerUserId: customerUserId
+            ) { [weak self] result in
+                self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
+            }
     }
 
     /// Activate IAPKit with Adapty provider and custom entitlement ID
@@ -97,9 +107,21 @@ public final class IAPKit: NSObject {
     ///   - entitlementId: The entitlement ID to check for premium status (default: "premium")
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(adaptyApiKey apiKey: String, paywallName: String, entitlementId: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(
+        adaptyApiKey apiKey: String,
+        paywallName: String,
+        entitlementId: String,
+        customerUserId: String? = nil,
+        sdkKey: String,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
         setupNetworking()
-        productFetcher.activate(adaptyApiKey: apiKey, paywallName: paywallName, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
+        productFetcher.activate(
+            adaptyApiKey: apiKey,
+            paywallName: paywallName,
+            entitlementId: entitlementId,
+            customerUserId: customerUserId
+        ) { [weak self] result in
             self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
         }
     }
@@ -111,9 +133,21 @@ public final class IAPKit: NSObject {
     ///   - entitlementId: The entitlement ID to check for premium status
     ///   - customerUserId: Optional customer user ID to identify the user during activation
     ///   - completion: Optional completion handler with success/failure result
-    public func activate(revenueCatApiKey apiKey: String, offeringId: String = "", entitlementId: String, customerUserId: String? = nil, sdkKey: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
+    public func activate(
+        revenueCatApiKey apiKey: String,
+        offeringId: String = "",
+        entitlementId: String,
+        customerUserId: String? = nil,
+        sdkKey: String,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
         setupNetworking()
-        productFetcher.activate(revenueCatApiKey: apiKey, offeringId: offeringId, entitlementId: entitlementId, customerUserId: customerUserId) { [weak self] result in
+        productFetcher.activate(
+            revenueCatApiKey: apiKey,
+            offeringId: offeringId,
+            entitlementId: entitlementId,
+            customerUserId: customerUserId
+        ) { [weak self] result in
             self?.registerApp(result: result, sdkKey: sdkKey, deviceId: customerUserId, completion: completion)
         }
     }
@@ -126,7 +160,12 @@ public final class IAPKit: NSObject {
         }
     }
 
-    private func registerApp(result: Result<Void, Error>, sdkKey: String, deviceId: String?, completion: ((Result<Void, Error>) -> Void)?) {
+    private func registerApp(
+        result: Result<Void, Error>,
+        sdkKey: String,
+        deviceId: String?,
+        completion: ((Result<Void, Error>) -> Void)?
+    ) {
         completion?(result)
         if case .success = result {
             Task {
@@ -147,7 +186,8 @@ public final class IAPKit: NSObject {
         )
 
         do {
-            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest).fetchResponse(hasAuthentication: false)
+            let response: RegisterResponse = try await IAPKitAPI.Auth.register(request: registerRequest)
+                .fetchResponse(hasAuthentication: false)
 
             IAPUser.current.save(tokens: (access: response.accessToken, refresh: response.refreshToken))
 
@@ -204,8 +244,7 @@ public final class IAPKit: NSObject {
     /// Automatically fetches offerings if not already loaded
     /// Only works when using RevenueCat as the IAP provider
     /// - Parameter completion: Completion handler with the paywall view, or nil if not using RevenueCat
-    @available(iOS 15.0, *)
-    public func getPaywallView(completion: @escaping (AnyView?) -> Void) {
+    @available(iOS 15.0, *) public func getPaywallView(completion: @escaping (AnyView?) -> Void) {
         productFetcher.getPaywallView(completion: completion)
     }
 

@@ -31,7 +31,7 @@ public extension IAPKitAPI {
                     url: IAPKitAPI.getURL(withPath: "api/v1/products/list"),
                     httpMethod: .get
                 )
-            case .spendCredit(let request):
+            case let .spendCredit(request):
                 await getRequest(
                     body: request,
                     url: IAPKitAPI.getURL(withPath: "api/v1/users/me/credits/spend"),

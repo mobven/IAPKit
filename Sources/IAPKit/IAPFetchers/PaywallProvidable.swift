@@ -10,9 +10,7 @@ import UIKit
 
 /// Protocol for fetchers that support remote paywall UI
 /// Only RevenueCat supports this feature currently
-@available(iOS 15.0, *)
-public protocol PaywallProvidable: AnyObject {
-
+@available(iOS 15.0, *) public protocol PaywallProvidable: AnyObject {
     /// Returns a SwiftUI PaywallView for the current placement
     /// Automatically fetches offerings if not already loaded
     /// - Parameter completion: Completion handler with the paywall view

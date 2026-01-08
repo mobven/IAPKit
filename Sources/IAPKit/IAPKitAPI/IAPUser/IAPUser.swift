@@ -5,7 +5,6 @@
 //  Created by Cansu Özdizlekli on 31.12.2025.
 //
 
-
 import Foundation
 
 /// Singleton manager for user session.

@@ -28,7 +28,7 @@ public struct CreditsAPIService: CreditsAPIServiceProtocol {
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await IAPKitAPI.Credits.getProducts.fetchResponse()
     }
-    
+
     public func spendCredit(amount: Int) async throws -> SpendCreditResponse {
         let request = SpendCreditRequest(amount: amount)
         return try await IAPKitAPI.Credits.spendCredit(request: request).fetchResponse()

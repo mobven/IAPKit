@@ -19,7 +19,6 @@ typealias LivePaywallFailureHandler = (IAPProduct?, Error) -> Void
 
 /// RevenueCat implementation of ManagedIAPProvider
 final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
-
     // MARK: - Properties
 
     var fetcherType: IAPFetcherType { .revenueCat }
@@ -34,16 +33,22 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
     private var currentOffering: Offering?
     private var placementId: String = ""
     private var entitlementId: String = "premium"
-    
+
     private var isRevenueCatFetchingProducts: Bool = false
     private var pendingPurchase: (product: IAPProduct, completion: (Result<IAPSubscription, Error>) -> Void)?
     private var purchaseRetryCount: Int = 0
     private let maxPurchaseRetries: Int = 1
-    
+
     // MARK: - Lifecycle
-    
-    func activate(apiKey: String, placementName: String, entitlementId: String, customerUserId: String? = nil, completion: ((Result<Void, Error>) -> Void)? = nil) {
-        self.placementId = placementName
+
+    func activate(
+        apiKey: String,
+        placementName: String,
+        entitlementId: String,
+        customerUserId: String? = nil,
+        completion: ((Result<Void, Error>) -> Void)? = nil
+    ) {
+        placementId = placementName
         self.entitlementId = entitlementId
 
         // Map IAPKit log level to RevenueCat log level
@@ -58,32 +63,32 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
         logger?.log("RevenueCat activated with placement: \(placementName), entitlement: \(entitlementId)")
 
         // If customerUserId is provided, identify the user
-        if let customerUserId = customerUserId, !customerUserId.isEmpty {
+        if let customerUserId, !customerUserId.isEmpty {
             identify(customerUserId, completion: completion)
         } else {
-        // RevenueCat configure is synchronous, so we can immediately return success
-        completion?(.success(()))
+            // RevenueCat configure is synchronous, so we can immediately return success
+            completion?(.success(()))
         }
     }
-    
+
     func setPlacement(_ placementName: String) {
-        let wasLoaded = self.currentOffering != nil
-        self.placementId = placementName
-        self.currentOffering = nil
+        let wasLoaded = currentOffering != nil
+        placementId = placementName
+        currentOffering = nil
 
         // Re-fetch if offerings were previously loaded
         if wasLoaded {
             fetch { _ in }
         }
     }
-    
+
     func logout() {
         Purchases.shared.logOut { _, _ in }
     }
-    
+
     func identify(_ userID: String, completion: ((Result<Void, Error>) -> Void)? = nil) {
         Purchases.shared.logIn(userID) { [weak self] _, _, error in
-            if let error = error {
+            if let error {
                 self?.logger?.logError(error, context: "RevenueCat identify")
                 completion?(.failure(error))
             } else {
@@ -91,109 +96,107 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
             }
         }
     }
-    
+
     // MARK: - Products
-    
+
     func fetch(completion: @escaping ((Result<IAPProducts, Error>) -> Void)) {
         isRevenueCatFetchingProducts = true
-        
+
         Purchases.shared.getOfferings { [weak self] offerings, error in
-            guard let self = self else { return }
-            self.isRevenueCatFetchingProducts = false
-            
-            if let error = error {
-                self.logger?.logError(error, context: "RevenueCat getOfferings")
+            guard let self else { return }
+            isRevenueCatFetchingProducts = false
+
+            if let error {
+                logger?.logError(error, context: "RevenueCat getOfferings")
                 completion(.failure(error))
                 return
             }
-            
-            guard let offerings = offerings else {
+
+            guard let offerings else {
                 completion(.success(IAPProducts(products: [])))
                 return
             }
-            
+
             self.offerings = offerings
 
             // Get offering for placement or fall back to current
-            let offering: Offering?
-            if !self.placementId.isEmpty {
-                offering = offerings.currentOffering(forPlacement: self.placementId)
+            let offering: Offering? = if !placementId.isEmpty {
+                offerings.currentOffering(forPlacement: placementId)
             } else {
-                offering = offerings.current
+                offerings.current
             }
 
             guard let currentOffering = offering else {
-                self.logger?.log("RevenueCat: No offering found for placement: \(self.placementId)")
+                logger?.log("RevenueCat: No offering found for placement: \(placementId)")
                 completion(.success(IAPProducts(products: [])))
                 return
             }
-            
+
             self.currentOffering = currentOffering
-            
+
             // Convert RevenueCat packages to IAPProducts
             let products = currentOffering.availablePackages.compactMap { package -> IAPProduct? in
                 self.createIAPProduct(from: package.storeProduct)
             }
-            
+
             let iapProducts = IAPProducts(
                 products: products,
                 config: currentOffering.metadata as? [String: Any],
                 paywallId: currentOffering.identifier
             )
-            
+
             completion(.success(iapProducts))
-            
+
             // Handle pending purchase if any
-            if let pending = self.pendingPurchase {
-                self.buy(product: pending.product, completion: pending.completion)
-                self.pendingPurchase = nil
+            if let pending = pendingPurchase {
+                buy(product: pending.product, completion: pending.completion)
+                pendingPurchase = nil
             }
         }
     }
-    
+
     func fetchPaywall(completion: @escaping ((Result<String, Error>) -> Void)) {
         Purchases.shared.getOfferings { [weak self] offerings, error in
-            if let error = error {
+            if let error {
                 self?.logger?.logError(error, context: "RevenueCat fetchPaywall")
                 completion(.failure(error))
                 return
             }
 
-            let offering: Offering?
-            if let placementId = self?.placementId, !placementId.isEmpty {
-                offering = offerings?.currentOffering(forPlacement: placementId)
+            let offering: Offering? = if let placementId = self?.placementId, !placementId.isEmpty {
+                offerings?.currentOffering(forPlacement: placementId)
             } else {
-                offering = offerings?.current
+                offerings?.current
             }
 
             completion(.success(offering?.identifier ?? ""))
         }
     }
-    
+
     // MARK: - Profile
-    
+
     func fetchProfile(completion: @escaping (Result<IAPProfile, Error>) -> Void) {
         Purchases.shared.getCustomerInfo { [weak self] customerInfo, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                self.logger?.logError(error, context: "RevenueCat fetchProfile")
+            guard let self else { return }
+
+            if let error {
+                logger?.logError(error, context: "RevenueCat fetchProfile")
                 completion(.failure(error))
                 return
             }
-            
-            let isSubscribed = customerInfo?.entitlements[self.entitlementId]?.isActive ?? false
-            let expireDate = customerInfo?.entitlements[self.entitlementId]?.expirationDate
-            
+
+            let isSubscribed = customerInfo?.entitlements[entitlementId]?.isActive ?? false
+            let expireDate = customerInfo?.entitlements[entitlementId]?.expirationDate
+
             completion(.success(IAPProfile(
                 isSubscribed: isSubscribed,
                 expireDate: expireDate
             )))
         }
     }
-    
+
     // MARK: - Purchases
-    
+
     func buy(product: IAPProduct, completion: @escaping ((Result<IAPSubscription, Error>) -> Void)) {
         // Find the package matching the product
         guard let package = currentOffering?.availablePackages.first(where: {
@@ -211,7 +214,9 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
                 let error = NSError(
                     domain: SKErrorDomain,
                     code: SKError.unknown.rawValue,
-                    userInfo: [NSLocalizedDescriptionKey: "Product not found in current offering after retry. Product ID: \(product.identifier)"]
+                    userInfo: [
+                        NSLocalizedDescriptionKey: "Product not found in current offering after retry. Product ID: \(product.identifier)"
+                    ]
                 )
                 logger?.logError(error, context: "RevenueCat buy - product not found")
                 completion(.failure(error))
@@ -221,13 +226,13 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
             // Try fetching products first
             purchaseRetryCount += 1
             fetch { [weak self] result in
-                guard let self = self else { return }
+                guard let self else { return }
                 switch result {
                 case .success:
-                    self.buy(product: product, completion: completion)
-                case .failure(let error):
-                    self.purchaseRetryCount = 0
-                    self.logger?.logError(error, context: "RevenueCat buy - fetch failed")
+                    buy(product: product, completion: completion)
+                case let .failure(error):
+                    purchaseRetryCount = 0
+                    logger?.logError(error, context: "RevenueCat buy - fetch failed")
                     completion(.failure(error))
                 }
             }
@@ -236,34 +241,34 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
 
         // Reset retry count on successful package find
         purchaseRetryCount = 0
-        
+
         Purchases.shared.purchase(package: package) { [weak self] transaction, customerInfo, error, userCancelled in
-            guard let self = self else { return }
-            
+            guard let self else { return }
+
             if userCancelled {
                 let cancelError = NSError(
                     domain: SKErrorDomain,
                     code: SKError.paymentCancelled.rawValue,
                     userInfo: [NSLocalizedDescriptionKey: "Purchase cancelled by user"]
                 )
-                self.logger?.logError(cancelError, context: "RevenueCat purchase cancelled")
+                logger?.logError(cancelError, context: "RevenueCat purchase cancelled")
                 completion(.failure(cancelError))
                 return
             }
-            
-            if let error = error {
-                self.logger?.logError(error, context: "RevenueCat purchase")
+
+            if let error {
+                logger?.logError(error, context: "RevenueCat purchase")
                 completion(.failure(error))
                 return
             }
-            
+
             // Log transaction if available
-            if let transaction = transaction {
-                self.logger?.log("RevenueCat purchase successful: \(transaction.transactionIdentifier)")
+            if let transaction {
+                logger?.log("RevenueCat purchase successful: \(transaction.transactionIdentifier)")
             }
 
             // Check if the entitlement is now active
-            let isActive = customerInfo?.entitlements[self.entitlementId]?.isActive ?? false
+            let isActive = customerInfo?.entitlements[entitlementId]?.isActive ?? false
 
             let subscription = IAPSubscription(
                 vendorTransactionId: transaction?.transactionIdentifier ?? "",
@@ -273,51 +278,51 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
                 vendorProductId: product.identifier,
                 vendorOriginalTransactionId: transaction?.transactionIdentifier ?? ""
             )
-            
+
             if isActive {
                 completion(.success(subscription))
             } else {
                 // Purchase went through but entitlement not active - unusual but handle it
-                self.logger?.log("RevenueCat: Purchase completed but entitlement not active")
+                logger?.log("RevenueCat: Purchase completed but entitlement not active")
                 completion(.success(subscription))
             }
         }
     }
-    
+
     func restorePurchases(completion: @escaping ((Result<Bool, Error>) -> Void)) {
         Purchases.shared.restorePurchases { [weak self] customerInfo, error in
-            guard let self = self else { return }
-            
-            if let error = error {
-                self.logger?.logError(error, context: "RevenueCat restorePurchases")
+            guard let self else { return }
+
+            if let error {
+                logger?.logError(error, context: "RevenueCat restorePurchases")
                 completion(.failure(error))
                 return
             }
-            
-            let isPremium = customerInfo?.entitlements[self.entitlementId]?.isActive ?? false
+
+            let isPremium = customerInfo?.entitlements[entitlementId]?.isActive ?? false
             completion(.success(isPremium))
         }
     }
-    
+
     // MARK: - Attribution
-    
+
     func setPlayerId(_ playerId: String?) {
-        guard let playerId = playerId, !playerId.isEmpty else { return }
+        guard let playerId, !playerId.isEmpty else { return }
         Purchases.shared.attribution.setOnesignalUserID(playerId)
     }
-    
+
     func setFirebaseId(_ id: String?) {
-        guard let id = id, !id.isEmpty else { return }
+        guard let id, !id.isEmpty else { return }
         Purchases.shared.attribution.setFirebaseAppInstanceID(id)
     }
-    
+
     func setAdjustDeviceId(_ adjustId: String?) {
-        guard let adjustId = adjustId, !adjustId.isEmpty else { return }
+        guard let adjustId, !adjustId.isEmpty else { return }
         Purchases.shared.attribution.setAdjustID(adjustId)
     }
-    
+
     // MARK: - Private Helpers
-    
+
     private func createIAPProduct(from storeProduct: StoreProduct) -> IAPProduct? {
         if #available(iOS 15.0, *) {
             if let sk2Product = storeProduct.sk2Product {
@@ -332,25 +337,22 @@ final class RevenueCatFetcher: NSObject, ManagedIAPProvider {
 
         return nil
     }
-
 }
 
 // MARK: - PaywallProvidable
 
-@available(iOS 15.0, *)
-extension RevenueCatFetcher: PaywallProvidable {
-
+@available(iOS 15.0, *) extension RevenueCatFetcher: PaywallProvidable {
     func getPaywallView(completion: @escaping (AnyView) -> Void) {
         ensureOfferingLoaded { [weak self] offering in
-            guard let self = self else { return }
-            completion(self.createPaywallView(offering: offering))
+            guard let self else { return }
+            completion(createPaywallView(offering: offering))
         }
     }
 
     func getPaywallViewController(delegate: Any?, completion: @escaping (UIViewController) -> Void) {
         ensureOfferingLoaded { [weak self] offering in
-            guard let self = self else { return }
-            completion(self.createPaywallViewController(offering: offering, delegate: delegate))
+            guard let self else { return }
+            completion(createPaywallViewController(offering: offering, delegate: delegate))
         }
     }
 
@@ -370,11 +372,10 @@ extension RevenueCatFetcher: PaywallProvidable {
     }
 
     private func createPaywallView(offering: Offering?) -> AnyView {
-        let paywallView: PaywallView
-        if let offering = offering {
-            paywallView = PaywallView(offering: offering)
+        let paywallView = if let offering {
+            PaywallView(offering: offering)
         } else {
-            paywallView = PaywallView()
+            PaywallView()
         }
 
         // Wrap with purchase handler
@@ -390,11 +391,10 @@ extension RevenueCatFetcher: PaywallProvidable {
     }
 
     private func createPaywallViewController(offering: Offering?, delegate: Any?) -> PaywallViewController {
-        let controller: PaywallViewController
-        if let offering = offering {
-            controller = PaywallViewController(offering: offering)
+        let controller = if let offering {
+            PaywallViewController(offering: offering)
         } else {
-            controller = PaywallViewController()
+            PaywallViewController()
         }
 
         // Create internal delegate wrapper to intercept purchase events
@@ -429,7 +429,7 @@ extension RevenueCatFetcher: PaywallProvidable {
     }
 
     fileprivate func handleLivePaywallPurchase(customerInfo: CustomerInfo, productId: String?) {
-        guard let productId = productId else {
+        guard let productId else {
             handleLivePaywallPurchaseFromCustomerInfo(customerInfo: customerInfo)
             return
         }
@@ -439,7 +439,7 @@ extension RevenueCatFetcher: PaywallProvidable {
     private func notifyPurchaseSuccess(productId: String?) {
         let paywallId = currentOffering?.identifier
 
-        guard let productId = productId else {
+        guard let productId else {
             // Create a placeholder product when we don't know the exact product
             let product = IAPProduct(identifier: "unknown")
             logger?.log("Live paywall purchase completed (unknown product)")
@@ -451,7 +451,7 @@ extension RevenueCatFetcher: PaywallProvidable {
         if let package = currentOffering?.availablePackages.first(where: {
             $0.storeProduct.productIdentifier == productId
         }),
-           let iapProduct = createIAPProduct(from: package.storeProduct) {
+            let iapProduct = createIAPProduct(from: package.storeProduct) {
             logger?.log("Live paywall purchase completed: \(productId)")
             onLivePaywallPurchase?(iapProduct, paywallId)
         } else {
@@ -470,14 +470,13 @@ extension RevenueCatFetcher: PaywallProvidable {
 
 // MARK: - Associated Keys
 
-private struct AssociatedKeys {
+private enum AssociatedKeys {
     static var delegateWrapper = "delegateWrapper"
 }
 
 // MARK: - Paywall Delegate Wrapper
 
-@available(iOS 15.0, *)
-private class PaywallDelegateWrapper: NSObject, PaywallViewControllerDelegate {
+@available(iOS 15.0, *) private class PaywallDelegateWrapper: NSObject, PaywallViewControllerDelegate {
     private weak var fetcher: RevenueCatFetcher?
     private var userDelegate: PaywallViewControllerDelegate?
 
@@ -497,4 +496,3 @@ private class PaywallDelegateWrapper: NSObject, PaywallViewControllerDelegate {
         userDelegate?.paywallViewController?(controller, didFinishPurchasingWith: customerInfo)
     }
 }
-

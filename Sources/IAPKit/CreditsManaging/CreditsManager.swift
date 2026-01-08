@@ -21,7 +21,7 @@ public protocol CreditsManaging: AnyObject, Sendable {
 // MARK: - Implementation
 
 public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked Sendable {
-    @Published private(set) public var credits: UserCredit?
+    @Published public private(set) var credits: UserCredit?
 
     private let creditsService: CreditsAPIServiceProtocol
 
@@ -48,7 +48,7 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
     public func getCreditProducts() async throws -> GetCreditProductsResponse {
         try await creditsService.getCreditProducts()
     }
-    
+
     public func spendCredit(amount: Int = 1) async throws -> Int {
         let response = try await creditsService.spendCredit(amount: amount)
         await MainActor.run {

@@ -7,15 +7,13 @@
 import Foundation
 import StoreKit
 
-@available(iOS 15.0, *)
-public struct IAPKitTransaction {
+@available(iOS 15.0, *) public struct IAPKitTransaction {
     public let transaction: Transaction
 }
 
 public protocol IAPKitLoggable: AnyObject {
     func logError(_ error: Error, context: String?)
-    @available(iOS 15.0, *)
-    func logTransaction(_ transaction: IAPKitTransaction)
+    @available(iOS 15.0, *) func logTransaction(_ transaction: IAPKitTransaction)
     func log(_ message: String)
 }
 

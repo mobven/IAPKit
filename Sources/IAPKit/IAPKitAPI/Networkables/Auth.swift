@@ -11,7 +11,7 @@ public extension IAPKitAPI {
     enum Auth: AsyncNetworkableV2 {
         case refresh(refreshToken: String)
         case register(request: RegisterRequest)
-        
+
         public func request() async -> URLRequest {
             switch self {
             case let .refresh(refreshToken):

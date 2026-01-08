@@ -59,7 +59,7 @@ public extension AsyncNetworkableV2 {
         request.httpBody = getBody(body)
         return request
     }
-    
+
     /// Creates a URLRequest with a JSON body and query parameters
     /// - Parameters:
     ///   - queryItems: Dictionary of query parameters to be added to the URL

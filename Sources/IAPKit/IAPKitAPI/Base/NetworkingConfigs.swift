@@ -73,20 +73,16 @@ extension NetworkingConfigs: OAuthProviderDelegateV2 {
                 )
 
             } catch {
-                switch error.httpStatusCodeV2 {
-                case 401:
-                    throw error
-                default:
-                    let isLastAttempt = attempt == maxRetryCount - 1
-                    if isLastAttempt {
-                        // After max retries failed, try to re-register
-                        return try await performReRegister()
-                    }
-                    // Exponential backoff: 1s, 2s, 4s, ...
-                    let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
-                    try? await Task.sleep(nanoseconds: delay)
+                let isLastAttempt = attempt == maxRetryCount - 1
+
+                if isLastAttempt {
+                    // After max retries failed, try to re-register
+                    return try await performReRegister()
                 }
-                return nil
+
+                // Exponential backoff: 1s, 2s, 4s, ...
+                let delay = baseDelay * UInt64(pow(2.0, Double(attempt)))
+                try? await Task.sleep(nanoseconds: delay)
             }
         }
         return nil

@@ -6,6 +6,12 @@ A Swift package for handling In-App Purchases with support for StoreKit, Adapty,
 
 IAPKit provides a unified interface for managing in-app purchases across different platforms and services. It supports StoreKit (Apple's native framework), Adapty, and RevenueCat with automatic fallback mechanisms and configurable timeout handling.
 
+## What's New in v2
+
+- 🪙 **Credits System**: Built-in credit/coin management with gift coins, subscription coins, and purchasable credit packages
+- 🔐 **Backend Authentication**: Automatic device-based authentication with SDK key registration
+- 🌐 **IAPKit API**: Server-side integration for receipt validation and credit management
+
 ## Features
 
 - 🛒 **Unified IAP Interface**: Single API for StoreKit, Adapty, and RevenueCat
@@ -15,6 +21,7 @@ IAPKit provides a unified interface for managing in-app purchases across differe
 - 👤 **User Management**: User identification and logout support
 - 📊 **Flexible Logging**: Pluggable logging system with real-world logger support
 - ✅ **Receipt Validation**: Built-in receipt verification
+- 🪙 **Credits Management**: Manage user credits with spend, refresh, and claim features
 
 ## Architecture
 
@@ -93,7 +100,7 @@ Add the following to your `Package.swift` file:
 
 ```swift
 dependencies: [
-    .package(url: "https://github.com/your-org/IAPKit", from: "1.0.0")
+    .package(url: "https://github.com/mobven/IAPKit", from: "2.0.0")
 ]
 ```
 
@@ -110,17 +117,28 @@ IAPKit supports two IAP providers: **Adapty** and **RevenueCat**. Choose one bas
 
 #### Option A: Using Adapty
 
+> **Important:** `sdkKey` is a required parameter unique to your application. Contact us to obtain your app-specific SDK key.
+
 ```swift
 import IAPKit
 
 // Configure IAPKit with Adapty
-IAPKit.store.activate(adaptyApiKey: "your_adapty_api_key", paywallName: "your_paywall_name")
+IAPKit.store.activate(
+    adaptyApiKey: "your_adapty_api_key",
+    paywallName: "your_paywall_name",
+    sdkKey: "your_sdk_key"
+)
 
 // With custom entitlement ID (optional, default: "premium")
-IAPKit.store.activate(adaptyApiKey: "your_adapty_api_key", paywallName: "your_paywall_name", entitlementId: "pro")
+IAPKit.store.activate(
+    adaptyApiKey: "your_adapty_api_key",
+    paywallName: "your_paywall_name",
+    entitlementId: "pro",
+    sdkKey: "your_sdk_key"
+)
 
 // Set timeout for primary fetcher (optional, default: 5 seconds)
-IAPKit.store.adaptyTimeoutDuration = 3
+IAPKit.store.primaryTimeoutDuration = 3
 ```
 
 #### Option B: Using RevenueCat
@@ -132,11 +150,12 @@ import IAPKit
 IAPKit.store.activate(
     revenueCatApiKey: "your_revenuecat_api_key",
     offeringId: "your_offering_id",
-    entitlementId: "premium"
+    entitlementId: "premium",
+    sdkKey: "your_sdk_key"
 )
 
 // Set timeout for primary fetcher (optional, default: 5 seconds)
-IAPKit.store.adaptyTimeoutDuration = 3
+IAPKit.store.primaryTimeoutDuration = 3
 ```
 
 > **Note:** Both providers use StoreKit as a fallback when the primary provider times out.
@@ -445,6 +464,43 @@ IAPKit.store.getPaywallView { view in
 
 > **Note:** `getPaywallView` and `getPaywallViewController` automatically fetch offerings if not already loaded. No need to call `requestProducts()` first.
 
+## Credits System
+
+IAPKit v2 introduces a built-in credits management system for apps that use coin/credit-based monetization.
+
+### Initialize Credits Manager
+
+```swift
+let creditsManager = CreditsManager()
+```
+
+### Basic Usage
+
+```swift
+// Refresh user credits from server
+try await creditsManager.refresh()
+
+// Access current credits
+if let credits = creditsManager.credits {
+    print("Total coins: \(credits.totalCoins)")
+    print("Gift coins: \(credits.giftCoins)")
+    print("Subscription coins: \(credits.subscriptionCoins)")
+    print("Is subscription active: \(credits.isSubscriptionActive)")
+}
+
+// Claim gift coins (one-time)
+let claimed = await creditsManager.claimGiftCoins()
+
+// Spend credits
+let remainingCoins = try await creditsManager.spendCredit(amount: 1)
+
+// Get available credit products for purchase
+let products = try await creditsManager.getCreditProducts()
+
+// Check if user should see paywall
+let shouldShowPaywall = creditsManager.checkCreditAndSubsStatus()
+```
+
 ## Error Handling
 
 IAPKit provides comprehensive error handling through the logging system. Common error contexts include:
@@ -464,6 +520,32 @@ IAPKit provides comprehensive error handling through the logging system. Common 
 - **"RevenueCat restorePurchases"**: Restore purchases errors
 - **"RevenueCat buy - product not found"**: Product not found in current offering
 
+## Migration from v1 to v2
+
+### Breaking Changes
+
+1. **`activate()` now requires `sdkKey` parameter:**
+
+   The `sdkKey` is a required, app-specific key that you need to obtain from us.
+
+```swift
+// v1 (deprecated)
+IAPKit.store.activate(adaptyApiKey: "key", paywallName: "paywall")
+
+// v2
+IAPKit.store.activate(adaptyApiKey: "key", paywallName: "paywall", sdkKey: "your_sdk_key")
+```
+
+2. **`adaptyTimeoutDuration` renamed to `primaryTimeoutDuration`:**
+
+```swift
+// v1 (deprecated)
+IAPKit.store.adaptyTimeoutDuration = 3
+
+// v2
+IAPKit.store.primaryTimeoutDuration = 3
+```
+
 ## Requirements
 
 - iOS 13.0+
@@ -476,6 +558,7 @@ IAPKit provides comprehensive error handling through the logging system. Common 
 - [RevenueCat SDK](https://github.com/RevenueCat/purchases-ios) (5.50.0+) - *Required for RevenueCat integration*
 - [RevenueCatUI](https://github.com/RevenueCat/purchases-ios) - *Required for Live Paywall feature*
 - [RxSwift](https://github.com/ReactiveX/RxSwift) (6.6.0+)
+- [MobKitCore](https://github.com/mobven/MobKitCore) (1.0.1+) - *Required for networking*
 
 ## License
 
@@ -488,3 +571,6 @@ IAPKit provides comprehensive error handling through the logging system. Common 
 ## Support
 
 [Add support contact information here] 
+
+
+

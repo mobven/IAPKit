@@ -14,7 +14,7 @@ public extension NetworkingConfigs {
         var isSSLEnabled: Bool {
             switch self {
             case .development: false
-            case .production: true
+            case .production: false // TODO: need certificates
             }
         }
 

@@ -21,7 +21,7 @@ public extension NetworkingConfigs {
         var baseURL: String {
             switch self {
             case .development: "https://ioslab.online/"
-            case .production: "http://ioslab.online/"
+            case .production: "https://ioslab.online/"
             }
         }
     }

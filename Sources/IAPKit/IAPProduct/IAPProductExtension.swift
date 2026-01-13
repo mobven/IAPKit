@@ -34,6 +34,7 @@ public extension IAPProduct {
     }
 
     func localizedDateText(weekly: String, monthly: String, yearly: String) -> String {
+        if isWeekly() { return weekly }
         switch subscriptionPeriodUnitRawValue {
         case 1: // Weekly
             weekly

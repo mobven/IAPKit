@@ -14,7 +14,7 @@ let package = Package(
         ),
     ],
     dependencies: [
-        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.11.0"),
+        .package(url: "https://github.com/adaptyteam/AdaptySDK-iOS", exact: "3.15.3"),
         .package(url: "https://github.com/ReactiveX/RxSwift", from: "6.6.0"),
         .package(url: "https://github.com/mobven/MobKitCore.git", from: "1.0.1"),
         .package(url: "https://github.com/RevenueCat/purchases-ios-spm.git", from: "5.50.0"),

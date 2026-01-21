@@ -60,8 +60,8 @@ public final class CreditsManager: ObservableObject, CreditsManaging, @unchecked
     public func checkCreditAndSubsStatus() -> Bool {
         guard let credits else { return true }
 
-        // 1. Gift coin varsa subscription olmadan da contente erişebilir.
-        if credits.giftCoins > 0 {
+        // 1. Gift veya purchase coin varsa subscription olmadan da contente erişebilir.
+        if credits.giftCoins > 0 || credits.purchaseCoins > 0 {
             return false
         }
 
